@@ -4,7 +4,9 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET     /                           controllers.HomeController.index
+GET         /                    controllers.AppController.graphiql
+
+POST        /graphql             controllers.AppController.graphqlBody
 
 
 # Map static resources from the /public folder to the /assets URL path
