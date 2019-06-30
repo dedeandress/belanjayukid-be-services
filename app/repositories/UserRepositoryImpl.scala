@@ -14,7 +14,7 @@ class UserRepositoryImpl @Inject()(val database: AppDatabase, implicit val execu
 
   import profile.api._
 
-  def userQuery = TableQuery[User.Table]
+  def userQuery = TableQuery[User.UserTable]
 
   override def findAll(): Future[List[User]] = db.run(Actions.findAll())
 
