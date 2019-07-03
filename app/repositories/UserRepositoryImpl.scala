@@ -3,6 +3,9 @@ package repositories
 import com.google.inject.{Inject, Singleton}
 import models.User
 import modules.AppDatabase
+import java.util.UUID
+
+import errors.NotFound
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -20,17 +23,14 @@ class UserRepositoryImpl @Inject()(val database: AppDatabase, implicit val execu
 
   override def create(user: User): Future[User] = db.run(Actions.create(user))
 
-  override def find(id: Long): Future[Option[User]] = db.run(Actions.find(id))
+  override def find(id: UUID): Future[Option[User]] = db.run(Actions.find(id))
 
   override def update(user: User): Future[User] = db.run(Actions.update(user))
 
-  override def delete(id: Long): Future[Boolean] = db.run(Actions.delete(id))
+  override def delete(id: UUID): Future[Boolean] = db.run(Actions.delete(id))
 
   object Actions {
-
-    import errors.NotFound
-
-    def find(id: Long): DBIO[Option[User]] = for {
+    def find(id: UUID): DBIO[Option[User]] = for {
       user <- userQuery.filter(_.id===id).result.headOption
     }yield user
 
@@ -44,16 +44,15 @@ class UserRepositoryImpl @Inject()(val database: AppDatabase, implicit val execu
     }yield result.get
 
     def update(user: User): DBIO[User] = for{
-      maybeId <- if(user.id.isDefined) DBIO.successful(user.id.get) else DBIO.failed(NotFound("not found user id"))
-      update <- userQuery.filter(_.id===maybeId).update(user)
+      update <- userQuery.filter(_.id===user.id).update(user)
       _ <- update match {
         case 0 => DBIO.failed(NotFound("not found user id"))
         case _ => DBIO.successful(())
       }
-      result <- find(maybeId)
+      result <- find(user.id)
     }yield result.get
 
-    def delete(id: Long): DBIO[Boolean] = for {
+    def delete(id: UUID): DBIO[Boolean] = for {
       maybeDelete <- userQuery.filter(_.id === id).delete
       isDelete =  if(maybeDelete == 1) true else false
     }yield isDelete
