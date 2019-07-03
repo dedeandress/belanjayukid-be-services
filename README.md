@@ -1,4 +1,4 @@
-# Belanjayuk.id api services
+# Belanjayuk.id Backend api services
 
 System Requirements:
 * Scala 2.12.8
@@ -60,7 +60,12 @@ Project Structure :
 8. write controllers (only single endpoint for graphql but if you use graphiql you must add one endpoint for graphiql)
 9. add a route for graphql (POST endpoint and if you use graphiql you must add one root)
 10. and 
-`while(noSuccess) {
+```scala
+while(noSuccess) {
     tryAgain()
     if(dead) break
-}`
+}
+```
+
+> pardon my english. - DA99 -
+>>>>>>> 9af42f6329a67c8241fd1cb488bab016d4a34487
