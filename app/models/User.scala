@@ -1,26 +1,39 @@
 package models
 
-import slick.jdbc.H2Profile.api.{Table => SlickTable, _}
+import java.util.UUID
+import java.util.UUID.randomUUID
+
+import slick.jdbc.PostgresProfile.api.{Table => SlickTable, _}
 import slick.lifted.{Tag => SlickTag}
-import spray.json.DefaultJsonProtocol
-import models.Role.RoleTable
+import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
 
-case class User(id: Option[Long] = None, name: String, email: String, roleId: Long)
+case class User(id: UUID = randomUUID, username: String, password: String, email: String, userProfileId: UUID)
 
-object User extends ((Option[Long], String, String, Long) => User) {
-  val roles = TableQuery[RoleTable]
+object User extends ((UUID, String, String, String, UUID) => User) {
+
+  import models.UserProfile.UserProfileTable
+
+  val userProfiles = TableQuery[UserProfileTable]
   class UserTable(slickTag: SlickTag) extends SlickTable[User](slickTag, "users"){
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-    def name = column[String]("name")
+    def id = column[UUID]("id", O.PrimaryKey)
+    def username = column[String]("username")
+    def password = column[String]("password")
     def email = column[String]("email")
-    def roleId = column[Long]("role_id")
-    def roleIdFK = foreignKey("roleId_FK", roleId, roles)(_.id)
-    def * = (id.?, name, email, roleId).mapTo[User]
+    def userProfileId = column[UUID]("user_profile_id")
+    def userProfileIdFK = foreignKey("user_profile_id", userProfileId, userProfiles)(_.id)
+    def * = (id, username, password, email, userProfileId).mapTo[User]
   }
 }
 
-import spray.json.JsonFormat
-
 object UserJsonProtocol extends DefaultJsonProtocol {
-  implicit val userJsonProtocolFormat: JsonFormat[User] = jsonFormat4(User)
+
+  implicit object UuidJsonFormat extends RootJsonFormat[UUID] {
+    def write(x: UUID) = JsString(x.toString) //Never execute this line
+    def read(value: JsValue) = value match {
+      case JsString(x) => UUID.fromString(x)
+      case x           => deserializationError("Expected UUID as JsString, but got " + x)
+    }
+  }
+
+  implicit val userJsonProtocolFormat: JsonFormat[User] = jsonFormat5(User)
 }
