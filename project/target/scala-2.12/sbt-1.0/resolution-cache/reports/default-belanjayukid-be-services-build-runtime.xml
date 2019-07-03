@@ -9,7 +9,7 @@
 		extra-sbtVersion="1.0"
 		conf="runtime"
 		confs="compile, runtime, test, provided, optional, compile-internal, runtime-internal, test-internal, plugin, pom, scala-tool"
-		date="20190629201803"/>
+		date="20190703150034"/>
 	<dependencies>
 		<module organisation="org.foundweekends.giter8" name="sbt-giter8-scaffold">
 			<revision name="0.11.0" status="release" pubdate="20180713151356" resolver="sbt-chain" artresolver="sbt-chain" homepage="http://www.foundweekends.org/giter8/" extra-scalaVersion="2.12" extra-sbtVersion="1.0" downloaded="false" searched="false" default="false" conf="compile, default(compile)" position="44">
