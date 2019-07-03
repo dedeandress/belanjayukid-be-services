@@ -1,23 +1,30 @@
 package graphql.schemas
 
 import com.google.inject.Inject
-import graphql.resolvers.{RoleResolver, UserResolver}
+import graphql.resolvers.{RoleResolver, UserProfileResolver, UserResolver}
 import models.User
 import sangria.macros.derive.{ObjectTypeName, deriveObjectType}
 import sangria.schema._
 
-class UserSchema @Inject()(userResolver: UserResolver, roleResolver: RoleResolver){
+class UserSchema @Inject()(userResolver: UserResolver, roleResolver: RoleResolver, userProfileResolver: UserProfileResolver){
 
-  import models.Role
-  import sangria.macros.derive.AddFields
+  import java.util.UUID
 
-  implicit val RoleType: ObjectType[Unit, Role] = deriveObjectType[Unit, Role](ObjectTypeName("Role"))
+  import models.{Role, UserProfile}
+  import sangria.macros.derive.ReplaceField
+  import utilities.CustomScalar
 
+  implicit val RoleType: ObjectType[Unit, Role] = deriveObjectType[Unit, Role](ObjectTypeName("Role"), ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id)))
+  implicit val UserProfileType: ObjectType[Unit, UserProfile] = deriveObjectType[Unit, UserProfile](ObjectTypeName("UserProfile"),
+    ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id)),
+    ReplaceField("dateOfBirth", Field("dateOfBirth", CustomScalar.GraphQLDateTime, resolve = _.value.dateOfBirth)),
+  )
   implicit val UserType: ObjectType[Unit, User] = deriveObjectType[Unit, User](
+    ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id)),
     ObjectTypeName("User"),
-    AddFields(
+    ReplaceField("userProfileId",
       Field(
-        "role", ListType(RoleType), resolve = c => roleResolver.findRole(c.value.roleId)
+        "userProfile", UserProfileType, resolve = c => userProfileResolver.findUserProfile(c.value.userProfileId)
       )
     )
   )
@@ -32,9 +39,9 @@ class UserSchema @Inject()(userResolver: UserResolver, roleResolver: RoleResolve
       name = "findUser",
       fieldType = OptionType(UserType),
       arguments = List(
-        Argument("id", LongType),
+        Argument("id", CustomScalar.UUIDType),
       ),
-      resolve = sangriaContext => userResolver.findUser(sangriaContext.args.arg[Long]("id"))
+      resolve = sangriaContext => userResolver.findUser(sangriaContext.args.arg[UUID]("id"))
     )
   )
 
@@ -43,38 +50,42 @@ class UserSchema @Inject()(userResolver: UserResolver, roleResolver: RoleResolve
       name = "addUser",
       fieldType = UserType,
       arguments = List(
-        Argument("name", StringType),
+        Argument("username", StringType),
+        Argument("password", StringType),
         Argument("email", StringType),
-        Argument("roleId", LongType)
+        Argument("userProfileId", CustomScalar.UUIDType)
       ),
-      resolve = sangriaContext => userResolver.addUser(sangriaContext.args.arg[String]("name"),
+      resolve = sangriaContext => userResolver.addUser(sangriaContext.args.arg[String]("username"),
+        sangriaContext.args.arg[String]("password"),
         sangriaContext.args.arg[String]("email"),
-        sangriaContext.args.arg[Long]("roleId")
+        sangriaContext.args.arg[UUID]("userProfileId")
       )
     ),
     Field(
       name = "deleteUser",
       fieldType = BooleanType,
       arguments = List(
-        Argument("id", LongType)
+        Argument("id", CustomScalar.UUIDType)
       ),
-      resolve = sangriaContext => userResolver.deleteUser(sangriaContext.args.arg[Long]("id"))
+      resolve = sangriaContext => userResolver.deleteUser(sangriaContext.args.arg[UUID]("id"))
     ),
     Field(
       name = "updateUser",
       fieldType = UserType,
       arguments = List(
-        Argument("id", LongType),
-        Argument("name", StringType),
+        Argument("id", CustomScalar.UUIDType),
+        Argument("username", StringType),
+        Argument("password", StringType),
         Argument("email", StringType),
-        Argument("roleId", LongType)
+        Argument("userProfileId", CustomScalar.UUIDType)
       ),
       resolve = sangriaContext =>
         userResolver.updateUser(
-          sangriaContext.args.arg[Long]("id"),
-          sangriaContext.args.arg[String]("name"),
+          sangriaContext.args.arg[UUID]("id"),
+          sangriaContext.args.arg[String]("username"),
+          sangriaContext.args.arg[String]("password"),
           sangriaContext.args.arg[String]("email"),
-          sangriaContext.args.arg[Long]("roleId")
+          sangriaContext.args.arg[UUID]("userProfileId")
         )
     )
   )
