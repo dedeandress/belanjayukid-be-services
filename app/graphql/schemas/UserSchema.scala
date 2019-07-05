@@ -5,8 +5,9 @@ import graphql.resolvers.{RoleResolver, UserProfileResolver, UserResolver}
 import models.User
 import sangria.macros.derive.{ObjectTypeName, deriveObjectType}
 import sangria.schema._
+import services.UserService
 
-class UserSchema @Inject()(userResolver: UserResolver, roleResolver: RoleResolver, userProfileResolver: UserProfileResolver){
+class UserSchema @Inject()(userResolver: UserResolver, roleResolver: RoleResolver, userProfileResolver: UserProfileResolver, userService: UserService){
 
   import java.util.UUID
 
@@ -55,7 +56,7 @@ class UserSchema @Inject()(userResolver: UserResolver, roleResolver: RoleResolve
         Argument("email", StringType),
         Argument("userProfileId", CustomScalar.UUIDType)
       ),
-      resolve = sangriaContext => userResolver.addUser(sangriaContext.args.arg[String]("username"),
+      resolve = sangriaContext => userService.registerUser(sangriaContext.args.arg[String]("username"),
         sangriaContext.args.arg[String]("password"),
         sangriaContext.args.arg[String]("email"),
         sangriaContext.args.arg[UUID]("userProfileId")

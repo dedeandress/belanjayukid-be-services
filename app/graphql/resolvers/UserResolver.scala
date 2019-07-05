@@ -15,7 +15,7 @@ class UserResolver @Inject()(userRepository: UserRepository, implicit val execut
 
   def users: Future[List[User]] = userRepository.findAll()
 
-  def addUser(username: String, password: String ,email: String, userProfileId: UUID): Future[User] = userRepository.create(User(username= username, password = password,email = email, userProfileId = userProfileId))
+  def addUser(user: User): Future[User] = userRepository.create(user)
 
   def deleteUser(id: UUID): Future[Boolean] = userRepository.delete(id)
 
