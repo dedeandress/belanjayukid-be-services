@@ -6,12 +6,12 @@ import java.util.UUID.randomUUID
 import akka.http.scaladsl.model.DateTime
 import slick.jdbc.PostgresProfile.api.{Table => SlickTable, _}
 import slick.lifted.{Tag => SlickTag}
+import java.sql.Timestamp
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
 
 case class UserProfile(id: UUID = randomUUID, fullName: String, phoneNumber: String, address: String, noNik: String, dateOfBirth: DateTime)
 
 object UserProfile extends ((UUID, String, String, String, String, DateTime) => UserProfile) {
-  import java.sql.Timestamp
 
   implicit val dateTimeColumnType = MappedColumnType.base[DateTime, Timestamp](
     dt => new Timestamp(dt.clicks),
@@ -26,6 +26,7 @@ object UserProfile extends ((UUID, String, String, String, String, DateTime) => 
     def dateOfBirth = column[DateTime]("date_of_birth")
     def * = (id, fullName, phoneNumber, address, noNik, dateOfBirth).mapTo[UserProfile]
   }
+
 }
 
 object UserProfileJsonProtocol extends DefaultJsonProtocol {
