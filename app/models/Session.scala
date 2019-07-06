@@ -1,7 +1,9 @@
 package models
 
 import java.util.UUID
+import java.sql.Timestamp
 
+import models.User.UserTable
 import akka.http.scaladsl.model.DateTime
 import slick.jdbc.PostgresProfile.api.{Table => SlickTable, _}
 import slick.lifted.{Tag => SlickTag}
@@ -12,7 +14,7 @@ case class Session(id: UUID, secretToken: String, secretTokenExp: DateTime, user
 
 object Session extends ((UUID, String, DateTime, UUID)=>Session) {
 
-  import java.sql.Timestamp
+  val users = TableQuery[UserTable]
 
   implicit val dateTimeColumnType = MappedColumnType.base[DateTime, Timestamp](
     dt => new Timestamp(dt.clicks),
@@ -24,6 +26,7 @@ object Session extends ((UUID, String, DateTime, UUID)=>Session) {
     def secretToken = column[String]("secret_token")
     def secretTokenExp = column[DateTime]("secret_token_exp")
     def userId = column[UUID]("user_id")
+    def userIdFK = foreignKey("user_id", userId, users)(_.id)
     def * = (id, secretToken, secretTokenExp, userId).mapTo[Session]
   }
 }
