@@ -9,12 +9,16 @@ import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonF
 case class ProductDetail(id: UUID, productStockName: String, productStockPrice: BigDecimal, productStockValue: Int, productId: UUID)
 
 object ProductDetail extends ((UUID, String, BigDecimal, Int, UUID)=>ProductDetail) {
+
+  val products = TableQuery[Product]
+
   class ProductDetailTable(slickTag: SlickTag) extends SlickTable[ProductDetail](slickTag, "product_detail") {
     def id = column[UUID]("id")
     def productStockName = column[String]("product_stock_name")
     def productStockPrice = column[BigDecimal]("product_stock_price")
     def productStockValue = column[Int]("product_stock_value")
     def productId = column[UUID]("product_id")
+    def productIdFK = foreignKey("product_id", productId, products)(_.id)
     def * = (id, productStockName, productStockPrice, productStockValue, productId).mapTo[ProductDetail]
   }
 }
