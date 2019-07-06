@@ -5,13 +5,12 @@ import java.util.UUID.randomUUID
 
 import slick.jdbc.PostgresProfile.api.{Table => SlickTable, _}
 import slick.lifted.{Tag => SlickTag}
+import models.UserProfile.UserProfileTable
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
 
 case class User(id: UUID = randomUUID, username: String, password: String, email: String, userProfileId: UUID)
 
 object User extends ((UUID, String, String, String, UUID) => User) {
-
-  import models.UserProfile.UserProfileTable
 
   val userProfiles = TableQuery[UserProfileTable]
   class UserTable(slickTag: SlickTag) extends SlickTable[User](slickTag, "users"){
