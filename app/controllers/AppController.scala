@@ -8,6 +8,7 @@ import play.api.libs.json._
 import sangria.ast.Document
 import sangria.parser.QueryParser
 import sangria.execution._
+import errors.{AuthenticationException, AuthorizationException}
 
 import scala.util.{Success, Try}
 import scala.util.Failure
@@ -61,7 +62,8 @@ class AppController @Inject()(graphQL: GraphQL, cc: ControllerComponents, implic
       Executor.execute(
         schema = graphQL.Schema,
         queryAst = queryAst,
-        variables = variables.getOrElse(Json.obj())
+        variables = variables.getOrElse(Json.obj()),
+        exceptionHandler = ErrorHandler
       ).map(Ok(_)).recover {
         case error: QueryAnalysisError => BadRequest(error.resolveError)
         case error: ErrorWithResolver => InternalServerError(error.resolveError)
@@ -71,5 +73,10 @@ class AppController @Inject()(graphQL: GraphQL, cc: ControllerComponents, implic
 
   def parseVariables(variables: String): JsObject = if (variables.trim.isEmpty || variables.trim == "null") Json.obj()
   else Json.parse(variables).as[JsObject]
+
+  val ErrorHandler = ExceptionHandler {
+    case (_, AuthenticationException(message)) ⇒ HandledException(message)
+    case (_, AuthorizationException(message)) ⇒ HandledException(message)
+  }
 
 }
