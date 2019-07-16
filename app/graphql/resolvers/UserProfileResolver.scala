@@ -1,17 +1,18 @@
 package graphql.resolvers
 
-import javax.inject.Inject
-import repositories.UserProfileRepository
 import java.util.UUID
 
+import javax.inject.Inject
 import models.UserProfile
+import services.UserService
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-import scala.concurrent.ExecutionContext
+class UserProfileResolver @Inject()(userService: UserService, implicit val executionContext: ExecutionContext){
 
-class UserProfileResolver @Inject()(userProfileRepository: UserProfileRepository, implicit val executionContext: ExecutionContext){
+  import graphql.input.UserProfileInput
 
-  def findUserProfile(id: UUID): Future[UserProfile] = userProfileRepository.findById(id)
+  def findUserProfile(userId: UUID): Future[Option[UserProfile]] = userService.findUserProfile(userId)
 
+  def insertUserProfile(userProfileInput: UserProfileInput): Future[UserProfile] = userService.insertUserProfile(userProfileInput)
 }
