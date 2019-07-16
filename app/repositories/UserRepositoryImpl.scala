@@ -29,6 +29,8 @@ class UserRepositoryImpl @Inject()(val database: AppDatabase, implicit val execu
 
   override def delete(id: UUID): Future[Boolean] = db.run(Actions.delete(id))
 
+  override def findUser(username: String): Future[Option[User]] = db.run(Actions.findUser(username))
+
   object Actions {
     def find(id: UUID): DBIO[Option[User]] = for {
       user <- userQuery.filter(_.id===id).result.headOption
@@ -56,6 +58,10 @@ class UserRepositoryImpl @Inject()(val database: AppDatabase, implicit val execu
       maybeDelete <- userQuery.filter(_.id === id).delete
       isDelete =  if(maybeDelete == 1) true else false
     }yield isDelete
+
+    def findUser(username: String): DBIO[Option[User]] = for {
+      user <- userQuery.filter(_.username===username).result.headOption
+    }yield user
   }
 
 }
