@@ -8,5 +8,9 @@ trait UserProfileRepository {
 
   import scala.concurrent.Future
 
-  def findById(id: UUID): Future[UserProfile]
+  def findByUserId(userId: UUID): Future[Option[UserProfile]]
+
+  def addUserProfile(userProfile: UserProfile) : Future[UserProfile]
+
+  def findById(id: UUID): Future[Option[UserProfile]]
 }
