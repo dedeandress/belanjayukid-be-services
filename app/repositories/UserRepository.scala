@@ -18,4 +18,6 @@ trait UserRepository {
 
   def update(user: User): Future[User]
 
+  def findUser(username: String): Future[Option[User]]
+
 }
