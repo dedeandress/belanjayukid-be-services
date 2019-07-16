@@ -20,7 +20,11 @@ class UserProfileRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
 
   val userProfileQuery = TableQuery[UserProfileTable]
 
-  override def findById(id: UUID): Future[UserProfile] = db.run(Actions.findById(id))
+  override def findByUserId(userId: UUID): Future[Option[UserProfile]] = db.run(Actions.findByUserId(userId))
+
+  override def addUserProfile(userProfile: UserProfile): Future[UserProfile] = db.run(Actions.addUserProfile(userProfile))
+
+  override def findById(id: UUID): Future[Option[UserProfile]] = db.run(Actions.findById(id))
 
   object Actions{
 
@@ -28,8 +32,17 @@ class UserProfileRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
       userProfile <- userProfileQuery.result
     }yield userProfile.toList
 
-    def findById(id: UUID): DBIO[UserProfile] = for{
+    def findByUserId(userId: UUID): DBIO[Option[UserProfile]] = for{
+      userProfile <- userProfileQuery.filter(_.userId===userId).result.headOption
+    }yield userProfile
+
+    def findById(id: UUID): DBIO[Option[UserProfile]] = for{
       userProfile <- userProfileQuery.filter(_.id===id).result.headOption
-    }yield userProfile.get
+    }yield userProfile
+
+    def addUserProfile(userProfile: UserProfile): DBIO[UserProfile] = for{
+      id <- userProfileQuery returning userProfileQuery.map(_.id) += userProfile
+      result <- findById(id)
+    }yield result.get
   }
 }
