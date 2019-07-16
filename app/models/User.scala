@@ -5,22 +5,17 @@ import java.util.UUID.randomUUID
 
 import slick.jdbc.PostgresProfile.api.{Table => SlickTable, _}
 import slick.lifted.{Tag => SlickTag}
-import models.UserProfile.UserProfileTable
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
 
-case class User(id: UUID = randomUUID, username: String, password: String, email: String, userProfileId: UUID)
+case class User(id: UUID = randomUUID, username: String, password: String, email: String)
 
-object User extends ((UUID, String, String, String, UUID) => User) {
-
-  val userProfiles = TableQuery[UserProfileTable]
+object User extends ((UUID, String, String, String) => User) {
   class UserTable(slickTag: SlickTag) extends SlickTable[User](slickTag, "users"){
     def id = column[UUID]("id", O.PrimaryKey)
     def username = column[String]("username")
     def password = column[String]("password")
     def email = column[String]("email")
-    def userProfileId = column[UUID]("user_profile_id")
-    def userProfileIdFK = foreignKey("user_profile_id", userProfileId, userProfiles)(_.id)
-    def * = (id, username, password, email, userProfileId).mapTo[User]
+    def * = (id, username, password, email).mapTo[User]
   }
 }
 
@@ -34,5 +29,5 @@ object UserJsonProtocol extends DefaultJsonProtocol {
     }
   }
 
-  implicit val userJsonProtocolFormat: JsonFormat[User] = jsonFormat5(User)
+  implicit val userJsonProtocolFormat: JsonFormat[User] = jsonFormat4(User)
 }
