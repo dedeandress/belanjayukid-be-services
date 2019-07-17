@@ -2,10 +2,11 @@
 /.idea
 /target
 /logs
-/project/project
+/project/project/*
 /project/target
 project/target/streams/compile/compileIncremental/$global/streams/out
 *.cache
+*.xml
 project/project/target/config-classes/$5069ced51b4088bddfd8.cache
 project/target/streams/$global/update/$global/streams/out
 project/target/streams/$global/update/$global/streams/update_cache_2.12/inputs
