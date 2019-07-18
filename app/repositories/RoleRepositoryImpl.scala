@@ -7,6 +7,7 @@ import java.util.UUID
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
+import models.Role.RoleTable
 
 @Singleton
 class RoleRepositoryImpl @Inject()(database: AppDatabase, implicit val executionContext: ExecutionContext) extends RoleRepository{
@@ -14,7 +15,6 @@ class RoleRepositoryImpl @Inject()(database: AppDatabase, implicit val execution
   val db = database.db
   val profile = database.profile
 
-  import models.Role.RoleTable
   import profile.api._
 
   val roleQuery = TableQuery[RoleTable]
