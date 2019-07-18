@@ -13,6 +13,6 @@ RUN sbt dist
 RUN unzip /usr/src/target/universal/belanjayukid-be-api-1.0-SNAPSHOT.zip
 FROM openjdk:8u181-jre-slim
 WORKDIR /root/
-COPY --from=builder /usr/src/belanjayukid-be-api.id-1.0-SNAPSHOT ./belanjayukid-be-api/
+COPY --from=builder /usr/src/belanjayukid-be-api-1.0-SNAPSHOT ./belanjayukid-be-api/
 ENTRYPOINT ["belanjayukid-be-api/bin/belanjayukid-be-api"]
 EXPOSE 9000
