@@ -10,9 +10,9 @@ RUN sbt compile
 COPY ./app ./app/
 COPY ./conf ./conf/
 RUN sbt dist
-RUN unzip /usr/src/target/universal/dana-instant-1.0-SNAPSHOT.zip
+RUN unzip /usr/src/target/universal/belanjayukid-be-api-1.0-SNAPSHOT.zip
 FROM openjdk:8u181-jre-slim
 WORKDIR /root/
-COPY --from=builder /usr/src/dana-instant-1.0-SNAPSHOT ./dana-instant/
-ENTRYPOINT ["dana-instant/bin/dana-instant"]
+COPY --from=builder /usr/src/belanjayukid-be-api.id-1.0-SNAPSHOT ./belanjayukid-be-api/
+ENTRYPOINT ["belanjayukid-be-api/bin/belanjayukid-be-api"]
 EXPOSE 9000
