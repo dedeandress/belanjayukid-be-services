@@ -1,4 +1,4 @@
-name := """api-belanjayuk.id"""
+name := """belanjayukid-be-api"""
 organization := "BelanjaYuk.id"
 
 version := "1.0-SNAPSHOT"
