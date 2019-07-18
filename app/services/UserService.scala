@@ -6,15 +6,15 @@ import com.google.inject.Inject
 import models.User
 import models.UserProfile
 import repositories.{UserProfileRepository, UserRepository}
+import graphql.input.UserInput
 
+import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 
 class UserService @Inject()(userProfileRepository: UserProfileRepository, userRepository: UserRepository, implicit val executionContext: ExecutionContext){
 
-  import graphql.input.UserInput
 
-  import scala.concurrent.Future
-
+//TODO
 //  def registerUser(username: String, password: String ,email: String, userProfileId: UUID) ={
 //    userResolver.addUser(new User(username = username, password = password, email = email))
 //  }
