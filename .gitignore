@@ -1,4 +1,9 @@
-*.class
-*.log
+/.g8
 /.idea
+/.metals
+/.bloop
 /target
+/logs
+/project/project
+/project/target
+/project/.bloop
