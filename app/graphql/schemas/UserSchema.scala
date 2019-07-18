@@ -7,14 +7,16 @@ import models.User
 import sangria.schema._
 import services.UserService
 import spray.json.{JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
+import java.util.UUID
+import models.{Role, UserProfile}
+import sangria.macros.derive._
+import utilities.CustomScalar
+import graphql.input.{UserInput, UserProfileInput}
+import models.Authorized
+import sangria.marshalling.sprayJson._
+import spray.json.DefaultJsonProtocol._
 
 class UserSchema @Inject()(userResolver: UserResolver, roleResolver: RoleResolver, userProfileResolver: UserProfileResolver, userService: UserService){
-
-  import java.util.UUID
-
-  import models.{Role, UserProfile}
-  import sangria.macros.derive._
-  import utilities.CustomScalar
 
   implicit val RoleType: ObjectType[Unit, Role] = deriveObjectType[Unit, Role](ObjectTypeName("Role"), ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id)))
   implicit val UserProfileType: ObjectType[Unit, UserProfile] = deriveObjectType[Unit, UserProfile](ObjectTypeName("UserProfile"),
@@ -53,10 +55,6 @@ class UserSchema @Inject()(userResolver: UserResolver, roleResolver: RoleResolve
       resolve = sangriaContext => userResolver.login(sangriaContext.args.arg[String]("username"),sangriaContext.args.arg[String]("password"))
     )
   )
-  import graphql.input.{UserInput, UserProfileInput}
-  import models.Authorized
-  import sangria.marshalling.sprayJson._
-  import spray.json.DefaultJsonProtocol._
 
   implicit val userJsonProtocolFormat: JsonFormat[UserInput] = jsonFormat3(UserInput)
   implicit object UuidJsonFormat extends RootJsonFormat[UUID] {
@@ -78,7 +76,8 @@ class UserSchema @Inject()(userResolver: UserResolver, roleResolver: RoleResolve
   implicit val userProfileJsonProtocolFormat: JsonFormat[UserProfileInput] = jsonFormat6(UserProfileInput)
 
   implicit val UserInputType : InputObjectType[UserInput] = deriveInputObjectType[UserInput]()
-//  Field(
+//  TODO
+// Field(
 //    name = "loginUser",
 //    fieldType = StringType,
 //    arguments = List(

@@ -6,11 +6,9 @@ import repositories.UserRepository
 
 import scala.concurrent.ExecutionContext
 import errors.AuthorizationException
-
+import scala.concurrent.Future
 
 case class AuthContext(userRepository: UserRepository, currentUser:Option[User] = None, implicit val executionContext: ExecutionContext) {
-
-  import scala.concurrent.Future
 
   def login(username: String, password: String): Future[String] = {
     userRepository.findUser(username).map{

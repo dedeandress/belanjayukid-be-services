@@ -7,7 +7,8 @@ import models.User
 import models.UserProfile
 import repositories.{UserProfileRepository, UserRepository}
 import graphql.input.UserInput
-
+import com.auth0.jwt.interfaces.DecodedJWT
+import graphql.input.UserProfileInput
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 
@@ -33,8 +34,7 @@ class UserService @Inject()(userProfileRepository: UserProfileRepository, userRe
         else throw new Exception("not found")
     }
   }
-  import com.auth0.jwt.interfaces.DecodedJWT
-  import graphql.input.UserProfileInput
+  
 
   def isAuthorized(headers: Headers) = {
     import errors.Unauthorized

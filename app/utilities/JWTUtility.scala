@@ -8,10 +8,11 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.google.inject.Inject
 import models.User
 import repositories.UserRepository
+import play.api.mvc.Headers
+import com.auth0.jwt.interfaces.DecodedJWT
+
 
 class JWTUtility @Inject()(userRepository: UserRepository){
-
-  import play.api.mvc.Headers
 
   def getUser(headers: Headers) = {
     import errors.Unauthorized
@@ -26,8 +27,6 @@ class JWTUtility @Inject()(userRepository: UserRepository){
 }
 
 object JWTUtility {
-
-  import com.auth0.jwt.interfaces.DecodedJWT
 
   def generateJWT(user: User) = {
     val algorithm: Algorithm = Algorithm.HMAC256(BelanjaYukConstant.secretKey)

@@ -2,18 +2,16 @@ package graphql.resolvers
 
 import com.google.inject.Inject
 import services.UserService
-
-import scala.concurrent.ExecutionContext
-
-class UserResolver @Inject()(implicit val executionContext: ExecutionContext, userService: UserService){
-
-  import java.util.UUID
+import java.util.UUID
 
   import graphql.input.UserInput
   import models.User
   import play.api.mvc.Headers
 
   import scala.concurrent.Future
+import scala.concurrent.ExecutionContext
+
+class UserResolver @Inject()(implicit val executionContext: ExecutionContext, userService: UserService){
 
   def users: Future[List[User]] = userService.users
 

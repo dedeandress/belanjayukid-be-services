@@ -9,6 +9,8 @@ import sangria.ast.Document
 import sangria.parser.QueryParser
 import sangria.execution._
 import errors.{AuthenticationException, AuthorizationException}
+import sangria.execution.Executor
+import sangria.execution.QueryAnalysisError
 
 import scala.util.{Success, Try}
 import scala.util.Failure
@@ -51,11 +53,6 @@ class AppController @Inject()(graphQL: GraphQL, cc: ControllerComponents, implic
         }
       }
   }
-
-  import sangria.execution.Executor
-  import sangria.execution.QueryAnalysisError
-
-
 
   def executeQuery(query: String, variables: Option[JsObject] = None, operation: Option[String] = None): Future[Result] = QueryParser.parse(query) match {
     case Success(queryAst: Document) =>
