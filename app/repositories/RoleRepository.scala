@@ -1,12 +1,13 @@
 package repositories
 
+import java.util.UUID
+import models.Role
+
+import scala.concurrent.Future
+
 trait RoleRepository {
 
-  import java.util.UUID
-
-  import models.Role
-
-  import scala.concurrent.Future
+  
 
   def findAll(): Future[List[Role]]
 
