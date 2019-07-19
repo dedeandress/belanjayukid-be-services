@@ -1,1 +1,1 @@
-web: target/universal/stage/bin/belanjayukid-be-api -Dhttp.port=$PORT -Dplay.crypto.secret=${APPLICATION_SECRET}
+web: target/universal/stage/bin/belanjayukid-be-api -Dhttp.port=$PORT -Dplay.http.secret.key=${APPLICATION_SECRET}
