@@ -4,7 +4,8 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET         /                    controllers.AppController.graphiql
+GET         /                    controllers.HomeController.index
+GET         /graphiql            controllers.AppController.graphiql
 
 POST        /graphql             controllers.AppController.graphqlBody
 
