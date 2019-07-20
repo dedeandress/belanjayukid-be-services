@@ -1,1 +1,1 @@
-web: target/universal/stage/bin/belanjayukid-be-api -Dhttp.port=$PORT -Dplay.http.secret.key=${PLAY_SECRET} -Dplay.evolutions.db.default.autoApply=true -Ddb.default.driver=org.postgresql.Driver -Ddb.default.url=${DATABASE_URL}
+web: target/universal/stage/bin/belanjayukid-be-api -Dhttp.port=$PORT
