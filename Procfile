@@ -1,1 +1,1 @@
-web: target/universal/stage/bin/belanjayukid-be-api -Dhttp.port=$PORT
+web: target/universal/stage/bin/belanjayukid-be-api -Dhttp.port=$PORT -Dplay.http.secret=${APPLICATION_SECRET} -Dplay.evolutions.db.default.autoApply=true -Ddb.default.url=${DATABASE_URL}
