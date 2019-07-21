@@ -2,3 +2,8 @@
 *.log
 /.idea
 /target
+/.bloop
+/.metals
+/project/project
+/project/.bloop
+/project/target
