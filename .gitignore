@@ -3,15 +3,7 @@
 /.metals
 /.bloop
 /target
-<<<<<<< HEAD
-/.bloop
-/.metals
-/project/project
-/project/.bloop
-/project/target
-=======
 /logs
 /project/project
 /project/target
 /project/.bloop
->>>>>>> bfc8c7ec7e5a71e68d2a95f2c45163f3bdddf9a0
