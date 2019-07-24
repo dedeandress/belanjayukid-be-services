@@ -14,5 +14,5 @@ class UserProfileResolver @Inject()(userService: UserService, implicit val execu
 
   def findUserProfile(userId: UUID): Future[Option[UserProfile]] = userService.findUserProfile(userId)
 
-  def insertUserProfile(userProfileInput: UserProfileInput): Future[UserProfile] = userService.insertUserProfile(userProfileInput)
+//  def insertUserProfile(userProfileInput: UserProfileInput): Future[UserProfile] = userService.insertUserProfile(userProfileInput)
 }
