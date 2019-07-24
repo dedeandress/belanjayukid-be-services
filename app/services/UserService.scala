@@ -6,9 +6,9 @@ import com.google.inject.Inject
 import models.User
 import models.UserProfile
 import repositories.{UserProfileRepository, UserRepository}
-import graphql.input.UserInput
+import graphql.input.{UserInput, UserProfileInput}
 import com.auth0.jwt.interfaces.DecodedJWT
-import graphql.input.UserProfileInput
+
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 
@@ -20,9 +20,9 @@ class UserService @Inject()(userProfileRepository: UserProfileRepository, userRe
 //    userResolver.addUser(new User(username = username, password = password, email = email))
 //  }
 //
-  def addUser(user: UserInput): Future[User] = {
-    userRepository.create(new User(username = user.username, password = user.password, email = user.email))
-  }
+//  def addUser(user: UserInput): Future[User] = {
+//    userRepository.create(new User(username = user.username, password = user.password, email = user.email))
+//  }
   import play.api.mvc.Headers
   import utilities.JWTUtility
 
@@ -49,7 +49,7 @@ class UserService @Inject()(userProfileRepository: UserProfileRepository, userRe
 
   def users: Future[List[User]] = userRepository.findAll()
 
-  def addUser(user: User): Future[User] = userRepository.create(user)
+//  def addUser(user: User): Future[User] = userRepository.create(user)
 
   def deleteUser(id: UUID): Future[Boolean] = userRepository.delete(id)
 
@@ -59,10 +59,10 @@ class UserService @Inject()(userProfileRepository: UserProfileRepository, userRe
 
   def findUserProfile(userId: UUID): Future[Option[UserProfile]] = userProfileRepository.findByUserId(userId)
 
-  def insertUserProfile(userProfileInput: UserProfileInput): Future[UserProfile] ={
-    userProfileRepository.addUserProfile(new UserProfile(fullName = userProfileInput.fullName, noNik = userProfileInput.noNik,
-      phoneNumber = userProfileInput.phoneNumber, address = userProfileInput.address, dateOfBirth = userProfileInput.dateOfBirth,
-      userId = userProfileInput.userId))
-  }
+//  def insertUserProfile(userProfileInput: UserProfileInput): Future[UserProfile] ={
+//    userProfileRepository.addUserProfile(new UserProfile(fullName = userProfileInput.fullName, noNik = userProfileInput.noNik,
+//      phoneNumber = userProfileInput.phoneNumber, address = userProfileInput.address, dateOfBirth = userProfileInput.dateOfBirth,
+//      userId = UUID.fromString("00e33ac8-9d68-11e9-a2a3-2a2ae2dbcce4")))
+//  }
 
 }
