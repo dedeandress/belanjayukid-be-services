@@ -12,7 +12,7 @@ trait UserRepository {
 
   def find(id: UUID): Future[Option[User]]
 
-  def create(user: User): Future[User]
+  def create(user: User): Future[UUID]
 
   def delete(id: UUID): Future[Boolean]
 
