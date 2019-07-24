@@ -4,9 +4,9 @@ import com.google.inject.Inject
 import services.UserService
 import java.util.UUID
 
-  import graphql.input.UserInput
-  import models.User
-  import play.api.mvc.Headers
+import graphql.input.UserInput
+import models.User
+import play.api.mvc.Headers
 
   import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
@@ -15,7 +15,7 @@ class UserResolver @Inject()(implicit val executionContext: ExecutionContext, us
 
   def users: Future[List[User]] = userService.users
 
-  def addUser(user: User): Future[User] = userService.addUser(user)
+//  def addUser(user: User): Future[User] = userService.addUser(user)
 
   def deleteUser(id: UUID): Future[Boolean] = userService.deleteUser(id)
 
@@ -25,9 +25,9 @@ class UserResolver @Inject()(implicit val executionContext: ExecutionContext, us
 
   def login(username: String, password: String): Future[String] = userService.login(username, password)
 
-  def inputUser(user: UserInput): Future[User] ={
-    userService.addUser(user)
-  }
+//  def inputUser(user: UserInput): Future[User] ={
+//    userService.addUser(user)
+//  }
 
   def getUser(headers: Headers): Future[Option[User]] = {
     userService.isAuthorized(headers)
