@@ -13,7 +13,7 @@ import spray.json.RootJsonFormat
 case class Role(id: UUID = randomUUID, name: String)
 
 object Role extends ((UUID, String)=>Role){
-  class RoleTable(slickTag: SlickTag) extends SlickTable[Role](slickTag, "roles"){
+  class RoleTable(slickTag: SlickTag) extends SlickTable[Role](slickTag, "role"){
     def id = column[UUID]("id", O.PrimaryKey)
     def name = column[String]("name")
     def * = (id, name).mapTo[Role]

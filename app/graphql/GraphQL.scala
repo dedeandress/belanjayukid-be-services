@@ -1,9 +1,9 @@
 package graphql
 
 import com.google.inject.Inject
-import graphql.schemas.UserSchema
+import graphql.schemas.{SchemaDefinition, UserSchema}
 
-class GraphQL @Inject()(userSchema: UserSchema){
+class GraphQL @Inject()(userSchema: UserSchema, schemaDefinition: SchemaDefinition){
 
   import sangria.schema.{ObjectType, fields}
 
@@ -16,8 +16,9 @@ class GraphQL @Inject()(userSchema: UserSchema){
 
     mutation = Some(ObjectType("Mutation",
       fields(
-        userSchema.Mutations: _*
-      ))
+        schemaDefinition.Mutations: _*
+      )
+    )
     )
   )
 

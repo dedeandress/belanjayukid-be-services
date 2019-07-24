@@ -8,5 +8,7 @@ import scala.concurrent.Future
 trait RoleRepository {
   def findAll(): Future[List[Role]]
 
-  def findById(id: UUID): Future[List[Role]]
+  def findById(id: UUID): Future[Option[Role]]
+
+  def findByName(roleName: String): Future[Option[Role]]
 }

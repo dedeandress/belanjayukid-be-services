@@ -66,5 +66,72 @@ while(noSuccess) {
     if(dead) break
 }
 ```
+## GraphQL Schema
+```graphql
 
+# for `dateOfBirth` argument, please use full ISO 8601 "yyyy-MM-dd'T'HH:mm:ssXXX" format but insert with epoch (LongType)
+
+type UserProfile{
+    id: UUID
+    fullName: String
+    address: String
+    phoneNumber: String
+    noNik: String
+    dateOfBirth: Long
+}
+
+type User{
+    id: UUID
+    username: String
+    password: String
+    email: String
+}
+
+type Staff {
+    id: Int
+    user: User
+    role: Role
+}
+
+type UserProfileInput {
+    fullname: String
+    phoneNumber: String
+    address: String
+    noNik: String
+    dateOfBirth: Long
+}
+
+type UserInput {
+    username: String
+    password: String
+    email: String
+}
+
+type staffInput {
+    userInput: UserInput !
+    userProfileInput: UserProfileInput !
+    roleName: String!
+}
+
+mutation addStaff($input: staffInput!){
+    addStaff(staff: $input){
+        id
+        user{
+          username
+          password
+          email
+          userProfile{
+            address
+            fullName
+            dateOfBirth
+            noNik
+            phoneNumber
+          }
+        }
+        role{
+          name
+        }
+    }
+}
+```
 > pardon my english. - DA99 -
