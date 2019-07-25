@@ -11,7 +11,7 @@ case class Store(id: UUID, storeName: String, phoneNumber: String, address: Stri
 object Store extends ((UUID, String, String, String)=> Store) {
 
   class StoreTable(slickTag : SlickTag) extends SlickTable[Store](slickTag, "store"){
-    def id = column[UUID]("id")
+    def id = column[UUID]("id", O.PrimaryKey)
     def storeName = column[String]("store_name")
     def phoneNumber = column[String]("phone_number")
     def address = column[String]("address")
