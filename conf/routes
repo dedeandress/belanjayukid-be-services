@@ -5,6 +5,7 @@
 
 # An example controller showing a sample home page
 GET         /                    controllers.HomeController.index
+GET         /schema              controllers.HomeController.generateSchema
 GET         /graphiql            controllers.AppController.graphiql
 
 POST        /graphql             controllers.AppController.graphqlBody
