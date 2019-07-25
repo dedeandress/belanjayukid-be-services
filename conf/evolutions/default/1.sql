@@ -176,7 +176,7 @@ create table transaction_detail (
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS user_profile cascade;
 DROP TABLE IF EXISTS category cascade;
-DROP TABLE IF EXISTS product cascade;
+DROP TABLE IF EXISTS products cascade;
 DROP TABLE IF EXISTS product_detail cascade;
 DROP TABLE IF EXISTS session cascade;
 DROP TABLE IF EXISTS role cascade;
