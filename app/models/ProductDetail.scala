@@ -2,7 +2,7 @@ package models
 
 import java.util.UUID
 
-import models.Product.ProductTable
+import models.Products.ProductsTable
 import slick.jdbc.PostgresProfile.api.{Table => SlickTable, _}
 import slick.lifted.{Tag => SlickTag}
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
@@ -11,7 +11,7 @@ case class ProductDetail(id: UUID, productStockName: String, productStockPrice: 
 
 object ProductDetail extends ((UUID, String, BigDecimal, Int, UUID)=>ProductDetail) {
 
-  val products = TableQuery[ProductTable]
+  val products = TableQuery[ProductsTable]
 
   class ProductDetailTable(slickTag: SlickTag) extends SlickTable[ProductDetail](slickTag, "product_detail") {
     def id = column[UUID]("id")
