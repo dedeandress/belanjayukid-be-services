@@ -51,7 +51,7 @@ create table product_detail (
     product_id uuid NOT NULL,
     primary key (id),
     CONSTRAINT product_detail_product_id_fkey FOREIGN KEY (product_id)
-      REFERENCES product (id) MATCH SIMPLE
+      REFERENCES products (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION
 );
 
