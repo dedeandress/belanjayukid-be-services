@@ -14,7 +14,7 @@ object ProductDetail extends ((UUID, String, BigDecimal, Int, UUID)=>ProductDeta
   val products = TableQuery[ProductsTable]
 
   class ProductDetailTable(slickTag: SlickTag) extends SlickTable[ProductDetail](slickTag, "product_detail") {
-    def id = column[UUID]("id")
+    def id = column[UUID]("id", O.PrimaryKey)
     def productStockName = column[String]("product_stock_name")
     def productStockPrice = column[BigDecimal]("product_stock_price")
     def productStockValue = column[Int]("product_stock_value")
