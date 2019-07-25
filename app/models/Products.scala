@@ -14,13 +14,13 @@ object Products extends ((UUID, String, String, Int, UUID)=>Products) {
   val categories = TableQuery[CategoryTable]
 
   class ProductsTable(slickTag: SlickTag) extends SlickTable[Products](slickTag, "products"){
-    def id = column[UUID]("id")
+    def id = column[UUID]("id", O.PrimaryKey)
     def productSKU = column[String]("product_sku")
     def productName = column[String]("product_name")
     def productStock = column[Int]("product_stock")
     def categoryId = column[UUID]("category_id")
     def categoryIdFK = foreignKey("category_id", categoryId, categories)(_.id)
-    def * = (id, productName, productStock, categoryId).mapTo[Products]
+    def * = (id, productSKU, productName, productStock, categoryId).mapTo[Products]
   }
 }
 
