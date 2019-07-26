@@ -12,4 +12,6 @@ trait CategoryRepository {
 
   def findCategory(id: UUID): Future[Option[Category]]
 
+  def getAllCategory: Future[Seq[Category]]
+
 }
