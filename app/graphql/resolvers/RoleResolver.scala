@@ -1,12 +1,12 @@
 package graphql.resolvers
 
 import com.google.inject.Inject
-import repositories.RoleRepository
 import models.Role
 import java.util.UUID
 
-import scala.concurrent.Future
+import repositories.repositoryInterfaces.RoleRepository
 
+import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 
 class RoleResolver @Inject()(roleRepository: RoleRepository, implicit val executionContext: ExecutionContext){
