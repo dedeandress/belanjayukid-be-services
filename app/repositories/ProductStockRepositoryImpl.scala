@@ -21,6 +21,8 @@ class ProductStockRepositoryImpl @Inject()(database: AppDatabase, implicit val e
 
   override def addProductStock(productStock: ProductStock): Future[ProductStock] = db.run(Actions.addProductStock(productStock))
 
+  override def getAllProductStock: Future[Seq[ProductStock]] = db.run(Actions.getAllProductStock)
+
   object Actions {
 
     def findProductStock(id: UUID): DBIO[Option[ProductStock]] = for{
@@ -31,6 +33,8 @@ class ProductStockRepositoryImpl @Inject()(database: AppDatabase, implicit val e
       id <- QueryUtility.productStockQuery returning QueryUtility.productStockQuery.map(_.id) += productStock
       productStock <- findProductStock(id)
     }yield productStock.get
+
+    def getAllProductStock: DBIO[Seq[ProductStock]] = QueryUtility.productStockQuery.result
 
   }
 }

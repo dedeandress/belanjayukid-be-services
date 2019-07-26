@@ -12,4 +12,6 @@ trait ProductStockRepository {
 
   def addProductStock(productStock: ProductStock): Future[ProductStock]
 
+  def getAllProductStock: Future[Seq[ProductStock]]
+
 }

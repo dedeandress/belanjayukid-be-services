@@ -12,6 +12,8 @@ class ProductStockService @Inject()(productStockRepository: ProductStockReposito
 
   def findProductStock(id: UUID): Future[Option[ProductStock]] = productStockRepository.findProductStock(id)
 
+  def getAllProductStock: Future[Seq[ProductStock]] = productStockRepository.getAllProductStock
+
   def addProductStock(productStock: ProductStock): Future[ProductStock] = productStockRepository.addProductStock(productStock)
 
 }

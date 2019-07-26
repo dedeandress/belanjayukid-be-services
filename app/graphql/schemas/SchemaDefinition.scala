@@ -19,6 +19,11 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       name = "getAllCategory",
       fieldType = ListType(graphQLType.CategoryType),
       resolve = _ => categoryResolver.getAllCategory
+    ),
+    Field(
+      name = "getAllProductStock",
+      fieldType = ListType(graphQLType.ProductStockType),
+      resolve = _ => productStockResolver.getAllProductStock
     )
   )
 
