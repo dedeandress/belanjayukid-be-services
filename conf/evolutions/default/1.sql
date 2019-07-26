@@ -1,192 +1,118 @@
+# --- !Ups  
 
--- Users schema
-
--- !Ups
-
-create table category (
-    id uuid NOT NULL,
-    category_name varchar(40) NOT NULL ,
-    PRIMARY KEY (id)
-);
-
-create table users (
-    id uuid NOT NULL,
-    username varchar(255) NOT NULL,
-    password varchar(255) NOT NULL,
-    email varchar(100) NOT NULL,
-    PRIMARY KEY (id)
-);
-
-create table user_profile (
-    id uuid NOT NULL,
-    full_name varchar(255) NOT NULL,
-    phone_number varchar(20) NOT NULL,
-    address varchar (255) NOT NULL,
-    no_nik varchar(50) NOT NULL,
-    date_of_birth bigint,
-    user_id uuid,
-    CONSTRAINT user_profile_user_id_fkey FOREIGN KEY (user_id)
-      REFERENCES users (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-    PRIMARY KEY (id)
-);
-
-create table products (
-    id uuid NOT NULL,
-    product_sku varchar(40) NOT NULL,
-    product_name varchar(40) NOT NULL,
-    product_stock integer,
-    category_id uuid,
-    PRIMARY KEY (id),
-    CONSTRAINT product_category_id_fkey FOREIGN KEY (category_id)
-      REFERENCES category (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-create table product_detail (
-    id uuid NOT NULL,
-    product_stock_name varchar(40) NOT NULL,
-    product_stock_price decimal(13,2),
-    product_stock_value integer,
-    product_id uuid NOT NULL,
-    primary key (id),
-    CONSTRAINT product_detail_product_id_fkey FOREIGN KEY (product_id)
-      REFERENCES products (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-create table session (
-  id                            uuid not null,
-  secret_token                  varchar(300),
-  secret_token_exp              timestamptz,
-  user_id                       uuid,
-  primary key (id),
-  CONSTRAINT session_user_id_fkey FOREIGN KEY (user_id)
-      REFERENCES users (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-create table role (
-    id uuid NOT NULL,
-    name varchar(255) NOT NULL,
-    description varchar(255) NOT NULL,
-    PRIMARY KEY (id)
-);
-
-insert into role values('00e33ac8-9d68-11e9-a2a3-2a2ae2dbcce4', 'Cashier', 'Staff');
-insert into role values('00e33866-9d68-11e9-a2a3-2a2ae2dbcce4', 'Checker', 'Staff');
-insert into role values('48f44592-adf2-11e9-a2a3-2a2ae2dbcce4', 'Admin', 'SuperUser');
-
-create table staff (
-    id uuid NOT NULL,
-    user_id uuid NOT NULL,
-    role_id uuid NOT NULL,
-    PRIMARY KEY (id),
-    CONSTRAINT staff_user_id_fkey FOREIGN KEY (user_id)
-      REFERENCES users (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-    CONSTRAINT staff_role_id_fkey FOREIGN KEY (role_id)
-      REFERENCES role (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-create table customer (
-    id uuid NOT NULL,
-    user_id uuid NOT NULL,
-    CONSTRAINT customer_user_id_fkey FOREIGN KEY (user_id)
-      REFERENCES users (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-    PRIMARY KEY (id)
-);
-
-create table supplier (
-    id uuid NOT NULL,
-    supplier_name varchar(255) NOT NULL,
-    phone_number varchar(20) NOT NULL,
-    supplier_address varchar(225) NOT NULL,
-    PRIMARY KEY (id)
-);
-
-create table store (
-    id uuid NOT NULL,
-    store_name varchar(80),
-    phone_number varchar(80),
-    address text,
-    primary key(id)
-);
-
-create table transactions (
-    id uuid NOT NULL,
-    transaction_status int,
-    staff_id uuid,
-    customer_id uuid,
-    store_id uuid,
-    total_price decimal(13,2),
-    primary key (id),
-    CONSTRAINT transaction_staff_id_fkey FOREIGN KEY (staff_id)
-      REFERENCES staff(id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-    CONSTRAINT transaction_customer_id_fkey FOREIGN KEY (customer_id)
-      REFERENCES customer(id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-    CONSTRAINT transaction_store_id_fkey FOREIGN KEY (store_id)
-      REFERENCES store(id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-create table shipment (
-  id uuid NOT NULL ,
-  address text,
-  phone varchar (20),
-  price decimal(13,2),
-  transaction_id uuid,
-  primary key (id),
-  CONSTRAINT shipment_transaction_id_fkey FOREIGN KEY (transaction_id)
-      REFERENCES transactions (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-create table payment_handle (
-    id uuid NOT NULL ,
-    transaction_id uuid,
-    payment_status integer,
-    CONSTRAINT payment_transaction_id_fkey FOREIGN KEY (transaction_id)
-        REFERENCES transactions (id) MATCH SIMPLE
-        ON UPDATE NO ACTION ON DELETE NO ACTION,
-    primary key (id)
-);
-
-create table transaction_detail (
-    id uuid NOT NULL,
-    transaction_id uuid,
-    product_detail_id uuid,
-    number_of_purchases integer,
-    subtotal_price decimal(13,2),
-    primary key (id),
-    CONSTRAINT transaction_detail_transaction_id_fkey FOREIGN KEY (transaction_id)
-      REFERENCES transactions (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-    CONSTRAINT transaction_detail_product_detail_id_fkey FOREIGN KEY (product_detail_id)
-      REFERENCES product_detail (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
--- !Downs
-
-DROP TABLE IF EXISTS users CASCADE;
-DROP TABLE IF EXISTS user_profile cascade;
-DROP TABLE IF EXISTS category cascade;
-DROP TABLE IF EXISTS products cascade;
-DROP TABLE IF EXISTS product_detail cascade;
-DROP TABLE IF EXISTS session cascade;
-DROP TABLE IF EXISTS role cascade;
-DROP TABLE IF EXISTS staff cascade;
-DROP TABLE IF EXISTS customer cascade;
-DROP TABLE IF EXISTS supplier cascade;
-DROP TABLE IF EXISTS store cascade;
-DROP TABLE IF EXISTS shipment cascade;
-DROP TABLE IF EXISTS payment_handle cascade;
-DROP TABLE IF EXISTS transactions cascade;
-DROP TABLE IF EXISTS transaction_detail cascade;
+create table "role" ("id" UUID NOT NULL PRIMARY KEY,"name" VARCHAR NOT NULL);
 
 
+create table "category" ("id" UUID NOT NULL PRIMARY KEY,"category_name" VARCHAR NOT NULL);
+
+
+create table "users" ("id" UUID NOT NULL PRIMARY KEY,"username" VARCHAR NOT NULL,"password" VARCHAR NOT NULL,"email" VARCHAR NOT NULL);
+
+
+create table "user_profile" ("id" UUID NOT NULL PRIMARY KEY,"full_name" VARCHAR NOT NULL,"phone_number" VARCHAR NOT NULL,"address" VARCHAR NOT NULL,"no_nik" VARCHAR NOT NULL,"date_of_birth" BIGINT NOT NULL,"user_id" UUID NOT NULL);
+alter table "user_profile" add constraint "user_id" foreign key("user_id") references "users"("id") on update NO ACTION on delete NO ACTION;
+
+
+create table "session" ("id" UUID NOT NULL PRIMARY KEY,"secret_token" VARCHAR NOT NULL,"secret_token_exp" TIMESTAMP NOT NULL,"user_id" UUID NOT NULL);
+alter table "session" add constraint "user_id" foreign key("user_id") references "users"("id") on update NO ACTION on delete NO ACTION;
+
+
+create table "staff" ("id" UUID NOT NULL PRIMARY KEY,"user_id" UUID NOT NULL,"role_id" UUID NOT NULL);
+alter table "staff" add constraint "role_id" foreign key("role_id") references "role"("id") on update NO ACTION on delete NO ACTION;
+alter table "staff" add constraint "user_id" foreign key("user_id") references "users"("id") on update NO ACTION on delete NO ACTION;
+
+
+create table "customer" ("id" UUID NOT NULL PRIMARY KEY,"user_id" UUID NOT NULL);
+alter table "customer" add constraint "user_id" foreign key("user_id") references "users"("id") on update NO ACTION on delete NO ACTION;
+
+
+create table "products" ("id" UUID NOT NULL PRIMARY KEY,"sku" VARCHAR NOT NULL,"name" VARCHAR NOT NULL,"stock" INTEGER NOT NULL,"category_id" UUID NOT NULL);
+alter table "products" add constraint "category_id" foreign key("category_id") references "category"("id") on update NO ACTION on delete NO ACTION;
+
+
+create table "product_stock" ("id" UUID NOT NULL PRIMARY KEY,"name" VARCHAR NOT NULL);
+
+
+create table "product_detail" ("id" UUID NOT NULL PRIMARY KEY,"product_stock_id" UUID NOT NULL,"selling_price" DECIMAL(21,2) NOT NULL,"purchase_price" DECIMAL(21,2) NOT NULL,"value" INTEGER NOT NULL,"product_id" UUID NOT NULL);
+alter table "product_detail" add constraint "product_id" foreign key("product_id") references "products"("id") on update NO ACTION on delete NO ACTION;
+alter table "product_detail" add constraint "product_stock_id" foreign key("product_stock_id") references "product_stock"("id") on update NO ACTION on delete NO ACTION;
+
+
+create table "supplier" ("id" UUID NOT NULL PRIMARY KEY,"supplier_name" VARCHAR NOT NULL,"phone_number" VARCHAR NOT NULL,"supplier_address" VARCHAR NOT NULL);
+
+
+create table "store" ("id" UUID NOT NULL PRIMARY KEY,"store_name" VARCHAR NOT NULL,"phone_number" VARCHAR NOT NULL,"address" VARCHAR NOT NULL);
+
+
+create table "transactions" ("id" UUID NOT NULL PRIMARY KEY,"payment_status" INTEGER NOT NULL,"staff_id" UUID NOT NULL,"customer_id" UUID NOT NULL,"store_id" UUID NOT NULL,"total_price" DECIMAL(21,2) NOT NULL);
+alter table "transactions" add constraint "customer_id" foreign key("customer_id") references "customer"("id") on update NO ACTION on delete NO ACTION;
+alter table "transactions" add constraint "staff_id" foreign key("staff_id") references "staff"("id") on update NO ACTION on delete NO ACTION;
+alter table "transactions" add constraint "store_id" foreign key("store_id") references "store"("id") on update NO ACTION on delete NO ACTION;
+
+
+create table "transaction_detail" ("id" UUID NOT NULL PRIMARY KEY,"transaction_id" UUID NOT NULL,"product_detail_id" UUID NOT NULL,"number_of_purchases" INTEGER NOT NULL,"subtotal_price" DECIMAL(21,2) NOT NULL);
+alter table "transaction_detail" add constraint "product_detail_id" foreign key("product_detail_id") references "product_detail"("id") on update NO ACTION on delete NO ACTION;
+alter table "transaction_detail" add constraint "transaction_id" foreign key("transaction_id") references "transactions"("id") on update NO ACTION on delete NO ACTION;
+
+
+create table "shipment" ("id" UUID NOT NULL PRIMARY KEY,"address" VARCHAR NOT NULL,"price" DECIMAL(21,2) NOT NULL,"transaction_id" UUID NOT NULL);
+alter table "shipment" add constraint "transaction_id" foreign key("transaction_id") references "transactions"("id") on update NO ACTION on delete NO ACTION;
+
+
+
+
+# --- !Downs
+
+drop table "role";
+
+
+drop table "category";
+
+
+drop table "users";
+
+
+alter table "user_profile" drop constraint "user_id";
+drop table "user_profile";
+
+
+alter table "session" drop constraint "user_id";
+drop table "session";
+
+
+alter table "staff" drop constraint "role_id";
+alter table "staff" drop constraint "user_id";
+drop table "staff";
+
+
+alter table "customer" drop constraint "user_id";
+drop table "customer";
+
+
+drop table "product_stock";
+
+
+alter table "product_detail" drop constraint "product_id";
+alter table "product_detail" drop constraint "product_stock_id";
+drop table "product_detail";
+
+
+drop table "supplier";
+
+
+drop table "store";
+
+
+alter table "transactions" drop constraint "customer_id";
+alter table "transactions" drop constraint "staff_id";
+alter table "transactions" drop constraint "store_id";
+drop table "transactions";
+
+
+alter table "transaction_detail" drop constraint "product_detail_id";
+alter table "transaction_detail" drop constraint "transaction_id";
+drop table "transaction_detail";
+
+
+alter table "shipment" drop constraint "transaction_id";
+drop table "shipment";
