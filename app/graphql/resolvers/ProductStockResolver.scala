@@ -13,4 +13,6 @@ class ProductStockResolver @Inject()(productStockService: ProductStockService){
 
   def findProductStock(id: UUID): Future[Option[ProductStock]] = productStockService.findProductStock(id)
 
+  def getAllProductStock: Future[Seq[ProductStock]] = productStockService.getAllProductStock
+
 }

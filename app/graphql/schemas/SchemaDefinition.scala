@@ -2,7 +2,7 @@ package graphql.schemas
 
 import com.google.inject.Inject
 import graphql.GraphQLType
-import graphql.resolvers.{CategoryResolver, ProductResolver, RoleResolver, StaffResolver, UserProfileResolver, UserResolver}
+import graphql.resolvers.{CategoryResolver, ProductResolver, ProductStockResolver, RoleResolver, StaffResolver, UserProfileResolver, UserResolver}
 import models.Category
 import sangria.schema
 import sangria.schema.{Argument, Field, ListType, OptionType}
@@ -11,13 +11,19 @@ import sangria.schema.{Argument, Field, ListType, OptionType}
 class SchemaDefinition @Inject()(staffResolver: StaffResolver
                                  , userResolver: UserResolver, userProfileResolver: UserProfileResolver
                                  , roleResolver: RoleResolver, categoryResolver: CategoryResolver
-                                 , productResolver: ProductResolver, graphQLType: GraphQLType){
+                                 , productResolver: ProductResolver, productStockResolver: ProductStockResolver
+                                 , graphQLType: GraphQLType){
 
   val Queries: List[Field[Unit, Unit]] = List(
     Field(
       name = "getAllCategory",
       fieldType = ListType(graphQLType.CategoryType),
       resolve = _ => categoryResolver.getAllCategory
+    ),
+    Field(
+      name = "getAllProductStock",
+      fieldType = ListType(graphQLType.ProductStockType),
+      resolve = _ => productStockResolver.getAllProductStock
     )
   )
 
