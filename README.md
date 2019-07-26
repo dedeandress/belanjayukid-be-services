@@ -212,6 +212,20 @@ input StaffInput {
     roleName: String!
 }
 
+# Query
+
+query getAllProductStock{
+    id
+    name
+}
+
+query getAllCategory{
+    id
+    name
+}
+
+# Mutation
+
 mutation addStaff($input: StaffInput!){
     addStaff(staff: $input){
         id
@@ -252,6 +266,20 @@ mutation addProduct($input: ProductInput!){
             }
             value
         }
+    }
+}
+
+mutation addProductStock($input: String!){
+    addProductStock(name: $input){
+        id
+        name
+    }
+}
+
+mutation addCategory($input: String!){
+    addProductStock(name: $input){
+        id
+        name
     }
 }
 
