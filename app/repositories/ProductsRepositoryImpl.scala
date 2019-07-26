@@ -6,7 +6,7 @@ import com.google.inject.Inject
 import models.Products
 import modules.AppDatabase
 import repositories.repositoryInterfaces.ProductsRepository
-import utilities.TableQueryDB
+import utilities.QueryUtility
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -24,11 +24,11 @@ class ProductsRepositoryImpl @Inject()(database: AppDatabase, implicit val execu
   object Actions {
 
     def findProduct(id: UUID): DBIO[Option[Products]] = for{
-      product <- TableQueryDB.productQuery.filter(_.id === id).result.headOption
+      product <- QueryUtility.productQuery.filter(_.id === id).result.headOption
     }yield product
 
     def addProduct(product: Products) :DBIO[Products] = for {
-      id <- TableQueryDB.productQuery returning TableQueryDB.productQuery.map(_.id) += product
+      id <- QueryUtility.productQuery returning QueryUtility.productQuery.map(_.id) += product
       product <- findProduct(id)
     }yield product.get
   }
