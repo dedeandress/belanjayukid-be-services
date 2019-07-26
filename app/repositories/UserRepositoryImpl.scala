@@ -6,6 +6,7 @@ import modules.AppDatabase
 import java.util.UUID
 
 import errors.NotFound
+import repositories.repositoryInterfaces.UserRepository
 
 import scala.concurrent.{ExecutionContext, Future}
 
