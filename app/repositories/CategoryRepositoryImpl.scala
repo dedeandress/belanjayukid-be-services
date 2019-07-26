@@ -21,6 +21,8 @@ class CategoryRepositoryImpl @Inject()(database: AppDatabase, implicit val execu
 
   override def findCategory(id: UUID): Future[Option[Category]] = db.run(Actions.findCategory(id))
 
+  override def getAllCategory: Future[Seq[Category]] = db.run(Actions.getAllCategory)
+
   object Actions{
 
     def findCategory(id: UUID): DBIO[Option[Category]] = for{
@@ -31,6 +33,8 @@ class CategoryRepositoryImpl @Inject()(database: AppDatabase, implicit val execu
       id <- QueryUtility.categoryQuery returning QueryUtility.categoryQuery.map(_.id) += category
       category <- findCategory(id)
     }yield category.get
+
+    def getAllCategory: DBIO[Seq[Category]] = QueryUtility.categoryQuery.result
 
   }
 }

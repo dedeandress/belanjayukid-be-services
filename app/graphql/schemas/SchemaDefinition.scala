@@ -5,7 +5,7 @@ import graphql.GraphQLType
 import graphql.resolvers.{CategoryResolver, ProductResolver, RoleResolver, StaffResolver, UserProfileResolver, UserResolver}
 import models.Category
 import sangria.schema
-import sangria.schema.{Argument, Field, OptionType}
+import sangria.schema.{Argument, Field, ListType, OptionType}
 
 
 class SchemaDefinition @Inject()(staffResolver: StaffResolver
@@ -13,13 +13,13 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
                                  , roleResolver: RoleResolver, categoryResolver: CategoryResolver
                                  , productResolver: ProductResolver, graphQLType: GraphQLType){
 
-//  val Queries: List[Field[Unit, Unit]] = List(
-//    Field(
-//      name = "",
-//      fieldType = StaffType,
-//      resolve =
-//    )
-//  )
+  val Queries: List[Field[Unit, Unit]] = List(
+    Field(
+      name = "getAllCategory",
+      fieldType = ListType(graphQLType.CategoryType),
+      resolve = _ => categoryResolver.getAllCategory
+    )
+  )
 
   val Mutations: List[Field[Unit, Unit]] = List(
     Field(

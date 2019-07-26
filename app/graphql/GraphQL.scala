@@ -10,7 +10,7 @@ class GraphQL @Inject()(userSchema: UserSchema, schemaDefinition: SchemaDefiniti
   val Schema = sangria.schema.Schema(
     query = ObjectType("Query",
       fields(
-        userSchema.Queries: _*
+        schemaDefinition.Queries: _*
       )
     ),
 

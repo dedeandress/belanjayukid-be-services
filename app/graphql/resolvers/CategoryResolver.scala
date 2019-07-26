@@ -14,4 +14,6 @@ class CategoryResolver @Inject()(categoryService: CategoryService){
 
   def addCategory(category: Category): Future[Category] = categoryService.addCategory(category)
 
+  def getAllCategory: Future[Seq[Category]] = categoryService.getAllCategory
+
 }
