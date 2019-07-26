@@ -3,7 +3,9 @@ package graphql.schemas
 import com.google.inject.Inject
 import graphql.GraphQLType
 import graphql.resolvers.{CategoryResolver, ProductResolver, RoleResolver, StaffResolver, UserProfileResolver, UserResolver}
-import sangria.schema.{Field, OptionType}
+import models.Category
+import sangria.schema
+import sangria.schema.{Argument, Field, OptionType}
 
 
 class SchemaDefinition @Inject()(staffResolver: StaffResolver
@@ -31,6 +33,14 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       fieldType = graphQLType.ProductType,
       arguments = graphQLType.ProductInputArg :: Nil,
       resolve = sangriaContext => productResolver.addProduct(sangriaContext.arg(graphQLType.ProductInputArg))
+    ),
+    Field(
+      name = "addCategory",
+      fieldType = graphQLType.CategoryType,
+      arguments = List(
+        Argument("name", schema.StringType)
+      ),
+      resolve = sangriaContext => categoryResolver.addCategory(new Category(categoryName = sangriaContext.arg[String]("name")))
     )
   )
 
