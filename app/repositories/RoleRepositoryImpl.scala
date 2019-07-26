@@ -8,6 +8,7 @@ import java.util.UUID
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 import models.Role.RoleTable
+import repositories.repositoryInterfaces.RoleRepository
 
 @Singleton
 class RoleRepositoryImpl @Inject()(database: AppDatabase, implicit val executionContext: ExecutionContext) extends RoleRepository{
