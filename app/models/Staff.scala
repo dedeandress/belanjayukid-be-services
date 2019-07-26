@@ -16,7 +16,7 @@ object Staff extends ((UUID, UUID, UUID)=>Staff) {
   val roles = TableQuery[RoleTable]
 
   class StaffTable(slickTag: SlickTag) extends SlickTable[Staff](slickTag,"staff"){
-    def id = column[UUID]("id")
+    def id = column[UUID]("id", O.PrimaryKey)
     def userId = column[UUID]("user_id")
     def roleId = column[UUID]("role_id")
     def userIdFK = foreignKey("user_id", userId, users)(_.id)

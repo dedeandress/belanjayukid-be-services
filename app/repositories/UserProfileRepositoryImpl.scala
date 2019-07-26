@@ -3,6 +3,7 @@ package repositories
 import com.google.inject.{Inject, Singleton}
 import modules.AppDatabase
 import play.api.Logger
+import repositories.repositoryInterfaces.UserProfileRepository
 
 import scala.concurrent.{ExecutionContext, Future}
 

@@ -1,7 +1,8 @@
 package modules
 
 import com.google.inject._
-import repositories.{RoleRepository, RoleRepositoryImpl}
+import repositories.RoleRepositoryImpl
+import repositories.repositoryInterfaces.RoleRepository
 
 class RoleModule extends AbstractModule {
   override def configure(): Unit = {

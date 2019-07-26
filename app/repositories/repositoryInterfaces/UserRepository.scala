@@ -1,8 +1,8 @@
-package repositories
+package repositories.repositoryInterfaces
+
 import models.User
 
 import scala.concurrent.Future
-
 
 trait UserRepository {
 

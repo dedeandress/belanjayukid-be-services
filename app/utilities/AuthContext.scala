@@ -2,10 +2,11 @@ package utilities
 
 import errors.AuthenticationException
 import models.User
-import repositories.UserRepository
 
 import scala.concurrent.ExecutionContext
 import errors.AuthorizationException
+import repositories.repositoryInterfaces.UserRepository
+
 import scala.concurrent.Future
 
 case class AuthContext(userRepository: UserRepository, currentUser:Option[User] = None, implicit val executionContext: ExecutionContext) {

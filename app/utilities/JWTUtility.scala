@@ -7,9 +7,9 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.google.inject.Inject
 import models.User
-import repositories.UserRepository
 import play.api.mvc.Headers
 import com.auth0.jwt.interfaces.DecodedJWT
+import repositories.repositoryInterfaces.UserRepository
 
 
 class JWTUtility @Inject()(userRepository: UserRepository){

@@ -18,16 +18,16 @@ object Transaction extends ((UUID, Int, UUID, UUID, UUID, BigDecimal)=>Transacti
   val stores = TableQuery[StoreTable]
 
   class TransactionTable(slickTag: SlickTag) extends SlickTable[Transaction](slickTag, "transactions") {
-    def id = column[UUID]("id")
+    def id = column[UUID]("id", O.PrimaryKey)
     def paymentStatus = column[Int]("payment_status")
+    def storeId = column[UUID]("store_id")
     def staffId = column[UUID]("staff_id")
     def customerId = column[UUID]("customer_id")
-    def storeId = column[UUID]("store_id")
     def totalPrice = column[BigDecimal]("total_price")
     def staffIdFK = foreignKey("staff_id", staffId, staffs)(_.id)
     def storeIdFK = foreignKey("store_id", storeId, stores)(_.id)
     def customerIdFK = foreignKey("customer_id", customerId, customers)(_.id)
-    def * = (id, paymentStatus, staffId, customerId, staffId, totalPrice).mapTo[Transaction]
+    def * = (id, paymentStatus, staffId, customerId, storeId, totalPrice).mapTo[Transaction]
   }
 
 }

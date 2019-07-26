@@ -16,7 +16,7 @@ object TransactionDetail extends ((UUID, UUID, UUID, Int, BigDecimal)=>Transacti
   val productDetails = TableQuery[ProductDetailTable]
 
   class TransactionDetailTable(slickTag: SlickTag) extends SlickTable[TransactionDetail](slickTag, "transaction_detail") {
-    def id = column[UUID]("id")
+    def id = column[UUID]("id", O.PrimaryKey)
     def transactionId = column[UUID]("transaction_id")
     def productDetailId = column[UUID]("product_detail_id")
     def numberOfPurchases = column[Int]("number_of_purchases")

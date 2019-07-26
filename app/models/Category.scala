@@ -10,7 +10,7 @@ case class Category(id: UUID, categoryName: String)
 
 object Category extends ((UUID, String)=>Category) {
   class CategoryTable(slickTag: SlickTag) extends SlickTable[Category](slickTag, "category") {
-    def id = column[UUID]("id")
+    def id = column[UUID]("id", O.PrimaryKey)
     def categoryName = column[String]("category_name")
     def * = (id, categoryName).mapTo[Category]
   }

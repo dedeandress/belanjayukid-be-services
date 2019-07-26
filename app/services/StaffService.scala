@@ -4,8 +4,7 @@ import com.google.inject.Inject
 import errors.NotFound
 import graphql.input.StaffInput
 import models.{Staff, User, UserProfile}
-import repositories.{RoleRepository, UserProfileRepository, UserRepository}
-import repositories.repositoryInterfaces.StaffRepository
+import repositories.repositoryInterfaces.{RoleRepository, StaffRepository, UserProfileRepository, UserRepository}
 import util.BCryptUtility
 
 import scala.concurrent.{ExecutionContext, Future}

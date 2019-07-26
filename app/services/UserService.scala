@@ -5,9 +5,9 @@ import java.util.UUID
 import com.google.inject.Inject
 import models.User
 import models.UserProfile
-import repositories.{UserProfileRepository, UserRepository}
 import graphql.input.{UserInput, UserProfileInput}
 import com.auth0.jwt.interfaces.DecodedJWT
+import repositories.repositoryInterfaces.{UserProfileRepository, UserRepository}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext

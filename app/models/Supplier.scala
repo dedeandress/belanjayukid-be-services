@@ -11,7 +11,7 @@ case class Supplier(id: UUID, supplierName: String, phoneNumber: String, address
 object Supplier extends ((UUID, String, String, String)=>Supplier){
 
   class SupplierTable(slickTag: SlickTag) extends SlickTable[Supplier](slickTag, "supplier"){
-    def id = column[UUID]("id")
+    def id = column[UUID]("id", O.PrimaryKey)
     def supplierName = column[String]("supplier_name")
     def phoneNumber = column[String]("phone_number")
     def supplierAddress = column[String]("supplier_address")

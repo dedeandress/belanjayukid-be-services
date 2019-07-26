@@ -1,6 +1,7 @@
-package repositories
+package repositories.repositoryInterfaces
 
 import java.util.UUID
+
 import models.Role
 
 import scala.concurrent.Future

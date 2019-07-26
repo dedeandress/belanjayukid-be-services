@@ -2,7 +2,9 @@ package controllers
 
 import javax.inject._
 import play.api._
+import play.api.libs.json.Json
 import play.api.mvc._
+import utilities.SchemaGenerator
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -21,4 +23,9 @@ class HomeController @Inject()(cc: ControllerComponents) extends AbstractControl
   def index() = Action { implicit request: Request[AnyContent] =>
     Ok(views.html.index())
   }
+
+  def generateSchema() = Action{implicit request: Request[AnyContent] =>
+    SchemaGenerator.run
+    Ok(Json.toJson("----------------------FINISHED GENERATING SCHEMA--------------------------"))
+}
 }
