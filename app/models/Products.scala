@@ -7,7 +7,7 @@ import slick.jdbc.PostgresProfile.api.{Table => SlickTable, _}
 import slick.lifted.{Tag => SlickTag}
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
 
-case class Products(id: UUID = UUID.randomUUID(), productSKU: String,productName: String, productStock: Int, categoryId: UUID)
+case class Products(id: UUID = UUID.randomUUID(), SKU: String, name: String, stock: Int = 0, categoryId: UUID)
 
 object Products extends ((UUID, String, String, Int, UUID)=>Products) {
 
@@ -15,12 +15,12 @@ object Products extends ((UUID, String, String, Int, UUID)=>Products) {
 
   class ProductsTable(slickTag: SlickTag) extends SlickTable[Products](slickTag, "products"){
     def id = column[UUID]("id", O.PrimaryKey)
-    def productSKU = column[String]("product_sku")
-    def productName = column[String]("product_name")
-    def productStock = column[Int]("product_stock")
+    def SKU = column[String]("sku")
+    def name = column[String]("name")
+    def stock = column[Int]("stock")
     def categoryId = column[UUID]("category_id")
     def categoryIdFK = foreignKey("category_id", categoryId, categories)(_.id)
-    def * = (id, productSKU, productName, productStock, categoryId).mapTo[Products]
+    def * = (id, SKU, name, stock, categoryId).mapTo[Products]
   }
 }
 
