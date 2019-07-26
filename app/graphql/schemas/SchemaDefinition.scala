@@ -2,8 +2,8 @@ package graphql.schemas
 
 import com.google.inject.Inject
 import graphql.GraphQLType
-import graphql.resolvers.{CategoryResolver, ProductResolver, RoleResolver, StaffResolver, UserProfileResolver, UserResolver}
-import models.Category
+import graphql.resolvers.{CategoryResolver, ProductResolver, ProductStockResolver, RoleResolver, StaffResolver, UserProfileResolver, UserResolver}
+import models.{Category, ProductStock}
 import sangria.schema
 import sangria.schema.{Argument, Field, ListType, OptionType}
 
@@ -11,7 +11,8 @@ import sangria.schema.{Argument, Field, ListType, OptionType}
 class SchemaDefinition @Inject()(staffResolver: StaffResolver
                                  , userResolver: UserResolver, userProfileResolver: UserProfileResolver
                                  , roleResolver: RoleResolver, categoryResolver: CategoryResolver
-                                 , productResolver: ProductResolver, graphQLType: GraphQLType){
+                                 , productResolver: ProductResolver, productStockResolver: ProductStockResolver
+                                 , graphQLType: GraphQLType){
 
   val Queries: List[Field[Unit, Unit]] = List(
     Field(
@@ -41,6 +42,14 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
         Argument("name", schema.StringType)
       ),
       resolve = sangriaContext => categoryResolver.addCategory(new Category(categoryName = sangriaContext.arg[String]("name")))
+    ),
+    Field(
+      name = "addProductStock",
+      fieldType = graphQLType.ProductStockType,
+      arguments = List(
+        Argument("name", schema.StringType)
+      ),
+      resolve = sangriaContext => productStockResolver.addProductStock(new ProductStock(name = sangriaContext.arg[String]("name")))
     )
   )
 
