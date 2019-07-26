@@ -12,4 +12,6 @@ class CategoryResolver @Inject()(categoryService: CategoryService){
 
   def findCategory(id: UUID): Future[Option[Category]] = categoryService.findCategory(id)
 
+  def addCategory(category: Category): Future[Category] = categoryService.addCategory(category)
+
 }
