@@ -12,4 +12,6 @@ trait ProductsRepository {
 
   def findProduct(id: UUID): Future[Option[Products]]
 
+  def updateProduct(id:UUID, products: Products): Future[Products]
+
 }
