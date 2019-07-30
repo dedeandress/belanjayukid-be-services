@@ -1,11 +1,11 @@
 package graphql.schemas
 
 import com.google.inject.Inject
-import graphql.GraphQLType
+import graphql.{Context, GraphQLType}
 import graphql.resolvers.{CategoryResolver, ProductResolver, ProductStockResolver, RoleResolver, StaffResolver, UserProfileResolver, UserResolver}
 import models.{Category, ProductStock}
 import sangria.schema
-import sangria.schema.{Argument, Field, ListType, OptionType}
+import sangria.schema.{Argument, Field, InterfaceType, ListType, OptionType}
 
 
 class SchemaDefinition @Inject()(staffResolver: StaffResolver
@@ -14,7 +14,7 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
                                  , productResolver: ProductResolver, productStockResolver: ProductStockResolver
                                  , graphQLType: GraphQLType){
 
-  val Queries: List[Field[Unit, Unit]] = List(
+  val Queries: List[Field[Context, Unit]] = List(
     Field(
       name = "getAllCategory",
       fieldType = ListType(graphQLType.CategoryType),
@@ -27,7 +27,16 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
     )
   )
 
-  val Mutations: List[Field[Unit, Unit]] = List(
+  val Mutations: List[Field[Context, Unit]] = List(
+    Field(
+      name = "login",
+      fieldType = graphQLType.LoginUserType,
+      arguments = List(
+        Argument("username", schema.StringType),
+        Argument("password", schema.StringType)
+      ),
+      resolve = sangriaContext => staffResolver.login(sangriaContext.arg[String]("username"), sangriaContext.arg[String]("password"))
+    ),
     Field(
       name = "addStaff",
       fieldType = OptionType(graphQLType.StaffType),
