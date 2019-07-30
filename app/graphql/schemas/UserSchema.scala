@@ -42,15 +42,6 @@ class UserSchema @Inject()(userResolver: UserResolver, roleResolver: RoleResolve
         Argument("id", CustomScalar.UUIDType),
       ),
       resolve = sangriaContext => userResolver.findUser(sangriaContext.args.arg[UUID]("id"))
-    ),
-    Field(
-      name = "login",
-      fieldType = StringType,
-      arguments = List(
-        Argument("username", StringType),
-        Argument("password", StringType)
-      ),
-      resolve = sangriaContext => userResolver.login(sangriaContext.args.arg[String]("username"),sangriaContext.args.arg[String]("password"))
     )
   )
 
@@ -74,45 +65,12 @@ class UserSchema @Inject()(userResolver: UserResolver, roleResolver: RoleResolve
   implicit val userProfileJsonProtocolFormat: JsonFormat[UserProfileInput] = jsonFormat5(UserProfileInput)
 
   implicit val UserInputType : InputObjectType[UserInput] = deriveInputObjectType[UserInput]()
-//  TODO
-// Field(
-//    name = "loginUser",
-//    fieldType = StringType,
-//    arguments = List(
-//      Argument("username", StringType),
-//      Argument("password", StringType)
-//    ),
-//    resolve = ctx => UpdateCtx(
-//      ctx.ctx.login(ctx.args.arg[String]("username"), ctx.args.arg[String]("password"))
-//    )
-//  ),
+
   val UserInputArg = Argument("user", UserInputType)
-  implicit val userProfileInputType : InputObjectType[UserProfileInput] = deriveInputObjectType[UserProfileInput](
-//    ReplaceInputField("dateOfBirth", InputField("dateOfBirth", CustomScalar.GraphQLDateTime))
-  )
+  implicit val userProfileInputType : InputObjectType[UserProfileInput] = deriveInputObjectType[UserProfileInput]()
   val UserProfileInputArg = Argument("userProfile", userProfileInputType)
   // TODO: if you get error inputObjectResultInput(?: FromInput[...], ioArgType) you must import sangria spray json when you use InputType
   val Mutations: List[Field[Unit, Unit]] = List(
-//    Field(
-//      name = "inputUser",
-//      fieldType = UserType,
-//      arguments = UserInputArg :: Nil,
-//      tags = Authorized :: Nil,
-//      resolve = sangriaContext => userResolver.inputUser(sangriaContext.arg(UserInputArg))
-//    ),
-//    Field(
-//      name = "addUser",
-//      fieldType = UserType,
-//      arguments = List(
-//        Argument("username", StringType),
-//        Argument("password", StringType),
-//        Argument("email", StringType)
-//      ),
-//      resolve = sangriaContext => userResolver.addUser(new models.User(username = sangriaContext.args.arg[String]("username"),
-//        password=sangriaContext.args.arg[String]("password"),
-//        email = sangriaContext.args.arg[String]("email"))
-//      )
-//    ),
     Field(
       name = "deleteUser",
       fieldType = BooleanType,
@@ -139,12 +97,5 @@ class UserSchema @Inject()(userResolver: UserResolver, roleResolver: RoleResolve
         )
     ),
   )
-
-//  Field(
-//    name = "insertUserProfile",
-//    fieldType = UserProfileType,
-//    arguments = UserProfileInputArg :: Nil,
-//    resolve = sangriaContext => userProfileResolver.insertUserProfile(sangriaContext.arg(UserProfileInputArg))
-//  )
 
 }
