@@ -16,23 +16,18 @@ class StaffService @Inject()(staffRepository: StaffRepository, userRepository: U
   def addStaff(staffInput: StaffInput): Future[Option[Staff]] = {
     val user = User(username = staffInput.userInput.username
       , password = BCryptUtility.hashPassword(staffInput.userInput.password), email = staffInput.userInput.email)
-    userRepository.create(user).flatMap{
-      id =>
         val staffDetail = staffInput.userProfileInput
-        val userProfile = UserProfile(fullName = staffDetail.fullName, address = staffDetail.address
-          , phoneNumber = staffDetail.phoneNumber, noNik = staffDetail.noNik, dateOfBirth = staffDetail.dateOfBirth
-          , userId = id)
-        userProfileRepository.addUserProfile(userProfile).flatMap{
-          _ =>
-            roleRepository.findByName(staffInput.roleName).flatMap{
-              role=>
-                if(role.isEmpty) throw NotFound("Role Name is not found")
-                staffRepository.addStaff(Staff(userId = id, roleId = role.get.id))
-            }
-        }
+        for{
+          userId <- userRepository.create(user)
+          userProfile <- Future.successful(UserProfile(fullName = staffDetail.fullName, address = staffDetail.address
+            , phoneNumber = staffDetail.phoneNumber, noNik = staffDetail.noNik, dateOfBirth = staffDetail.dateOfBirth
+            , userId = userId))
+          _ <- userProfileRepository.addUserProfile(userProfile)
+          role <- roleRepository.findByName(staffInput.roleName)
+          staff <- if(role.isEmpty) throw NotFound("Role Name is not found")
+          else staffRepository.addStaff(Staff(userId = userId, roleId = role.get.id))
+        }yield staff
     }
-
-  }
 
   def login(username: String, password: String): Future[LoginUser] = {
     userRepository.findUser(username).flatMap{
