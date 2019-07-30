@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.DateTime
 import com.google.inject.Inject
 import graphql.input.{ProductDetailInput, ProductInput, StaffInput, UserInput, UserProfileInput}
 import graphql.resolvers.{CategoryResolver, ProductDetailResolver, ProductResolver, ProductStockResolver, RoleResolver, StaffResolver, UserProfileResolver, UserResolver}
-import models.{Category, ProductDetail, ProductStock, Products, Role, Staff, User, UserProfile}
+import models.{Category, LoginUser, ProductDetail, ProductStock, Products, Role, Staff, User, UserProfile}
 import sangria.macros.derive.{ReplaceInputField, _}
 import sangria.marshalling.sprayJson._
 import sangria.schema.{Argument, Field, InputField, InputObjectType, ListType, ObjectType, OptionType}
@@ -72,7 +72,10 @@ class GraphQLType @Inject()(userResolver: UserResolver, staffResolver: StaffReso
     AddFields(
       Field("productDetail", ListType(ProductDetailType), resolve = c => productDetailResolver.findProductDetailByProductId(c.value.id))
     )
+  )
 
+  implicit val LoginUserType: ObjectType[Unit, LoginUser] = deriveObjectType[Unit, LoginUser](
+    ObjectTypeName("Credential")
   )
 
   implicit val userJsonProtocolFormat: JsonFormat[UserInput] = jsonFormat3(UserInput)
