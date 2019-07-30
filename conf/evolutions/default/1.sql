@@ -63,56 +63,43 @@ alter table "shipment" add constraint "transaction_id" foreign key("transaction_
 
 # --- !Downs
 
-drop table "role";
+drop table if exists "category";
 
 
-drop table "category";
+drop table if exists "users";
 
 
-drop table "users";
+drop table if exists "user_profile";
 
 
-alter table "user_profile" drop constraint "user_id";
-drop table "user_profile";
+drop table if exists "session";
 
 
-alter table "session" drop constraint "user_id";
-drop table "session";
+drop table if exists "staff";
 
 
-alter table "staff" drop constraint "role_id";
-alter table "staff" drop constraint "user_id";
-drop table "staff";
+drop table if exists "role";
 
 
-alter table "customer" drop constraint "user_id";
-drop table "customer";
+drop table if exists "customer";
 
 
-drop table "product_stock";
+drop table if exists "product_stock";
 
 
-alter table "product_detail" drop constraint "product_id";
-alter table "product_detail" drop constraint "product_stock_id";
-drop table "product_detail";
+drop table if exists "product_detail";
 
 
-drop table "supplier";
+drop table if exists "supplier";
 
 
-drop table "store";
+drop table if exists "store";
 
 
-alter table "transactions" drop constraint "customer_id";
-alter table "transactions" drop constraint "staff_id";
-alter table "transactions" drop constraint "store_id";
-drop table "transactions";
+drop table if exists "transactions";
 
 
-alter table "transaction_detail" drop constraint "product_detail_id";
-alter table "transaction_detail" drop constraint "transaction_id";
-drop table "transaction_detail";
+drop table if exists "transaction_detail";
 
 
-alter table "shipment" drop constraint "transaction_id";
-drop table "shipment";
+drop table if exists "shipment";
