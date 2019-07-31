@@ -3,7 +3,7 @@
 create table "role" ("id" UUID NOT NULL PRIMARY KEY,"name" VARCHAR NOT NULL);
 
 
-create table "category" ("id" UUID NOT NULL PRIMARY KEY,"category_name" VARCHAR NOT NULL);
+create table "category" ("id" UUID NOT NULL PRIMARY KEY,"name" VARCHAR NOT NULL);
 
 
 create table "users" ("id" UUID NOT NULL PRIMARY KEY,"username" VARCHAR NOT NULL,"password" VARCHAR NOT NULL,"email" VARCHAR NOT NULL);
@@ -38,7 +38,7 @@ alter table "product_detail" add constraint "product_id" foreign key("product_id
 alter table "product_detail" add constraint "product_stock_id" foreign key("product_stock_id") references "product_stock"("id") on update NO ACTION on delete NO ACTION;
 
 
-create table "supplier" ("id" UUID NOT NULL PRIMARY KEY,"supplier_name" VARCHAR NOT NULL,"phone_number" VARCHAR NOT NULL,"supplier_address" VARCHAR NOT NULL);
+create table "supplier" ("id" UUID NOT NULL PRIMARY KEY,"name" VARCHAR NOT NULL,"phone_number" VARCHAR NOT NULL,"address" VARCHAR NOT NULL);
 
 
 create table "store" ("id" UUID NOT NULL PRIMARY KEY,"store_name" VARCHAR NOT NULL,"phone_number" VARCHAR NOT NULL,"address" VARCHAR NOT NULL);
@@ -63,43 +63,37 @@ alter table "shipment" add constraint "transaction_id" foreign key("transaction_
 
 # --- !Downs
 
-drop table if exists "category";
-
-
-drop table if exists "users";
-
-
-drop table if exists "user_profile";
-
-
-drop table if exists "session";
-
-
-drop table if exists "staff";
-
-
-drop table if exists "role";
-
-
-drop table if exists "customer";
-
-
-drop table if exists "product_stock";
-
-
-drop table if exists "product_detail";
-
-
 drop table if exists "supplier";
 
 
 drop table if exists "store";
 
 
+drop table if exists "transaction_detail";
+
+
 drop table if exists "transactions";
 
 
-drop table if exists "transaction_detail";
+drop table if exists "session";
+
+
+drop table if exists "customer";
+
+
+drop table if exists "user_profile";
+
+
+drop table if exists "users";
+
+
+drop table if exists "product_detail";
+
+
+drop table if exists "product_stock";
+
+
+drop table if exists "staff";
 
 
 drop table if exists "shipment";
