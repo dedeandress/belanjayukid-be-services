@@ -10,10 +10,10 @@ import scala.concurrent.Future
 
 class CategoryResolver @Inject()(categoryService: CategoryService){
 
-  def findCategory(id: UUID): Future[Option[Category]] = categoryService.findCategory(id)
+  def category(id: UUID): Future[Option[Category]] = categoryService.findCategory(id)
 
-  def addCategory(category: Category): Future[Category] = categoryService.addCategory(category)
+  def category(category: Category): Future[Category] = categoryService.createCategory(category)
 
-  def getAllCategory: Future[Seq[Category]] = categoryService.getAllCategory
+  def categories: Future[Seq[Category]] = categoryService.getAllCategory
 
 }
