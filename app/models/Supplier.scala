@@ -12,9 +12,9 @@ object Supplier extends ((UUID, String, String, String)=>Supplier){
 
   class SupplierTable(slickTag: SlickTag) extends SlickTable[Supplier](slickTag, "supplier"){
     def id = column[UUID]("id", O.PrimaryKey)
-    def name = column[String]("supplier_name")
+    def name = column[String]("name")
     def phoneNumber = column[String]("phone_number")
-    def supplierAddress = column[String]("supplier_address")
+    def supplierAddress = column[String]("address")
     def * = (id, name, phoneNumber, supplierAddress).mapTo[Supplier]
   }
 
