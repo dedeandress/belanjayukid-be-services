@@ -6,16 +6,16 @@ import slick.jdbc.PostgresProfile.api.{Table => SlickTable, _}
 import slick.lifted.{Tag => SlickTag}
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
 
-case class Supplier(id: UUID, supplierName: String, phoneNumber: String, address: String)
+case class Supplier(id: UUID, name: String, phoneNumber: String, address: String)
 
 object Supplier extends ((UUID, String, String, String)=>Supplier){
 
   class SupplierTable(slickTag: SlickTag) extends SlickTable[Supplier](slickTag, "supplier"){
     def id = column[UUID]("id", O.PrimaryKey)
-    def supplierName = column[String]("supplier_name")
+    def name = column[String]("supplier_name")
     def phoneNumber = column[String]("phone_number")
     def supplierAddress = column[String]("supplier_address")
-    def * = (id, supplierName, phoneNumber, supplierAddress).mapTo[Supplier]
+    def * = (id, name, phoneNumber, supplierAddress).mapTo[Supplier]
   }
 
 }

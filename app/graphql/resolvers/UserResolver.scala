@@ -19,6 +19,6 @@ class UserResolver @Inject()(implicit val executionContext: ExecutionContext, us
 
   def updateUser(id: UUID, username: String, password: String, email: String): Future[User] = userService.updateUser(id,username, password, email)
 
-  def findUser(id: UUID): Future[Option[User]] = userService.findUser(id)
+  def user(id: UUID): Future[Option[User]] = userService.findUser(id)
 
 }

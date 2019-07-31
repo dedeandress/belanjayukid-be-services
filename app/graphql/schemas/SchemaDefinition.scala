@@ -16,14 +16,19 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
 
   val Queries: List[Field[Context, Unit]] = List(
     Field(
-      name = "getAllCategory",
+      name = "categories",
       fieldType = ListType(graphQLType.CategoryType),
-      resolve = _ => categoryResolver.getAllCategory
+      resolve = _ => categoryResolver.categories
     ),
     Field(
-      name = "getAllProductStock",
+      name = "productStocks",
       fieldType = ListType(graphQLType.ProductStockType),
-      resolve = _ => productStockResolver.getAllProductStock
+      resolve = _ => productStockResolver.productStocks
+    ),
+    Field(
+      name = "roles",
+      fieldType = ListType(graphQLType.RoleType),
+      resolve = _ => staffResolver.roles
     )
   )
 
@@ -38,32 +43,32 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       resolve = sangriaContext => staffResolver.login(sangriaContext.arg[String]("username"), sangriaContext.arg[String]("password"))
     ),
     Field(
-      name = "addStaff",
+      name = "createStaff",
       fieldType = OptionType(graphQLType.StaffType),
       arguments = graphQLType.StaffInputArg :: Nil,
-      resolve = sangriaContext => staffResolver.addStaff(sangriaContext.arg(graphQLType.StaffInputArg))
+      resolve = sangriaContext => staffResolver.createStaff(sangriaContext.arg(graphQLType.StaffInputArg))
     ),
     Field(
-      name = "addProduct",
+      name = "createProduct",
       fieldType = graphQLType.ProductType,
       arguments = graphQLType.ProductInputArg :: Nil,
-      resolve = sangriaContext => productResolver.addProduct(sangriaContext.arg(graphQLType.ProductInputArg))
+      resolve = sangriaContext => productResolver.createProduct(sangriaContext.arg(graphQLType.ProductInputArg))
     ),
     Field(
-      name = "addCategory",
+      name = "createCategory",
       fieldType = graphQLType.CategoryType,
       arguments = List(
         Argument("name", schema.StringType)
       ),
-      resolve = sangriaContext => categoryResolver.addCategory(new Category(categoryName = sangriaContext.arg[String]("name")))
+      resolve = sangriaContext => categoryResolver.category(new Category(name = sangriaContext.arg[String]("name")))
     ),
     Field(
-      name = "addProductStock",
+      name = "createProductStock",
       fieldType = graphQLType.ProductStockType,
       arguments = List(
         Argument("name", schema.StringType)
       ),
-      resolve = sangriaContext => productStockResolver.addProductStock(new ProductStock(name = sangriaContext.arg[String]("name")))
+      resolve = sangriaContext => productStockResolver.createProductStock(new ProductStock(name = sangriaContext.arg[String]("name")))
     )
   )
 
