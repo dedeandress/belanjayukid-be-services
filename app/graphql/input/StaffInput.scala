@@ -1,3 +1,3 @@
 package graphql.input
 
-case class StaffInput(userInput: UserInput, roleName: String, userProfileInput: UserProfileInput)
+case class StaffInput(userInput: UserInput, roleId: String, userProfileInput: UserProfileInput)
