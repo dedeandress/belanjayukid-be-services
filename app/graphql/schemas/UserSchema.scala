@@ -26,7 +26,7 @@ class UserSchema @Inject()(userResolver: UserResolver, roleResolver: RoleResolve
   implicit val UserType: ObjectType[Unit, User] = deriveObjectType[Unit, User](
     ObjectTypeName("User"),
     ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id)),
-    AddFields(Field("userProfile", OptionType(UserProfileType) ,resolve = c => userProfileResolver.findUserProfile(c.value.id)))
+    AddFields(Field("userProfile", OptionType(UserProfileType) ,resolve = c => userProfileResolver.userProfile(c.value.id)))
   )
 
   val Queries: List[Field[Unit, Unit]] = List(
@@ -41,7 +41,7 @@ class UserSchema @Inject()(userResolver: UserResolver, roleResolver: RoleResolve
       arguments = List(
         Argument("id", CustomScalar.UUIDType),
       ),
-      resolve = sangriaContext => userResolver.findUser(sangriaContext.args.arg[UUID]("id"))
+      resolve = sangriaContext => userResolver.user(sangriaContext.args.arg[UUID]("id"))
     )
   )
 

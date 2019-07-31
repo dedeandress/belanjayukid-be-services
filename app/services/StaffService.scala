@@ -1,9 +1,11 @@
 package services
 
+import java.util.UUID
+
 import com.google.inject.Inject
-import errors.{AuthorizationException, NotFound}
+import errors.{AlreadyExists, AuthorizationException, NotFound}
 import graphql.input.StaffInput
-import models.{LoginUser, Staff, User, UserProfile}
+import models.{LoginUser, Role, Staff, User, UserProfile}
 import repositories.repositoryInterfaces.{RoleRepository, StaffRepository, UserProfileRepository, UserRepository}
 import utilities.{BCryptUtility, JWTUtility}
 
@@ -13,19 +15,19 @@ class StaffService @Inject()(staffRepository: StaffRepository, userRepository: U
                              , userProfileRepository: UserProfileRepository, roleRepository: RoleRepository
                              , implicit val executionContext: ExecutionContext){
 
-  def addStaff(staffInput: StaffInput): Future[Option[Staff]] = {
+  def createStaff(staffInput: StaffInput): Future[Option[Staff]] = {
     val user = User(username = staffInput.userInput.username
       , password = BCryptUtility.hashPassword(staffInput.userInput.password), email = staffInput.userInput.email)
         val staffDetail = staffInput.userProfileInput
         for{
-          userId <- userRepository.create(user)
+          searchUser <- userRepository.findUser(user.username)
+          userId <- if(searchUser.isEmpty) userRepository.create(user)
+          else throw AlreadyExists("username already exist")
           userProfile <- Future.successful(UserProfile(fullName = staffDetail.fullName, address = staffDetail.address
             , phoneNumber = staffDetail.phoneNumber, noNik = staffDetail.noNik, dateOfBirth = staffDetail.dateOfBirth
             , userId = userId))
           _ <- userProfileRepository.addUserProfile(userProfile)
-          role <- roleRepository.findByName(staffInput.roleName)
-          staff <- if(role.isEmpty) throw NotFound("Role Name is not found")
-          else staffRepository.addStaff(Staff(userId = userId, roleId = role.get.id))
+          staff <-staffRepository.addStaff(Staff(userId = userId, roleId = UUID.fromString(staffInput.roleId)))
         }yield staff
     }
 
@@ -34,10 +36,10 @@ class StaffService @Inject()(staffRepository: StaffRepository, userRepository: U
       user=>
         if(user.isEmpty) throw AuthorizationException("username or password doesn't exist")
         if (BCryptUtility.check(password, user.get.password)){
-          play.Logger.warn(""+user.get.id)
+          play.Logger.warn("user passed")
           staffRepository.findByUserId(user.get.id).flatMap{
             staff=>
-              play.Logger.warn(""+staff.get.id)
+              play.Logger.warn("staff found")
               roleRepository.findById(staff.get.roleId).map{
                 role=>
                   LoginUser(JWTUtility.generateJWT(user.get, role.get.name), user.get.username, role.get.name)
@@ -46,5 +48,9 @@ class StaffService @Inject()(staffRepository: StaffRepository, userRepository: U
         }
         else throw AuthorizationException("username or password doesn't exist")
     }
+  }
+
+  def roles: Future[List[Role]] = {
+    roleRepository.findAll()
   }
 }

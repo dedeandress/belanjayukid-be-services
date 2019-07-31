@@ -11,10 +11,10 @@ import scala.concurrent.Future
 
 class ProductStockResolver @Inject()(productStockService: ProductStockService){
 
-  def findProductStock(id: UUID): Future[Option[ProductStock]] = productStockService.findProductStock(id)
+  def productStock(id: UUID): Future[Option[ProductStock]] = productStockService.findProductStock(id)
 
-  def getAllProductStock: Future[Seq[ProductStock]] = productStockService.getAllProductStock
+  def productStocks: Future[Seq[ProductStock]] = productStockService.getAllProductStock
   
-  def addProductStock(productStock: ProductStock): Future[ProductStock] = productStockService.addProductStock(productStock)
+  def createProductStock(productStock: ProductStock): Future[ProductStock] = productStockService.createProductStock(productStock)
 
 }

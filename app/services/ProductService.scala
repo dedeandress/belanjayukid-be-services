@@ -13,7 +13,7 @@ class ProductService @Inject()(productsRepository: ProductsRepository, categoryR
 
   def findProduct(id: UUID): Future[Option[Products]] = productsRepository.findProduct(id)
 
-  def addProductDetail(product: Products, productInput: ProductInput): Future[Unit] = {
+  def createProductDetail(product: Products, productInput: ProductInput): Future[Unit] = {
     Future.successful(
       for(productDetail <- productInput.productDetailInput) {
         productDetailRepository.addProductDetail(
@@ -33,7 +33,7 @@ class ProductService @Inject()(productsRepository: ProductsRepository, categoryR
 
     for {
       product <- productsRepository.addProduct(new Products(SKU = productInput.SKU, name = productInput.name, categoryId = UUID.fromString(productInput.categoryId)))
-      productDetail <- addProductDetail(product, productInput)
+      productDetail <- createProductDetail(product, productInput)
     }yield product
 
 //      productsRepository.addProduct(new Products(SKU = productInput.SKU, name = productInput.name, categoryId = UUID.fromString(productInput.categoryId))).map{
