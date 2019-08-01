@@ -21,6 +21,8 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies ++= Seq(
+  ehcache,
+  ws,
   evolutions,
   guice,
   "org.sangria-graphql" %% "sangria-play-json" % "1.0.5",

@@ -2,25 +2,28 @@ package models
 
 import java.util.UUID
 
-import models.Product.ProductTable
+import models.Products.ProductsTable
 import slick.jdbc.PostgresProfile.api.{Table => SlickTable, _}
 import slick.lifted.{Tag => SlickTag}
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
+import utilities.QueryUtility
 
-case class ProductDetail(id: UUID, productStockName: String, productStockPrice: BigDecimal, productStockValue: Int, productId: UUID)
+case class ProductDetail(id: UUID = UUID.randomUUID(), productStockId: UUID, sellingPrice: BigDecimal, purchasePrice: BigDecimal, value: Int, productId: UUID)
 
-object ProductDetail extends ((UUID, String, BigDecimal, Int, UUID)=>ProductDetail) {
+object ProductDetail extends ((UUID, UUID, BigDecimal, BigDecimal, Int, UUID)=>ProductDetail) {
 
-  val products = TableQuery[ProductTable]
+  val products = TableQuery[ProductsTable]
 
   class ProductDetailTable(slickTag: SlickTag) extends SlickTable[ProductDetail](slickTag, "product_detail") {
-    def id = column[UUID]("id")
-    def productStockName = column[String]("product_stock_name")
-    def productStockPrice = column[BigDecimal]("product_stock_price")
-    def productStockValue = column[Int]("product_stock_value")
+    def id = column[UUID]("id", O.PrimaryKey)
+    def productStockId = column[UUID]("product_stock_id")
+    def sellingPrice = column[BigDecimal]("selling_price")
+    def purchasePrice = column[BigDecimal]("purchase_price")
+    def value = column[Int]("value")
     def productId = column[UUID]("product_id")
     def productIdFK = foreignKey("product_id", productId, products)(_.id)
-    def * = (id, productStockName, productStockPrice, productStockValue, productId).mapTo[ProductDetail]
+    def productStockIdFK = foreignKey("product_stock_id", productStockId, QueryUtility.productStockQuery)(_.id)
+    def * = (id, productStockId, sellingPrice, purchasePrice, value, productId).mapTo[ProductDetail]
   }
 }
 
@@ -34,5 +37,5 @@ object ProductDetailJsonProtocol extends DefaultJsonProtocol {
     }
   }
 
-  implicit val productDetailJsonProtocolFormat: JsonFormat[ProductDetail] = jsonFormat5(ProductDetail)
+  implicit val productDetailJsonProtocolFormat: JsonFormat[ProductDetail] = jsonFormat6(ProductDetail)
 }

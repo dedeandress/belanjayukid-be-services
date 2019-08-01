@@ -9,9 +9,9 @@ import slick.lifted.{Tag => SlickTag}
 import java.sql.Timestamp
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
 
-case class UserProfile(id: UUID = randomUUID, fullName: String, phoneNumber: String, address: String, noNik: String, dateOfBirth: DateTime, userId: UUID)
+case class UserProfile(id: UUID = randomUUID, fullName: String, phoneNumber: String, address: String, noNik: String, dateOfBirth: Long, userId: UUID)
 
-object UserProfile extends ((UUID, String, String, String, String, DateTime, UUID) => UserProfile) {
+object UserProfile extends ((UUID, String, String, String, String, Long, UUID) => UserProfile) {
 
   implicit val dateTimeColumnType = MappedColumnType.base[DateTime, Timestamp](
     dt => new Timestamp(dt.clicks),
@@ -27,7 +27,7 @@ object UserProfile extends ((UUID, String, String, String, String, DateTime, UUI
     def phoneNumber = column[String]("phone_number")
     def address = column[String]("address")
     def noNik = column[String]("no_nik")
-    def dateOfBirth = column[DateTime]("date_of_birth")
+    def dateOfBirth = column[Long]("date_of_birth")
     def userId = column[UUID]("user_id")
     def userIdFK = foreignKey("user_id", userId, users)(_.id)
     def * = (id, fullName, phoneNumber, address, noNik, dateOfBirth, userId).mapTo[UserProfile]

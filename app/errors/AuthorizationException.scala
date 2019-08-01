@@ -1,3 +1,7 @@
 package errors
 
-case class AuthorizationException(message: String) extends Exception(message)
+import sangria.execution.UserFacingError
+
+case class AuthorizationException(msg: String) extends Exception(msg) with UserFacingError {
+  override def getMessage(): String = msg
+}

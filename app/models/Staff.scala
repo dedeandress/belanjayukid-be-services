@@ -8,7 +8,7 @@ import slick.jdbc.PostgresProfile.api.{Table => SlickTable, _}
 import slick.lifted.{Tag => SlickTag}
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
 
-case class Staff(id: UUID, userId: UUID, roleId: UUID)
+case class Staff(id: UUID = UUID.randomUUID(), userId: UUID, roleId: UUID)
 
 object Staff extends ((UUID, UUID, UUID)=>Staff) {
 
@@ -16,7 +16,7 @@ object Staff extends ((UUID, UUID, UUID)=>Staff) {
   val roles = TableQuery[RoleTable]
 
   class StaffTable(slickTag: SlickTag) extends SlickTable[Staff](slickTag,"staff"){
-    def id = column[UUID]("id")
+    def id = column[UUID]("id", O.PrimaryKey)
     def userId = column[UUID]("user_id")
     def roleId = column[UUID]("role_id")
     def userIdFK = foreignKey("user_id", userId, users)(_.id)

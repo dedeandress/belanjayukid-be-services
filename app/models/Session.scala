@@ -22,7 +22,7 @@ object Session extends ((UUID, String, DateTime, UUID)=>Session) {
   )
 
   class SessionTable (slickTag: SlickTag) extends SlickTable[Session](slickTag, "session"){
-    def id = column[UUID]("id")
+    def id = column[UUID]("id", O.PrimaryKey)
     def secretToken = column[String]("secret_token")
     def secretTokenExp = column[DateTime]("secret_token_exp")
     def userId = column[UUID]("user_id")

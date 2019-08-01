@@ -14,7 +14,7 @@ object Customer extends ((UUID, UUID)=>Customer) {
   val users = TableQuery[UserTable]
 
   class CustomerTable(slickTag: SlickTag) extends SlickTable[Customer](slickTag,"customer"){
-    def id = column[UUID]("id")
+    def id = column[UUID]("id", O.PrimaryKey)
     def userId = column[UUID]("user_id")
     def userIdFK = foreignKey("user_id", userId, users)(_.id)
     def * = (id, userId).mapTo[Customer]

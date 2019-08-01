@@ -12,7 +12,6 @@ import graphql.input.UserProfileInput
 
 class UserProfileResolver @Inject()(userService: UserService, implicit val executionContext: ExecutionContext){
 
-  def findUserProfile(userId: UUID): Future[Option[UserProfile]] = userService.findUserProfile(userId)
+  def userProfile(userId: UUID): Future[Option[UserProfile]] = userService.findUserProfile(userId)
 
-  def insertUserProfile(userProfileInput: UserProfileInput): Future[UserProfile] = userService.insertUserProfile(userProfileInput)
 }

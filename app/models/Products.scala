@@ -7,19 +7,20 @@ import slick.jdbc.PostgresProfile.api.{Table => SlickTable, _}
 import slick.lifted.{Tag => SlickTag}
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
 
-case class Product(id: UUID, productName: String, productStock: Int, categoryId: UUID)
+case class Products(id: UUID = UUID.randomUUID(), SKU: String, name: String, stock: Int = 0, categoryId: UUID)
 
-object Product extends ((UUID, String, Int, UUID)=>Product) {
+object Products extends ((UUID, String, String, Int, UUID)=>Products) {
 
   val categories = TableQuery[CategoryTable]
 
-  class ProductTable(slickTag: SlickTag) extends SlickTable[Product](slickTag, "product"){
-    def id = column[UUID]("id")
-    def productName = column[String]("product_name")
-    def productStock = column[Int]("product_stock")
+  class ProductsTable(slickTag: SlickTag) extends SlickTable[Products](slickTag, "products"){
+    def id = column[UUID]("id", O.PrimaryKey)
+    def SKU = column[String]("sku")
+    def name = column[String]("name")
+    def stock = column[Int]("stock")
     def categoryId = column[UUID]("category_id")
     def categoryIdFK = foreignKey("category_id", categoryId, categories)(_.id)
-    def * = (id, productName, productStock, categoryId).mapTo[Product]
+    def * = (id, SKU, name, stock, categoryId).mapTo[Products]
   }
 }
 
@@ -33,5 +34,5 @@ object ProductJsonProtocol extends DefaultJsonProtocol {
     }
   }
 
-  implicit val productJsonProtocolFormat: JsonFormat[Product] = jsonFormat4(Product)
+  implicit val productJsonProtocolFormat: JsonFormat[Product] = jsonFormat5(Products)
 }

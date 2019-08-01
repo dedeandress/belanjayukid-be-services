@@ -1,7 +1,8 @@
 package modules
 
 import com.google.inject._
-import repositories.{UserRepository, UserRepositoryImpl}
+import repositories.UserRepositoryImpl
+import repositories.repositoryInterfaces.UserRepository
 
 class UserModule extends AbstractModule {
   override def configure(): Unit = {

@@ -14,7 +14,7 @@ object Shipment extends ((UUID, String, String, BigDecimal, UUID)=>Shipment){
   val transactions = TableQuery[TransactionTable]
 
   class ShipmentTable(slickTag: SlickTag) extends SlickTable[Shipment](slickTag, "shipment") {
-    def id = column[UUID]("id")
+    def id = column[UUID]("id", O.PrimaryKey)
     def address = column[String]("address")
     def phone = column[String]("address")
     def price = column[BigDecimal]("price")

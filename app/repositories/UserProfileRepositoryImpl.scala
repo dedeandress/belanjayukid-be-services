@@ -2,6 +2,8 @@ package repositories
 
 import com.google.inject.{Inject, Singleton}
 import modules.AppDatabase
+import play.api.Logger
+import repositories.repositoryInterfaces.UserProfileRepository
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -22,7 +24,10 @@ class UserProfileRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
 
   override def findByUserId(userId: UUID): Future[Option[UserProfile]] = db.run(Actions.findByUserId(userId))
 
-  override def addUserProfile(userProfile: UserProfile): Future[UserProfile] = db.run(Actions.addUserProfile(userProfile))
+  override def addUserProfile(userProfile: UserProfile): Future[UserProfile] = {
+    play.Logger.warn("add UserProfile")
+    db.run(Actions.addUserProfile(userProfile))
+  }
 
   override def findById(id: UUID): Future[Option[UserProfile]] = db.run(Actions.findById(id))
 
@@ -43,6 +48,7 @@ class UserProfileRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
     def addUserProfile(userProfile: UserProfile): DBIO[UserProfile] = for{
       id <- userProfileQuery returning userProfileQuery.map(_.id) += userProfile
       result <- findById(id)
+
     }yield result.get
   }
 }

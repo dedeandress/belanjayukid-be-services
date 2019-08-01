@@ -6,13 +6,13 @@ import slick.jdbc.PostgresProfile.api.{Table => SlickTable, _}
 import slick.lifted.{Tag => SlickTag}
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
 
-case class Category(id: UUID, categoryName: String)
+case class Category(id: UUID = UUID.randomUUID(), name: String)
 
 object Category extends ((UUID, String)=>Category) {
   class CategoryTable(slickTag: SlickTag) extends SlickTable[Category](slickTag, "category") {
-    def id = column[UUID]("id")
-    def categoryName = column[String]("category_name")
-    def * = (id, categoryName).mapTo[Category]
+    def id = column[UUID]("id", O.PrimaryKey)
+    def name = column[String]("name")
+    def * = (id, name).mapTo[Category]
   }
 }
 

@@ -6,6 +6,7 @@ import modules.AppDatabase
 import java.util.UUID
 
 import errors.NotFound
+import repositories.repositoryInterfaces.UserRepository
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -21,7 +22,10 @@ class UserRepositoryImpl @Inject()(val database: AppDatabase, implicit val execu
 
   override def findAll(): Future[List[User]] = db.run(Actions.findAll())
 
-  override def create(user: User): Future[User] = db.run(Actions.create(user))
+  override def create(user: User): Future[UUID] = {
+    play.Logger.warn("add User")
+    db.run(Actions.create(user))
+  }
 
   override def find(id: UUID): Future[Option[User]] = db.run(Actions.find(id))
 
@@ -40,10 +44,9 @@ class UserRepositoryImpl @Inject()(val database: AppDatabase, implicit val execu
       users <- userQuery.result
     } yield users.toList
 
-    def create(user: User): DBIO[User] = for{
+    def create(user: User): DBIO[UUID] = for{
         userId <- userQuery returning userQuery.map(_.id) += user
-        result <- find(userId)
-    }yield result.get
+    }yield userId
 
     def update(user: User): DBIO[User] = for{
       update <- userQuery.filter(_.id===user.id).update(user)

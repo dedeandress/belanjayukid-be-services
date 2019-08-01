@@ -1,12 +1,12 @@
 package graphql.resolvers
 
 import com.google.inject.Inject
-import repositories.RoleRepository
 import models.Role
 import java.util.UUID
 
-import scala.concurrent.Future
+import repositories.repositoryInterfaces.RoleRepository
 
+import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 
 class RoleResolver @Inject()(roleRepository: RoleRepository, implicit val executionContext: ExecutionContext){
@@ -14,5 +14,5 @@ class RoleResolver @Inject()(roleRepository: RoleRepository, implicit val execut
 
   def roles: Future[List[Role]] = roleRepository.findAll()
 
-  def findRole(id: UUID): Future[List[Role]] = roleRepository.findById(id)
+  def role(id: UUID): Future[Option[Role]] = roleRepository.findById(id)
 }
