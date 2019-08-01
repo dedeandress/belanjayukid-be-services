@@ -4,6 +4,7 @@ import java.util.UUID
 
 import com.google.inject.Inject
 import errors.{AlreadyExists, AuthorizationException, NotFound}
+import graphql.Context
 import graphql.input.StaffInput
 import models.{LoginUser, Role, Staff, User, UserProfile}
 import repositories.repositoryInterfaces.{RoleRepository, StaffRepository, UserProfileRepository, UserRepository}
@@ -15,7 +16,8 @@ class StaffService @Inject()(staffRepository: StaffRepository, userRepository: U
                              , userProfileRepository: UserProfileRepository, roleRepository: RoleRepository
                              , implicit val executionContext: ExecutionContext){
 
-  def createStaff(staffInput: StaffInput): Future[Option[Staff]] = {
+  def createStaff(context: Context, staffInput: StaffInput): Future[Option[Staff]] = {
+    JWTUtility.isAdmin(context)
     val user = User(username = staffInput.userInput.username
       , password = BCryptUtility.hashPassword(staffInput.userInput.password), email = staffInput.userInput.email)
         val staffDetail = staffInput.userProfileInput
@@ -50,7 +52,8 @@ class StaffService @Inject()(staffRepository: StaffRepository, userRepository: U
     }
   }
 
-  def roles: Future[List[Role]] = {
+  def roles(context: Context): Future[List[Role]] = {
+    JWTUtility.isAdmin(context)
     roleRepository.findAll()
   }
 }
