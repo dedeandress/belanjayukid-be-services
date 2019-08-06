@@ -23,7 +23,7 @@ class ProductDetailRepositoryImpl @Inject()(database: AppDatabase, implicit val 
     db.run(Actions.findProductDetail(id))
   }
 
-  override def addProductDetail(productId: UUID, productInput: ProductInput): Future[Unit] = {
+  override def addProductDetails(productId: UUID, productInput: ProductInput): Future[Unit] = {
     play.Logger.warn("add ProductDetail")
     val insert = for(productDetail <- productInput.productDetailInput) yield {
         val productDetailRow = new ProductDetail(
@@ -49,6 +49,8 @@ class ProductDetailRepositoryImpl @Inject()(database: AppDatabase, implicit val 
     findProductDetail(id)
   }
 
+  override def addProductDetail(productDetail: ProductDetail): Future[Option[ProductDetail]] = db.run(Actions.addProductDetail(productDetail))
+
   object Actions {
 
     def findProductDetail(id: UUID): DBIO[Option[ProductDetail]] = for{
@@ -58,5 +60,10 @@ class ProductDetailRepositoryImpl @Inject()(database: AppDatabase, implicit val 
     def findProductDetailByProductId(productId: UUID): DBIO[Seq[ProductDetail]] = for{
       productDetails <- QueryUtility.productDetailQuery.filter(_.productId === productId).result
     }yield productDetails
+
+    def addProductDetail(productDetail: ProductDetail): DBIO[Option[ProductDetail]] = for {
+      id <- QueryUtility.productDetailQuery returning QueryUtility.productDetailQuery.map(_.id) += productDetail
+      productDetail <- findProductDetail(id)
+    }yield productDetail
   }
 }

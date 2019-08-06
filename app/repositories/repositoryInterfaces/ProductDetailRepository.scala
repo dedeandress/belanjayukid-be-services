@@ -11,9 +11,11 @@ trait ProductDetailRepository {
 
   def findProductDetail(id: UUID): Future[Option[ProductDetail]]
 
-  def addProductDetail(productId: UUID, productDetail: ProductInput): Future[Unit]
+  def addProductDetails(productId: UUID, productDetail: ProductInput): Future[Unit]
 
   def findProductDetailByProductId(productId: UUID): Future[Seq[ProductDetail]]
 
   def updateProductDetailStatus(id: UUID): Future[Option[ProductDetail]]
+
+  def addProductDetail(productDetail: ProductDetail): Future[Option[ProductDetail]]
 }
