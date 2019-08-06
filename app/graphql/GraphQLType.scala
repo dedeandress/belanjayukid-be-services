@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.DateTime
 import com.google.inject.Inject
 import graphql.input.{ProductDetailInput, ProductInput, StaffInput, UserInput, UserProfileInput}
 import graphql.resolvers.{CategoryResolver, ProductDetailResolver, ProductResolver, ProductStockResolver, RoleResolver, StaffResolver, UserProfileResolver, UserResolver}
-import models.{Category, ProductDetail, ProductStock, Products, Role, Staff, User, UserProfile}
+import models.{Category, LoginUser, ProductDetail, ProductStock, Products, Role, Staff, User, UserProfile}
 import sangria.macros.derive.{ReplaceInputField, _}
 import sangria.marshalling.sprayJson._
 import sangria.schema.{Argument, Field, InputField, InputObjectType, ListType, ObjectType, OptionType}
@@ -28,14 +28,14 @@ class GraphQLType @Inject()(userResolver: UserResolver, staffResolver: StaffReso
 
   implicit val UserType: ObjectType[Unit, User] = deriveObjectType[Unit, User](
     ObjectTypeName("User"),
-    AddFields(Field("userProfile", OptionType(UserProfileType) ,resolve = c => userProfileResolver.findUserProfile(c.value.id))),
+    AddFields(Field("userProfile", OptionType(UserProfileType) ,resolve = c => userProfileResolver.userProfile(c.value.id))),
     ExcludeFields("id")
   )
 
   implicit val StaffType: ObjectType[Unit, Staff] = deriveObjectType[Unit, Staff](
     ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id)),
-    ReplaceField("userId", Field("user", OptionType(UserType), resolve = c => userResolver.findUser(c.value.userId))),
-    ReplaceField("roleId", Field("role", OptionType(RoleType), resolve = c => roleResolver.findRole(c.value.roleId)))
+    ReplaceField("userId", Field("user", OptionType(UserType), resolve = c => userResolver.user(c.value.userId))),
+    ReplaceField("roleId", Field("role", OptionType(RoleType), resolve = c => roleResolver.role(c.value.roleId)))
   )
 
   implicit val CategoryType: ObjectType[Unit, Category] = deriveObjectType[Unit, Category](
@@ -52,7 +52,7 @@ class GraphQLType @Inject()(userResolver: UserResolver, staffResolver: StaffReso
       Field(
         "productStock"
         , OptionType(ProductStockType)
-        , resolve = c => productStockResolver.findProductStock(c.value.productStockId)
+        , resolve = c => productStockResolver.productStock(c.value.productStockId)
       )
     ),
     ReplaceField("sellingPrice", Field("sellingPrice", CustomScalar.BigDecimalType, resolve = _.value.sellingPrice)),
@@ -61,18 +61,21 @@ class GraphQLType @Inject()(userResolver: UserResolver, staffResolver: StaffReso
       Field(
         "product"
         , OptionType(ProductType)
-        , resolve = c => productResolver.findProduct(c.value.id)
+        , resolve = c => productResolver.product(c.value.id)
       )
     )
   )
 
   implicit val ProductType: ObjectType[Unit, Products] = deriveObjectType[Unit, Products](
     ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id)),
-    ReplaceField("categoryId", Field("category", OptionType(CategoryType), resolve = c => categoryResolver.findCategory(c.value.categoryId))),
+    ReplaceField("categoryId", Field("category", OptionType(CategoryType), resolve = c => categoryResolver.category(c.value.categoryId))),
     AddFields(
-      Field("productDetail", ListType(ProductDetailType), resolve = c => productDetailResolver.findProductDetailByProductId(c.value.id))
+      Field("productDetail", ListType(ProductDetailType), resolve = c => productDetailResolver.productDetailByProductId(c.value.id))
     )
+  )
 
+  implicit val LoginUserType: ObjectType[Unit, LoginUser] = deriveObjectType[Unit, LoginUser](
+    ObjectTypeName("Credential")
   )
 
   implicit val userJsonProtocolFormat: JsonFormat[UserInput] = jsonFormat3(UserInput)
@@ -92,9 +95,9 @@ class GraphQLType @Inject()(userResolver: UserResolver, staffResolver: StaffReso
     }
   }
 
-  implicit val userProfileJsonProtocolFormat: JsonFormat[UserProfileInput] = jsonFormat5(UserProfileInput)
-  implicit val staffJsonProtocolFormat: JsonFormat[StaffInput] = jsonFormat3(StaffInput)
-  implicit val productDetailJsonProtocolFormat: JsonFormat[ProductDetailInput] = jsonFormat4(ProductDetailInput)
+  implicit val userProfileInputJsonProtocolFormat: JsonFormat[UserProfileInput] = jsonFormat5(UserProfileInput)
+  implicit val staffInputJsonProtocolFormat: JsonFormat[StaffInput] = jsonFormat3(StaffInput)
+  implicit val productDetailInputJsonProtocolFormat: JsonFormat[ProductDetailInput] = jsonFormat4(ProductDetailInput)
   implicit val productInputJsonProtocolFormat: JsonFormat[ProductInput] = jsonFormat5(ProductInput)
   implicit val userProfileInputType : InputObjectType[UserProfileInput] = deriveInputObjectType[UserProfileInput]()
   implicit val UserInputType : InputObjectType[UserInput] = deriveInputObjectType[UserInput]()

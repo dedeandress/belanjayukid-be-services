@@ -10,6 +10,6 @@ import scala.concurrent.Future
 
 class ProductDetailResolver @Inject()(productDetailService: ProductDetailService){
 
-  def findProductDetailByProductId(productId: UUID): Future[Seq[ProductDetail]] = productDetailService.findProductDetailByProductId(productId)
+  def productDetailByProductId(productId: UUID): Future[Seq[ProductDetail]] = productDetailService.findProductDetailByProductId(productId)
 
 }

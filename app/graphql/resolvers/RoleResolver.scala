@@ -14,5 +14,5 @@ class RoleResolver @Inject()(roleRepository: RoleRepository, implicit val execut
 
   def roles: Future[List[Role]] = roleRepository.findAll()
 
-  def findRole(id: UUID): Future[Option[Role]] = roleRepository.findById(id)
+  def role(id: UUID): Future[Option[Role]] = roleRepository.findById(id)
 }

@@ -11,8 +11,8 @@ import scala.concurrent.Future
 
 class ProductResolver @Inject()(productService: ProductService){
 
-  def findProduct(id: UUID): Future[Option[Products]] = productService.findProduct(id)
+  def product(id: UUID): Future[Option[Products]] = productService.findProduct(id)
 
-  def addProduct(productInput: ProductInput): Future[Products] = productService.addProduct(productInput)
+  def createProduct(productInput: ProductInput): Future[Products] = productService.addProduct(productInput)
 
 }

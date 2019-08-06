@@ -12,7 +12,7 @@ class CategoryService @Inject()(categoryRepository: CategoryRepository){
 
   def findCategory(id: UUID): Future[Option[Category]] = categoryRepository.findCategory(id)
 
-  def addCategory(category: Category): Future[Category] = categoryRepository.addCategory(category)
+  def createCategory(category: Category): Future[Category] = categoryRepository.addCategory(category)
 
   def getAllCategory: Future[Seq[Category]] = categoryRepository.getAllCategory
 

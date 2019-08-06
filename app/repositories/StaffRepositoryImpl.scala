@@ -7,6 +7,7 @@ import models.Staff
 import models.Staff.StaffTable
 import modules.AppDatabase
 import repositories.repositoryInterfaces.StaffRepository
+import utilities.QueryUtility
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -26,6 +27,8 @@ class StaffRepositoryImpl @Inject()(database: AppDatabase, implicit val executio
 
   override def findById(id: UUID): Future[Option[Staff]] = db.run(Action.findById(id))
 
+  override def findByUserId(userId: UUID): Future[Option[Staff]] = db.run(Action.findByUserId(userId))
+
   object Action {
 
     def findById(id: UUID): DBIO[Option[Staff]] = for{
@@ -35,6 +38,10 @@ class StaffRepositoryImpl @Inject()(database: AppDatabase, implicit val executio
     def addStaff(staff: Staff): DBIO[Option[Staff]] = for {
       id <- staffQuery returning staffQuery.map(_.id) += staff
       staff <- findById(id)
+    }yield staff
+
+    def findByUserId(userId: UUID): DBIO[Option[Staff]] = for{
+      staff <- QueryUtility.staffQuery.filter(_.userId === userId).result.headOption
     }yield staff
 
   }
