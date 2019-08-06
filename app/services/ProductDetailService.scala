@@ -17,6 +17,9 @@ class ProductDetailService @Inject()(productDetailRepository: ProductDetailRepos
     productDetailRepository.findProductDetailByProductId(productId)
   }
 
-  def updateProductDetailStatus(id: UUID): Future[Option[ProductDetail]] = productDetailRepository.updateProductDetailStatus(id)
+  def updateProductDetailStatus(context: Context, id: UUID): Future[Option[ProductDetail]] = {
+    JWTUtility.isAdmin(context)
+    productDetailRepository.updateProductDetailStatus(id)
+  }
 
 }
