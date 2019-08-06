@@ -17,7 +17,7 @@ object JWTUtility {
     val algorithm: Algorithm = Algorithm.HMAC256(BelanjaYukConstant.secretKey)
     JWT.create().withIssuer("BelanjaYuk.id")
       .withClaim("id", user.id.toString).withClaim("role", roleName)
-      .withExpiresAt(Date.from(ZonedDateTime.now(ZoneId.systemDefault()).plusMinutes(60).toInstant))
+      .withExpiresAt(Date.from(ZonedDateTime.now(ZoneId.systemDefault()).plusDays(1).toInstant))
       .sign(algorithm)
   }
 
