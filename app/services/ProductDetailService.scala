@@ -12,4 +12,6 @@ class ProductDetailService @Inject()(productDetailRepository: ProductDetailRepos
 
   def findProductDetailByProductId(productId: UUID): Future[Seq[ProductDetail]] = productDetailRepository.findProductDetailByProductId(productId)
 
+  def updateProductDetailStatus(id: UUID): Future[Option[ProductDetail]] = productDetailRepository.updateProductDetailStatus(id)
+
 }

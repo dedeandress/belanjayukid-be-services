@@ -23,6 +23,13 @@ class ProductDetailRepositoryImpl @Inject()(database: AppDatabase, implicit val 
 
   override def findProductDetailByProductId(productId: UUID): Future[Seq[ProductDetail]] = db.run(Actions.findProductDetailByProductId(productId))
 
+  override def updateProductDetailStatus(id: UUID): Future[Option[ProductDetail]] = {
+    val q = for { p <- QueryUtility.productDetailQuery if p.id === id} yield p.status
+    q.update(true)
+    q.updateStatement
+    findProductDetail(id)
+  }
+
   object Actions {
 
     def findProductDetail(id: UUID): DBIO[Option[ProductDetail]] = for{
@@ -37,6 +44,5 @@ class ProductDetailRepositoryImpl @Inject()(database: AppDatabase, implicit val 
     def findProductDetailByProductId(productId: UUID): DBIO[Seq[ProductDetail]] = for{
       productDetails <- QueryUtility.productDetailQuery.filter(_.productId === productId).result
     }yield productDetails
-
   }
 }

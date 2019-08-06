@@ -2,7 +2,7 @@ package graphql.schemas
 
 import com.google.inject.Inject
 import graphql.{Context, GraphQLType}
-import graphql.resolvers.{CategoryResolver, ProductResolver, ProductStockResolver, RoleResolver, StaffResolver, UserProfileResolver, UserResolver}
+import graphql.resolvers.{CategoryResolver, ProductDetailResolver, ProductResolver, ProductStockResolver, RoleResolver, StaffResolver, UserProfileResolver, UserResolver}
 import models.{Category, ProductStock}
 import sangria.schema
 import sangria.schema.{Argument, Field, InterfaceType, ListType, OptionType}
@@ -12,7 +12,7 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
                                  , userResolver: UserResolver, userProfileResolver: UserProfileResolver
                                  , roleResolver: RoleResolver, categoryResolver: CategoryResolver
                                  , productResolver: ProductResolver, productStockResolver: ProductStockResolver
-                                 , graphQLType: GraphQLType){
+                                 , productDetailResolver: ProductDetailResolver, graphQLType: GraphQLType){
 
   val Queries: List[Field[Context, Unit]] = List(
     Field(
@@ -69,6 +69,14 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
         Argument("name", schema.StringType)
       ),
       resolve = sangriaContext => productStockResolver.createProductStock(new ProductStock(name = sangriaContext.arg[String]("name")))
+    ),
+    Field(
+      name = "deleteProductDetail",
+      fieldType = graphQLType.ProductDetailType,
+      arguments = List(
+        Argument("id", schema.IntType)
+      ),
+      resolve = sangriaContext => productDetailResolver.productDetailByProductId(id)
     )
   )
 

@@ -12,4 +12,6 @@ class ProductDetailResolver @Inject()(productDetailService: ProductDetailService
 
   def productDetailByProductId(productId: UUID): Future[Seq[ProductDetail]] = productDetailService.findProductDetailByProductId(productId)
 
+  def deleteProductDetail(id: UUID): Future[Option[ProductDetail]] = productDetailService.updateProductDetailStatus(id)
+
 }
