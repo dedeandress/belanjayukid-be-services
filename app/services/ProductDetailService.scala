@@ -3,14 +3,19 @@ package services
 import java.util.UUID
 
 import com.google.inject.Inject
+import graphql.Context
 import models.ProductDetail
 import repositories.repositoryInterfaces.ProductDetailRepository
+import utilities.JWTUtility
 
 import scala.concurrent.Future
 
 class ProductDetailService @Inject()(productDetailRepository: ProductDetailRepository){
 
-  def findProductDetailByProductId(productId: UUID): Future[Seq[ProductDetail]] = productDetailRepository.findProductDetailByProductId(productId)
+  def findProductDetailByProductId(context: Context, productId: UUID): Future[Seq[ProductDetail]] = {
+    JWTUtility.isAdmin(context)
+    productDetailRepository.findProductDetailByProductId(productId)
+  }
 
   def updateProductDetailStatus(id: UUID): Future[Option[ProductDetail]] = productDetailRepository.updateProductDetailStatus(id)
 

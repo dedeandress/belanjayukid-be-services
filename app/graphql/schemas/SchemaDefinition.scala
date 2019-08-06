@@ -1,11 +1,13 @@
 package graphql.schemas
 
+import java.util.UUID
+
 import com.google.inject.Inject
 import graphql.{Context, GraphQLType}
 import graphql.resolvers.{CategoryResolver, ProductDetailResolver, ProductResolver, ProductStockResolver, RoleResolver, StaffResolver, UserProfileResolver, UserResolver}
 import models.{Category, ProductStock}
 import sangria.schema
-import sangria.schema.{Argument, Field, InterfaceType, ListType, OptionType}
+import sangria.schema.{Argument, Field, ListType, OptionType}
 
 
 class SchemaDefinition @Inject()(staffResolver: StaffResolver
@@ -18,17 +20,17 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
     Field(
       name = "categories",
       fieldType = ListType(graphQLType.CategoryType),
-      resolve = _ => categoryResolver.categories
+      resolve = sangriaContext => categoryResolver.categories(sangriaContext.ctx)
     ),
     Field(
       name = "productStocks",
       fieldType = ListType(graphQLType.ProductStockType),
-      resolve = _ => productStockResolver.productStocks
+      resolve = sangriaContext => productStockResolver.productStocks(sangriaContext.ctx)
     ),
     Field(
       name = "roles",
       fieldType = ListType(graphQLType.RoleType),
-      resolve = _ => staffResolver.roles
+      resolve = sangriaContext => staffResolver.roles(sangriaContext.ctx)
     )
   )
 
@@ -46,13 +48,13 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       name = "createStaff",
       fieldType = OptionType(graphQLType.StaffType),
       arguments = graphQLType.StaffInputArg :: Nil,
-      resolve = sangriaContext => staffResolver.createStaff(sangriaContext.arg(graphQLType.StaffInputArg))
+      resolve = sangriaContext => staffResolver.createStaff(sangriaContext.ctx, sangriaContext.arg(graphQLType.StaffInputArg))
     ),
     Field(
       name = "createProduct",
       fieldType = graphQLType.ProductType,
       arguments = graphQLType.ProductInputArg :: Nil,
-      resolve = sangriaContext => productResolver.createProduct(sangriaContext.arg(graphQLType.ProductInputArg))
+      resolve = sangriaContext => productResolver.createProduct(sangriaContext.ctx, sangriaContext.arg(graphQLType.ProductInputArg))
     ),
     Field(
       name = "createCategory",
@@ -60,7 +62,7 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       arguments = List(
         Argument("name", schema.StringType)
       ),
-      resolve = sangriaContext => categoryResolver.category(new Category(name = sangriaContext.arg[String]("name")))
+      resolve = sangriaContext => categoryResolver.category(sangriaContext.ctx, new Category(name = sangriaContext.arg[String]("name")))
     ),
     Field(
       name = "createProductStock",
@@ -68,15 +70,15 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       arguments = List(
         Argument("name", schema.StringType)
       ),
-      resolve = sangriaContext => productStockResolver.createProductStock(new ProductStock(name = sangriaContext.arg[String]("name")))
+      resolve = sangriaContext => productStockResolver.createProductStock(sangriaContext.ctx, new ProductStock(name = sangriaContext.arg[String]("name")))
     ),
     Field(
       name = "deleteProductDetail",
-      fieldType = graphQLType.ProductDetailType,
+      fieldType = OptionType(graphQLType.ProductDetailType),
       arguments = List(
         Argument("id", schema.IntType)
       ),
-      resolve = sangriaContext => productDetailResolver.productDetailByProductId(id)
+      resolve = sangriaContext => productDetailResolver.productDetailByProductId(sangriaContext.ctx, UUID.fromString(sangriaContext.arg[String]("id")))
     )
   )
 

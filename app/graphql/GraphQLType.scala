@@ -5,8 +5,8 @@ import java.util.UUID
 import akka.http.scaladsl.model.DateTime
 import com.google.inject.Inject
 import graphql.input.{ProductDetailInput, ProductInput, StaffInput, UserInput, UserProfileInput}
-import graphql.resolvers.{CategoryResolver, ProductDetailResolver, ProductResolver, ProductStockResolver, RoleResolver, StaffResolver, UserProfileResolver, UserResolver}
 import models.{Category, LoginUser, ProductDetail, ProductStock, Products, Role, Staff, User, UserProfile}
+import repositories.repositoryInterfaces.{CategoryRepository, ProductDetailRepository, ProductStockRepository, ProductsRepository, RoleRepository, UserProfileRepository, UserRepository}
 import sangria.macros.derive.{ReplaceInputField, _}
 import sangria.marshalling.sprayJson._
 import sangria.schema.{Argument, Field, InputField, InputObjectType, ListType, ObjectType, OptionType}
@@ -14,10 +14,10 @@ import spray.json.DefaultJsonProtocol._
 import spray.json.{JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
 import utilities.CustomScalar
 
-class GraphQLType @Inject()(userResolver: UserResolver, staffResolver: StaffResolver
-                            , userProfileResolver: UserProfileResolver, roleResolver: RoleResolver
-                            , categoryResolver: CategoryResolver, productStockResolver: ProductStockResolver
-                            , productResolver: ProductResolver, productDetailResolver: ProductDetailResolver){
+class GraphQLType @Inject()(userRepository: UserRepository
+                            , userProfileRepository: UserProfileRepository, roleRepository: RoleRepository
+                            , categoryRepository: CategoryRepository, productStockRepository: ProductStockRepository
+                            , productRepository: ProductsRepository, productDetailRepository: ProductDetailRepository){
 
   implicit val RoleType: ObjectType[Unit, Role] = deriveObjectType[Unit, Role](ObjectTypeName("Role"), ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id)))
 
@@ -28,14 +28,14 @@ class GraphQLType @Inject()(userResolver: UserResolver, staffResolver: StaffReso
 
   implicit val UserType: ObjectType[Unit, User] = deriveObjectType[Unit, User](
     ObjectTypeName("User"),
-    AddFields(Field("userProfile", OptionType(UserProfileType) ,resolve = c => userProfileResolver.userProfile(c.value.id))),
+    AddFields(Field("userProfile", OptionType(UserProfileType) ,resolve = c => userProfileRepository.findById(c.value.id))),
     ExcludeFields("id")
   )
 
   implicit val StaffType: ObjectType[Unit, Staff] = deriveObjectType[Unit, Staff](
     ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id)),
-    ReplaceField("userId", Field("user", OptionType(UserType), resolve = c => userResolver.user(c.value.userId))),
-    ReplaceField("roleId", Field("role", OptionType(RoleType), resolve = c => roleResolver.role(c.value.roleId)))
+    ReplaceField("userId", Field("user", OptionType(UserType), resolve = c => userRepository.find(c.value.userId))),
+    ReplaceField("roleId", Field("role", OptionType(RoleType), resolve = c => roleRepository.findById(c.value.roleId)))
   )
 
   implicit val CategoryType: ObjectType[Unit, Category] = deriveObjectType[Unit, Category](
@@ -52,7 +52,7 @@ class GraphQLType @Inject()(userResolver: UserResolver, staffResolver: StaffReso
       Field(
         "productStock"
         , OptionType(ProductStockType)
-        , resolve = c => productStockResolver.productStock(c.value.productStockId)
+        , resolve = c => productStockRepository.findProductStock(c.value.productStockId)
       )
     ),
     ReplaceField("sellingPrice", Field("sellingPrice", CustomScalar.BigDecimalType, resolve = _.value.sellingPrice)),
@@ -61,16 +61,16 @@ class GraphQLType @Inject()(userResolver: UserResolver, staffResolver: StaffReso
       Field(
         "product"
         , OptionType(ProductType)
-        , resolve = c => productResolver.product(c.value.id)
+        , resolve = c => productRepository.findProduct(c.value.id)
       )
     )
   )
 
   implicit val ProductType: ObjectType[Unit, Products] = deriveObjectType[Unit, Products](
     ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id)),
-    ReplaceField("categoryId", Field("category", OptionType(CategoryType), resolve = c => categoryResolver.category(c.value.categoryId))),
+    ReplaceField("categoryId", Field("category", OptionType(CategoryType), resolve = c => categoryRepository.findCategory(c.value.categoryId))),
     AddFields(
-      Field("productDetail", ListType(ProductDetailType), resolve = c => productDetailResolver.productDetailByProductId(c.value.id))
+      Field("productDetail", ListType(ProductDetailType), resolve = c => productDetailRepository.findProductDetailByProductId(c.value.id))
     )
   )
 

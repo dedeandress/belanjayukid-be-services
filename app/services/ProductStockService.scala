@@ -3,17 +3,28 @@ package services
 import java.util.UUID
 
 import com.google.inject.Inject
+import graphql.Context
 import models.ProductStock
 import repositories.repositoryInterfaces.ProductStockRepository
+import utilities.JWTUtility
 
 import scala.concurrent.Future
 
 class ProductStockService @Inject()(productStockRepository: ProductStockRepository){
 
-  def findProductStock(id: UUID): Future[Option[ProductStock]] = productStockRepository.findProductStock(id)
+  def findProductStock(context: Context, id: UUID): Future[Option[ProductStock]] = {
+    JWTUtility.isAdmin(context)
+    productStockRepository.findProductStock(id)
+  }
 
-  def getAllProductStock: Future[Seq[ProductStock]] = productStockRepository.getAllProductStock
+  def getAllProductStock(context: Context): Future[Seq[ProductStock]] = {
+    JWTUtility.isAdmin(context)
+    productStockRepository.getAllProductStock
+  }
 
-  def createProductStock(productStock: ProductStock): Future[ProductStock] = productStockRepository.addProductStock(productStock)
+  def createProductStock(context: Context, productStock: ProductStock): Future[ProductStock] ={
+    JWTUtility.isAdmin(context)
+    productStockRepository.addProductStock(productStock)
+  }
 
 }
