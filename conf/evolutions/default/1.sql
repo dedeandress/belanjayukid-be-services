@@ -26,14 +26,14 @@ create table "customer" ("id" UUID NOT NULL PRIMARY KEY,"user_id" UUID NOT NULL)
 alter table "customer" add constraint "user_id" foreign key("user_id") references "users"("id") on update NO ACTION on delete NO ACTION;
 
 
-create table "products" ("id" UUID NOT NULL PRIMARY KEY,"sku" VARCHAR NOT NULL,"name" VARCHAR NOT NULL,"stock" INTEGER NOT NULL,"category_id" UUID NOT NULL);
+create table "products" ("id" UUID NOT NULL PRIMARY KEY,"sku" VARCHAR NOT NULL,"name" VARCHAR NOT NULL,"stock" INTEGER NOT NULL,"category_id" UUID NOT NULL,"status" BOOLEAN NOT NULL);
 alter table "products" add constraint "category_id" foreign key("category_id") references "category"("id") on update NO ACTION on delete NO ACTION;
 
 
 create table "product_stock" ("id" UUID NOT NULL PRIMARY KEY,"name" VARCHAR NOT NULL);
 
 
-create table "product_detail" ("id" UUID NOT NULL PRIMARY KEY,"product_stock_id" UUID NOT NULL,"selling_price" DECIMAL(21,2) NOT NULL,"purchase_price" DECIMAL(21,2) NOT NULL,"value" INTEGER NOT NULL,"product_id" UUID NOT NULL);
+create table "product_detail" ("id" UUID NOT NULL PRIMARY KEY,"product_stock_id" UUID NOT NULL,"selling_price" DECIMAL(21,2) NOT NULL,"purchase_price" DECIMAL(21,2) NOT NULL,"value" INTEGER NOT NULL,"product_id" UUID NOT NULL,"status" BOOLEAN NOT NULL);
 alter table "product_detail" add constraint "product_id" foreign key("product_id") references "products"("id") on update NO ACTION on delete NO ACTION;
 alter table "product_detail" add constraint "product_stock_id" foreign key("product_stock_id") references "product_stock"("id") on update NO ACTION on delete NO ACTION;
 

@@ -94,7 +94,7 @@ class GraphQLType @Inject()(userResolver: UserResolver, staffResolver: StaffReso
 
   implicit val userProfileJsonProtocolFormat: JsonFormat[UserProfileInput] = jsonFormat5(UserProfileInput)
   implicit val staffJsonProtocolFormat: JsonFormat[StaffInput] = jsonFormat3(StaffInput)
-  implicit val productDetailJsonProtocolFormat: JsonFormat[ProductDetailInput] = jsonFormat4(ProductDetailInput)
+  implicit val productDetailJsonProtocolFormat: JsonFormat[ProductDetailInput] = jsonFormat5(ProductDetailInput)
   implicit val productInputJsonProtocolFormat: JsonFormat[ProductInput] = jsonFormat5(ProductInput)
   implicit val userProfileInputType : InputObjectType[UserProfileInput] = deriveInputObjectType[UserProfileInput]()
   implicit val UserInputType : InputObjectType[UserInput] = deriveInputObjectType[UserInput]()

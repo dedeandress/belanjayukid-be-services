@@ -15,4 +15,6 @@ class ProductResolver @Inject()(productService: ProductService){
 
   def addProduct(productInput: ProductInput): Future[Products] = productService.addProduct(productInput)
 
+  def updateProduct(productId: UUID, categoryId: UUID, name: String): Future[Option[Products]] = productService.updateProduct(productId, categoryId, name)
+
 }

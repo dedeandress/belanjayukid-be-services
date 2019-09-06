@@ -3,6 +3,7 @@ package repositories
 import java.util.UUID
 
 import com.google.inject.Inject
+import errors.NotFound
 import models.Products
 import modules.AppDatabase
 import repositories.repositoryInterfaces.ProductsRepository
@@ -21,6 +22,10 @@ class ProductsRepositoryImpl @Inject()(database: AppDatabase, implicit val execu
 
   override def findProduct(id: UUID): Future[Option[Products]] = db.run(Actions.findProduct(id))
 
+  override def updateProduct(products: Products): Future[Option[Products]] = db.run(Actions.updateProduct(products))
+
+  override def deleteProduct(productsId: UUID): Future[Boolean] = db.run(Actions.delete(productsId))
+
   object Actions {
 
     def findProduct(id: UUID): DBIO[Option[Products]] = for{
@@ -31,5 +36,19 @@ class ProductsRepositoryImpl @Inject()(database: AppDatabase, implicit val execu
       id <- QueryUtility.productQuery returning QueryUtility.productQuery.map(_.id) += product
       product <- findProduct(id)
     }yield product.get
+
+    def updateProduct(products: Products): DBIO[Option[Products]] = for {
+      update <- QueryUtility.productQuery.filter(_.id===products.id).update(products)
+      _ <- update match {
+        case 0 => DBIO.failed(NotFound("not found user id"))
+        case _ => DBIO.successful(())
+      }
+      product <- findProduct(products.id)
+    }yield product
+
+    def delete(id: UUID): DBIO[Boolean] = for {
+      maybeDelete <- QueryUtility.productQuery.filter(_.id === id).delete
+      isDelete =  if(maybeDelete == 1) true else false
+    }yield isDelete
   }
 }

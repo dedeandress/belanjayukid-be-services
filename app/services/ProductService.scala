@@ -30,7 +30,6 @@ class ProductService @Inject()(productsRepository: ProductsRepository, categoryR
   }
 
   def addProduct(productInput: ProductInput): Future[Products] ={
-
     for {
       product <- productsRepository.addProduct(new Products(SKU = productInput.SKU, name = productInput.name, categoryId = UUID.fromString(productInput.categoryId)))
       productDetail <- addProductDetail(product, productInput)
@@ -50,7 +49,15 @@ class ProductService @Inject()(productsRepository: ProductsRepository, categoryR
 //            )
 //          }
 //      }
+  }
 
+  def updateProduct(productId: UUID, categoryId: UUID, name: String): Future[Option[Products]] = {
+    productsRepository.findProduct(productId).flatMap{
+      product =>
+        productsRepository.updateProduct(product.get.copy(categoryId = categoryId, name = name))
+    }
 
   }
+
+
 }
