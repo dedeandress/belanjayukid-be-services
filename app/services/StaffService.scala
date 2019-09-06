@@ -17,7 +17,6 @@ class StaffService @Inject()(staffRepository: StaffRepository, userRepository: U
                              , implicit val executionContext: ExecutionContext){
 
   def createStaff(context: Context, staffInput: StaffInput): Future[Option[Staff]] = {
-    JWTUtility.isAdmin(context)
     val user = User(username = staffInput.userInput.username
       , password = BCryptUtility.hashPassword(staffInput.userInput.password), email = staffInput.userInput.email)
         val staffDetail = staffInput.userProfileInput

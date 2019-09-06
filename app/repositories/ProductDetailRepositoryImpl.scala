@@ -3,6 +3,7 @@ package repositories
 import java.util.UUID
 
 import com.google.inject.Inject
+import errors.NotFound
 import graphql.input.ProductInput
 import models.ProductDetail
 import modules.AppDatabase
@@ -42,6 +43,10 @@ class ProductDetailRepositoryImpl @Inject()(database: AppDatabase, implicit val 
     db.run(Actions.findProductDetailByProductId(productId))
   }
 
+  override def addProductDetail(productDetail: ProductDetail): Future[ProductDetail] = db.run(Actions.addProductDetail(productDetail))
+
+  override def deleteProductDetail(id: UUID): Future[Int] = db.run(Actions.update(id))
+
   object Actions {
 
     def findProductDetail(id: UUID): DBIO[Option[ProductDetail]] = for{
@@ -51,6 +56,15 @@ class ProductDetailRepositoryImpl @Inject()(database: AppDatabase, implicit val 
     def findProductDetailByProductId(productId: UUID): DBIO[Seq[ProductDetail]] = for{
       productDetails <- QueryUtility.productDetailQuery.filter(_.productId === productId).result
     }yield productDetails
+
+    def update(id: UUID) : DBIO[Int] = for {
+      update <- QueryUtility.productDetailQuery.filter(_.id === id).map(_.status).update(false)
+    }yield update
+
+    def addProductDetail(productDetail: ProductDetail): DBIO[ProductDetail] = for{
+      id <- QueryUtility.productDetailQuery returning QueryUtility.productDetailQuery.map(_.id) += productDetail
+      productDetail <- findProductDetail(id)
+    }yield productDetail.get
 
   }
 }
