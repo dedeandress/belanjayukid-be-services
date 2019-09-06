@@ -3,17 +3,29 @@ package services
 import java.util.UUID
 
 import com.google.inject.Inject
+import errors.AuthorizationException
+import graphql.Context
 import models.Category
 import repositories.repositoryInterfaces.CategoryRepository
+import utilities.JWTUtility
 
 import scala.concurrent.Future
 
 class CategoryService @Inject()(categoryRepository: CategoryRepository){
 
-  def findCategory(id: UUID): Future[Option[Category]] = categoryRepository.findCategory(id)
+  def findCategory(context: Context, id: UUID): Future[Option[Category]] = {
+    if(JWTUtility.isAdmin(context))categoryRepository.findCategory(id)
+    else throw AuthorizationException("You are not authorized")
+  }
 
-  def addCategory(category: Category): Future[Category] = categoryRepository.addCategory(category)
+  def createCategory(context: Context,category: Category): Future[Category] = {
+    if(JWTUtility.isAdmin(context))categoryRepository.addCategory(category)
+    else throw AuthorizationException("You are not authorized")
+  }
 
-  def getAllCategory: Future[Seq[Category]] = categoryRepository.getAllCategory
+  def getAllCategory(context: Context): Future[Seq[Category]] = {
+    if(JWTUtility.isAdmin(context)) categoryRepository.getAllCategory
+    else throw AuthorizationException("You are not authorized")
+  }
 
 }

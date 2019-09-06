@@ -3,6 +3,7 @@ package graphql.resolvers
 import java.util.UUID
 
 import com.google.inject.Inject
+import graphql.Context
 import models.Category
 import services.CategoryService
 
@@ -10,10 +11,10 @@ import scala.concurrent.Future
 
 class CategoryResolver @Inject()(categoryService: CategoryService){
 
-  def findCategory(id: UUID): Future[Option[Category]] = categoryService.findCategory(id)
+  def category(context: Context, id: UUID): Future[Option[Category]] = categoryService.findCategory(context, id)
 
-  def addCategory(category: Category): Future[Category] = categoryService.addCategory(category)
+  def category(context: Context, category: Category): Future[Category] = categoryService.createCategory(context, category)
 
-  def getAllCategory: Future[Seq[Category]] = categoryService.getAllCategory
+  def categories(context: Context): Future[Seq[Category]] = categoryService.getAllCategory(context)
 
 }

@@ -3,18 +3,18 @@ package graphql.resolvers
 import java.util.UUID
 
 import com.google.inject.Inject
+import graphql.Context
 import models.ProductStock
-import repositories.repositoryInterfaces.ProductStockRepository
 import services.ProductStockService
 
 import scala.concurrent.Future
 
 class ProductStockResolver @Inject()(productStockService: ProductStockService){
 
-  def findProductStock(id: UUID): Future[Option[ProductStock]] = productStockService.findProductStock(id)
+  def productStock(context: Context, id: UUID): Future[Option[ProductStock]] = productStockService.findProductStock(context, id)
 
-  def getAllProductStock: Future[Seq[ProductStock]] = productStockService.getAllProductStock
+  def productStocks(context: Context): Future[Seq[ProductStock]] = productStockService.getAllProductStock(context)
   
-  def addProductStock(productStock: ProductStock): Future[ProductStock] = productStockService.addProductStock(productStock)
+  def createProductStock(context: Context, productStock: ProductStock): Future[ProductStock] = productStockService.createProductStock(context, productStock)
 
 }

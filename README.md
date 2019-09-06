@@ -209,24 +209,24 @@ input ProductInput {
 input StaffInput {
     userInput: UserInput !
     userProfileInput: UserProfileInput !
-    roleName: String!
+    roleId: String!
 }
 
 # Query
 
-query getAllProductStock{
+query productStocks{
     id
     name
 }
 
-query getAllCategory{
+query categories{
     id
     name
 }
 
 # Mutation
 
-mutation addStaff($input: StaffInput!){
+mutation createStaff($input: StaffInput!){
     addStaff(staff: $input){
         id
         user{
@@ -247,7 +247,7 @@ mutation addStaff($input: StaffInput!){
     }
 }
 
-mutation addProduct($input: ProductInput!){
+mutation createProduct($input: ProductInput!){
     addProduct(product: $input){
         id
         name
@@ -269,17 +269,25 @@ mutation addProduct($input: ProductInput!){
     }
 }
 
-mutation addProductStock($input: String!){
+mutation createProductStock($input: String!){
     addProductStock(name: $input){
         id
         name
     }
 }
 
-mutation addCategory($input: String!){
+mutation createCategory($input: String!){
     addProductStock(name: $input){
         id
         name
+    }
+}
+
+mutation login($username: String!, $password: String!){
+    login(username: $username, password: $password){
+        bearerToken
+        roleName
+        username
     }
 }
 

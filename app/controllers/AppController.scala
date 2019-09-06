@@ -2,13 +2,13 @@ package controllers
 
 import play.api.mvc._
 import com.google.inject.{Inject, Singleton}
-import graphql.GraphQL
+import graphql.{Context, GraphQL}
 import sangria.marshalling.playJson._
 import play.api.libs.json._
 import sangria.ast.Document
 import sangria.parser.QueryParser
 import sangria.execution._
-import errors.{AuthenticationException, AuthorizationException}
+import errors.{AuthenticationException, AuthorizationException, TooComplexQueryError}
 import sangria.execution.Executor
 import sangria.execution.QueryAnalysisError
 
@@ -47,20 +47,26 @@ class AppController @Inject()(graphQL: GraphQL, cc: ControllerComponents, implic
       }
 
       maybeQuery match {
-        case Success((query, operationName, variables)) => executeQuery(query, variables, operationName)
+        case Success((query, operationName, variables)) =>
+          val httpContext = Context(request.headers, request.cookies)
+          executeQuery(query, variables, operationName, httpContext)
+            .map(_.withHeaders(httpContext.newHeaders: _*).withCookies(httpContext.newCookies: _*))
         case Failure(error) => Future.successful {
           BadRequest(error.getMessage)
         }
       }
   }
 
-  def executeQuery(query: String, variables: Option[JsObject] = None, operation: Option[String] = None): Future[Result] = QueryParser.parse(query) match {
-    case Success(queryAst: Document) =>
-      Executor.execute(
+  def executeQuery(query: String, variables: Option[JsObject] = None, operation: Option[String] = None, context: Context): Future[Result] = QueryParser.parse(query) match {
+    case Success(queryAst: Document) => Executor.execute(
         schema = graphQL.Schema,
+        userContext = context,
         queryAst = queryAst,
         variables = variables.getOrElse(Json.obj()),
-        exceptionHandler = ErrorHandler
+        queryReducers = List(
+          QueryReducer.rejectMaxDepth[Context](graphQL.maxQueryDepth),
+          QueryReducer.rejectComplexQueries[Context](graphQL.maxQueryComplexity, (_, _) => TooComplexQueryError())
+        )
       ).map(Ok(_)).recover {
         case error: QueryAnalysisError => BadRequest(error.resolveError)
         case error: ErrorWithResolver => InternalServerError(error.resolveError)
