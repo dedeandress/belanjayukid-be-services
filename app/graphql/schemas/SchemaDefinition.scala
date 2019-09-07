@@ -32,6 +32,15 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       name = "roles",
       fieldType = ListType(graphQLType.RoleType),
       resolve = sangriaContext => staffResolver.roles(sangriaContext.ctx)
+    ),
+    //product
+    Field(
+      name = "product",
+      fieldType = ListType(graphQLType.ProductType),
+      arguments = List(
+        Argument("name", schema.StringType)
+      ),
+      resolve = sangriaContext => productResolver.products(sangriaContext.ctx, sangriaContext.arg[String]("name"))
     )
   )
 

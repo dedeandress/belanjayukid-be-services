@@ -16,4 +16,6 @@ trait ProductsRepository {
 
   def deleteProduct(productsId: UUID): Future[Int]
 
+  def findProduct(name: String): Future[Seq[Products]]
+
 }

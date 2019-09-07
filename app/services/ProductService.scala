@@ -40,5 +40,10 @@ class ProductService @Inject()(productsRepository: ProductsRepository, categoryR
     }
   }
 
+  def findProduct(context: Context, name: String): Future[Seq[Products]] = {
+    if(!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
+    productsRepository.findProduct(name)
+  }
+
 
 }
