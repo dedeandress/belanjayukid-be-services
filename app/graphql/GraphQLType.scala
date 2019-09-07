@@ -4,12 +4,13 @@ import java.util.UUID
 
 import akka.http.scaladsl.model.DateTime
 import com.google.inject.Inject
+import graphql.`type`.ProductsResult
 import graphql.input.{ProductDetailInput, ProductInput, StaffInput, UserInput, UserProfileInput}
 import models.{Category, LoginUser, ProductDetail, ProductStock, Products, Role, Staff, User, UserProfile}
 import repositories.repositoryInterfaces.{CategoryRepository, ProductDetailRepository, ProductStockRepository, ProductsRepository, RoleRepository, UserProfileRepository, UserRepository}
 import sangria.macros.derive.{ReplaceInputField, _}
 import sangria.marshalling.sprayJson._
-import sangria.schema.{Argument, Field, InputField, InputObjectType, ListType, ObjectType, OptionType}
+import sangria.schema.{Argument, Field, InputField, InputObjectType, ListType, ObjectType, OptionType, ValidOutType}
 import spray.json.DefaultJsonProtocol._
 import spray.json.{JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
 import utilities.CustomScalar
@@ -63,6 +64,12 @@ class GraphQLType @Inject()(userRepository: UserRepository
         , OptionType(ProductType)
         , resolve = c => productRepository.findProduct(c.value.id)
       )
+    )
+  )
+
+  implicit val ProductsResultType: ObjectType[Unit, ProductsResult] = deriveObjectType[Unit, ProductsResult](
+    ReplaceField("products",
+      Field("product", ListType(ProductType), resolve = c => c.value.products)
     )
   )
 

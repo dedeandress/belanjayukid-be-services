@@ -5,6 +5,7 @@ import java.util.UUID
 import com.google.inject.Inject
 import errors.AuthorizationException
 import graphql.Context
+import graphql.`type`.ProductsResult
 import graphql.input.ProductInput
 import models.Products
 import repositories.repositoryInterfaces.{CategoryRepository, ProductDetailRepository, ProductStockRepository, ProductsRepository}
@@ -43,6 +44,12 @@ class ProductService @Inject()(productsRepository: ProductsRepository, categoryR
   def findProduct(context: Context, name: String): Future[Seq[Products]] = {
     if(!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
     productsRepository.findProduct(name)
+  }
+
+  def getAllProducts(context: Context, limit: Int): Future[ProductsResult] = {
+//    if(!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
+
+    productsRepository.getAllProducts(limit)
   }
 
 

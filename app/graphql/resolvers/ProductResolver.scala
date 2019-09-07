@@ -4,6 +4,7 @@ import java.util.UUID
 
 import com.google.inject.Inject
 import graphql.Context
+import graphql.`type`.ProductsResult
 import graphql.input.ProductInput
 import models.Products
 import services.ProductService
@@ -21,5 +22,7 @@ class ProductResolver @Inject()(productService: ProductService){
   def deleteProduct(context: Context, productId: UUID): Future[Boolean] = productService.deleteProduct(context, productId)
 
   def products(context: Context, name: String): Future[Seq[Products]] = productService.findProduct(context, name)
+
+  def products(context: Context, limit: Int): Future[ProductsResult] = productService.getAllProducts(context, limit)
 
 }
