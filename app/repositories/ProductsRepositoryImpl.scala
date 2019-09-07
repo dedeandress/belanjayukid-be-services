@@ -4,6 +4,7 @@ import java.util.UUID
 
 import com.google.inject.Inject
 import errors.NotFound
+import graphql.`type`.ProductsResult
 import models.Products
 import modules.AppDatabase
 import repositories.repositoryInterfaces.ProductsRepository
@@ -27,6 +28,8 @@ class ProductsRepositoryImpl @Inject()(database: AppDatabase, implicit val execu
   override def deleteProduct(productsId: UUID): Future[Int] = db.run(Actions.update(productsId))
 
   override def findProduct(name: String): Future[Seq[Products]] = db.run(Actions.findProduct(name))
+
+  override def getAllProducts(limit: Int): Future[ProductsResult] = db.run(Actions.getAllProducts(limit))
 
   object Actions {
 
@@ -55,6 +58,15 @@ class ProductsRepositoryImpl @Inject()(database: AppDatabase, implicit val execu
     def findProduct(name: String): DBIO[Seq[Products]] = for {
       products <- QueryUtility.productQuery.filter(p=>(p.name.toLowerCase like s"%${name.toLowerCase}%") && (p.status === true)).result
     }yield products
+
+    def getAllProducts(limit: Int): DBIO[ProductsResult] = for {
+      products <- QueryUtility.productQuery.filter(_.status === true).sortBy(_.name.asc).take(limit).result
+      numberOfProduct <- QueryUtility.productQuery.filter(_.status === true).length.result
+    }yield ProductsResult(
+      products = products,
+      totalCount = numberOfProduct,
+      hasNextData = numberOfProduct > limit
+    )
 
   }
 }
