@@ -18,4 +18,6 @@ class ProductResolver @Inject()(productService: ProductService){
 
   def updateProduct(context: Context, productId: UUID, categoryId: UUID, name: String): Future[Option[Products]] = productService.updateProduct(context, productId, categoryId, name)
 
+  def deleteProduct(context: Context, productId: UUID): Future[Boolean] = productService.deleteProduct(context, productId)
+
 }

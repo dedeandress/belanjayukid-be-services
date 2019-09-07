@@ -84,6 +84,14 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       ),
       resolve = sangriaContext => productResolver.updateProduct(sangriaContext.ctx, UUID.fromString(sangriaContext.arg[String]("productId")), UUID.fromString(sangriaContext.arg[String]("categoryId")), sangriaContext.arg[String]("name"))
     ),
+    Field(
+      name = "deleteProduct",
+      fieldType = schema.BooleanType,
+      arguments = List(
+        Argument("id", schema.StringType)
+      ),
+      resolve = sangriaContext => productResolver.deleteProduct(sangriaContext.ctx, UUID.fromString(sangriaContext.arg[String]("id")))
+    ),
     //productDetail
     Field(
       name = "deleteProductDetail",
@@ -94,7 +102,7 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       resolve = sangriaContext => productDetailResolver.deleteProductDetail(sangriaContext.ctx, UUID.fromString(sangriaContext.arg[String]("id")))
     ),
     Field(
-      name = "addProductDetail",
+      name = "createProductDetail",
       fieldType = graphQLType.ProductDetailType,
       arguments = graphQLType.ProductDetailInputArg :: Nil,
       resolve = sangriaContext => productDetailResolver.addProductDetail(sangriaContext.ctx, sangriaContext.arg(graphQLType.ProductDetailInputArg))

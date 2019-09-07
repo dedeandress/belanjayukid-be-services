@@ -14,6 +14,6 @@ trait ProductsRepository {
 
   def updateProduct(product: Products): Future[Option[Products]]
 
-  def deleteProduct(productsId: UUID): Future[Boolean]
+  def deleteProduct(productsId: UUID): Future[Int]
 
 }

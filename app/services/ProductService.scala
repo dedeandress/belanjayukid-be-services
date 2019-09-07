@@ -6,7 +6,7 @@ import com.google.inject.Inject
 import errors.AuthorizationException
 import graphql.Context
 import graphql.input.ProductInput
-import models.{ProductDetail, Products}
+import models.Products
 import repositories.repositoryInterfaces.{CategoryRepository, ProductDetailRepository, ProductStockRepository, ProductsRepository}
 import utilities.JWTUtility
 
@@ -22,21 +22,6 @@ class ProductService @Inject()(productsRepository: ProductsRepository, categoryR
       product <- productsRepository.addProduct(new Products(SKU = productInput.SKU, name = productInput.name, categoryId = UUID.fromString(productInput.categoryId)))
       _ <- productDetailRepository.addProductDetail(product.id, productInput)
     }yield product
-
-//      productsRepository.addProduct(new Products(SKU = productInput.SKU, name = productInput.name, categoryId = UUID.fromString(productInput.categoryId))).map{
-//        product=>
-//          for(productDetail <- productInput.productDetailInput){
-//            productDetailRepository.addProductDetail(
-//              new ProductDetail(
-//                value = productDetail.value,
-//                purchasePrice = productDetail.purchasePrice,
-//                sellingPrice = productDetail.sellingPrice,
-//                productId = product.id,
-//                productStockId = UUID.fromString(productDetail.productStockId)
-//              )
-//            )
-//          }
-//      }
   }
 
   def updateProduct(context: Context, productId: UUID, categoryId: UUID, name: String): Future[Option[Products]] = {
@@ -45,7 +30,14 @@ class ProductService @Inject()(productsRepository: ProductsRepository, categoryR
       product =>
         productsRepository.updateProduct(product.get.copy(categoryId = categoryId, name = name))
     }
+  }
 
+  def deleteProduct(context: Context, id: UUID): Future[Boolean] = {
+    if(!JWTUtility.isAdmin(context)) throw AuthorizationException("You are not authorized")
+    productsRepository.deleteProduct(id).map{
+      case 0 => false
+      case _ => true
+    }
   }
 
 

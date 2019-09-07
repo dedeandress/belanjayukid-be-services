@@ -24,31 +24,31 @@ class ProductsRepositoryImpl @Inject()(database: AppDatabase, implicit val execu
 
   override def updateProduct(products: Products): Future[Option[Products]] = db.run(Actions.updateProduct(products))
 
-  override def deleteProduct(productsId: UUID): Future[Boolean] = db.run(Actions.delete(productsId))
+  override def deleteProduct(productsId: UUID): Future[Int] = db.run(Actions.update(productsId))
 
   object Actions {
 
-    def findProduct(id: UUID): DBIO[Option[Products]] = for{
+    def findProduct(id: UUID): DBIO[Option[Products]] = for {
       product <- QueryUtility.productQuery.filter(_.id === id).result.headOption
-    }yield product
+    } yield product
 
-    def addProduct(product: Products) :DBIO[Products] = for {
+    def addProduct(product: Products): DBIO[Products] = for {
       id <- QueryUtility.productQuery returning QueryUtility.productQuery.map(_.id) += product
       product <- findProduct(id)
-    }yield product.get
+    } yield product.get
 
     def updateProduct(products: Products): DBIO[Option[Products]] = for {
-      update <- QueryUtility.productQuery.filter(_.id===products.id).update(products)
+      update <- QueryUtility.productQuery.filter(_.id === products.id).update(products)
       _ <- update match {
         case 0 => DBIO.failed(NotFound("not found user id"))
         case _ => DBIO.successful(())
       }
       product <- findProduct(products.id)
-    }yield product
+    } yield product
 
-    def delete(id: UUID): DBIO[Boolean] = for {
-      maybeDelete <- QueryUtility.productQuery.filter(_.id === id).delete
-      isDelete =  if(maybeDelete == 1) true else false
-    }yield isDelete
+    def update(id: UUID): DBIO[Int] = for {
+      update <- QueryUtility.productQuery.filter(_.id === id).map(_.status).update(false)
+    } yield update
+
   }
 }
