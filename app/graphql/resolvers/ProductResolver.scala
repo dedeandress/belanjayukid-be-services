@@ -20,4 +20,6 @@ class ProductResolver @Inject()(productService: ProductService){
 
   def deleteProduct(context: Context, productId: UUID): Future[Boolean] = productService.deleteProduct(context, productId)
 
+  def products(context: Context, name: String): Future[Seq[Products]] = productService.findProduct(context, name)
+
 }

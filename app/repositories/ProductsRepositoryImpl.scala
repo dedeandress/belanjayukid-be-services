@@ -26,6 +26,8 @@ class ProductsRepositoryImpl @Inject()(database: AppDatabase, implicit val execu
 
   override def deleteProduct(productsId: UUID): Future[Int] = db.run(Actions.update(productsId))
 
+  override def findProduct(name: String): Future[Seq[Products]] = db.run(Actions.findProduct(name))
+
   object Actions {
 
     def findProduct(id: UUID): DBIO[Option[Products]] = for {
@@ -49,6 +51,10 @@ class ProductsRepositoryImpl @Inject()(database: AppDatabase, implicit val execu
     def update(id: UUID): DBIO[Int] = for {
       update <- QueryUtility.productQuery.filter(_.id === id).map(_.status).update(false)
     } yield update
+
+    def findProduct(name: String): DBIO[Seq[Products]] = for {
+      products <- QueryUtility.productQuery.filter(p=>(p.name.toLowerCase like s"%${name.toLowerCase}%") && (p.status === true)).result
+    }yield products
 
   }
 }
