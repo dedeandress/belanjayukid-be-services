@@ -46,9 +46,14 @@ class ProductService @Inject()(productsRepository: ProductsRepository, categoryR
     productsRepository.findProduct(name)
   }
 
-  def getAllProducts(context: Context, limit: Int): Future[ProductsResult] = {
+  def getAllProductsWithPagination(context: Context, limit: Int): Future[ProductsResult] = {
     if(!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
-    productsRepository.getAllProducts(limit)
+    productsRepository.getAllProductsWithPagination(limit)
+  }
+
+  def getAllProducts(context: Context): Future[Seq[Products]] = {
+    if(!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
+    productsRepository.getAllProducts
   }
 
 

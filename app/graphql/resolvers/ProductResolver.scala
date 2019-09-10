@@ -23,6 +23,8 @@ class ProductResolver @Inject()(productService: ProductService){
 
   def products(context: Context, name: String): Future[Seq[Products]] = productService.findProduct(context, name)
 
-  def products(context: Context, limit: Int): Future[ProductsResult] = productService.getAllProducts(context, limit)
+  def products(context: Context, limit: Int): Future[ProductsResult] = productService.getAllProductsWithPagination(context, limit)
+
+  def products(context: Context): Future[Seq[Products]] = productService.getAllProducts(context)
 
 }

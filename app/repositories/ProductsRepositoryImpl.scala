@@ -29,7 +29,9 @@ class ProductsRepositoryImpl @Inject()(database: AppDatabase, implicit val execu
 
   override def findProduct(name: String): Future[Seq[Products]] = db.run(Actions.findProduct(name))
 
-  override def getAllProducts(limit: Int): Future[ProductsResult] = db.run(Actions.getAllProducts(limit))
+  override def getAllProductsWithPagination(limit: Int): Future[ProductsResult] = db.run(Actions.getAllProductsWithPagination(limit))
+
+  override def getAllProducts: Future[Seq[Products]] = db.run(Actions.getAllProducts)
 
   object Actions {
 
@@ -59,7 +61,7 @@ class ProductsRepositoryImpl @Inject()(database: AppDatabase, implicit val execu
       products <- QueryUtility.productQuery.filter(p=>(p.name.toLowerCase like s"%${name.toLowerCase}%") && (p.status === true)).result
     }yield products
 
-    def getAllProducts(limit: Int): DBIO[ProductsResult] = for {
+    def getAllProductsWithPagination(limit: Int): DBIO[ProductsResult] = for {
       products <- QueryUtility.productQuery.filter(_.status === true).sortBy(_.name.asc).take(limit).result
       numberOfProduct <- QueryUtility.productQuery.filter(_.status === true).length.result
     }yield ProductsResult(
@@ -67,6 +69,10 @@ class ProductsRepositoryImpl @Inject()(database: AppDatabase, implicit val execu
       totalCount = numberOfProduct,
       hasNextData = numberOfProduct > limit
     )
+
+    def getAllProducts: DBIO[Seq[Products]] = for {
+      products <- QueryUtility.productQuery.filter(_.status === true).sortBy(_.name.asc).result
+    }yield products
 
   }
 }

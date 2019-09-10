@@ -19,6 +19,8 @@ trait ProductsRepository {
 
   def findProduct(name: String): Future[Seq[Products]]
 
-  def getAllProducts(limit: Int): Future[ProductsResult]
+  def getAllProductsWithPagination(limit: Int): Future[ProductsResult]
+
+  def getAllProducts: Future[Seq[Products]]
 
 }

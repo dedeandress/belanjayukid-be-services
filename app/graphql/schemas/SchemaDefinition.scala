@@ -44,11 +44,8 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
     ),
     Field(
       name = "products",
-      fieldType = graphQLType.ProductsResultType,
-      arguments = List(
-        Argument("limit", schema.IntType)
-      ),
-      resolve = sangriaContext => productResolver.products(sangriaContext.ctx, sangriaContext.arg[Int]("limit"))
+      fieldType = ListType(graphQLType.ProductType),
+      resolve = sangriaContext => productResolver.products(sangriaContext.ctx)
     )
   )
 
