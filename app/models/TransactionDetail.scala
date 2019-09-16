@@ -7,10 +7,11 @@ import models.Transaction.TransactionTable
 import slick.jdbc.PostgresProfile.api.{Table => SlickTable, _}
 import slick.lifted.{Tag => SlickTag}
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
+import utilities.TransactionDetailStatus
 
-case class TransactionDetail(id: UUID, transactionId: UUID, productDetailId: UUID, numberOfPurchases: Int, subTotalPrice: BigDecimal)
+case class TransactionDetail(id: UUID = UUID.randomUUID(), transactionId: UUID, productDetailId: UUID, numberOfPurchases: Int, subTotalPrice: BigDecimal, status: Int)
 
-object TransactionDetail extends ((UUID, UUID, UUID, Int, BigDecimal)=>TransactionDetail){
+object TransactionDetail extends ((UUID, UUID, UUID, Int, BigDecimal, Int)=>TransactionDetail){
 
   val transactions = TableQuery[TransactionTable]
   val productDetails = TableQuery[ProductDetailTable]
@@ -21,9 +22,10 @@ object TransactionDetail extends ((UUID, UUID, UUID, Int, BigDecimal)=>Transacti
     def productDetailId = column[UUID]("product_detail_id")
     def numberOfPurchases = column[Int]("number_of_purchases")
     def subTotalPrice = column[BigDecimal]("subtotal_price")
+    def status = column[Int]("status")
     def transactionIdFK = foreignKey("transaction_id", transactionId, transactions)(_.id)
     def productDetailIdFK = foreignKey("product_detail_id", productDetailId, productDetails)(_.id)
-    def * = (id, transactionId, productDetailId, numberOfPurchases, subTotalPrice).mapTo[TransactionDetail]
+    def * = (id, transactionId, productDetailId, numberOfPurchases, subTotalPrice, status).mapTo[TransactionDetail]
   }
 }
 
@@ -37,5 +39,5 @@ object TransactionDetailJsonProtocol extends DefaultJsonProtocol {
     }
   }
 
-  implicit val transactionDetailJsonProtocolFormat: JsonFormat[TransactionDetail] = jsonFormat5(TransactionDetail)
+  implicit val transactionDetailJsonProtocolFormat: JsonFormat[TransactionDetail] = jsonFormat6(TransactionDetail)
 }

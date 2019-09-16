@@ -4,7 +4,7 @@ import java.util.UUID
 
 import com.google.inject.Inject
 import graphql.{Context, GraphQLType}
-import graphql.resolvers.{CategoryResolver, ProductDetailResolver, ProductResolver, ProductStockResolver, RoleResolver, StaffResolver, UserProfileResolver, UserResolver}
+import graphql.resolvers.{CategoryResolver, ProductDetailResolver, ProductResolver, ProductStockResolver, RoleResolver, StaffResolver, TransactionResolver, UserProfileResolver, UserResolver}
 import models.{Category, ProductStock}
 import sangria.schema
 import sangria.schema.{Argument, Field, ListType, OptionType}
@@ -14,7 +14,7 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
                                  , userResolver: UserResolver, userProfileResolver: UserProfileResolver
                                  , roleResolver: RoleResolver, categoryResolver: CategoryResolver
                                  , productResolver: ProductResolver, productStockResolver: ProductStockResolver
-                                 , productDetailResolver: ProductDetailResolver
+                                 , productDetailResolver: ProductDetailResolver, transactionResolver: TransactionResolver
                                  , graphQLType: GraphQLType){
 
   val Queries: List[Field[Context, Unit]] = List(
@@ -120,6 +120,26 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       fieldType = graphQLType.ProductDetailType,
       arguments = graphQLType.ProductDetailInputArg :: Nil,
       resolve = sangriaContext => productDetailResolver.addProductDetail(sangriaContext.ctx, sangriaContext.arg(graphQLType.ProductDetailInputArg))
+    ),
+    //transaction
+    Field(
+      name = "createTransaction",
+      fieldType = schema.IntType,
+      resolve = sangriaContext => transactionResolver.createTransaction()
+    ),
+    Field(
+      name = "addTransactionDetail",
+      fieldType = schema.IntType,
+      arguments = graphQLType.TransactionInputArg :: Nil,
+      resolve = sangriaContext => transactionResolver.createTransactionDetail(sangriaContext.arg(graphQLType.TransactionInputArg))
+    ),
+    Field(
+      name = "completePayment",
+      fieldType = schema.IntType,
+      arguments = List(
+        Argument("transactionId", schema.StringType)
+      ),
+      resolve = sangriaContext => transactionResolver.completePayment(sangriaContext.arg[String]("transactionId"))
     )
   )
 
