@@ -44,13 +44,12 @@ create table "supplier" ("id" UUID NOT NULL PRIMARY KEY,"name" VARCHAR NOT NULL,
 create table "store" ("id" UUID NOT NULL PRIMARY KEY,"store_name" VARCHAR NOT NULL,"phone_number" VARCHAR NOT NULL,"address" VARCHAR NOT NULL);
 
 
-create table "transactions" ("id" UUID NOT NULL PRIMARY KEY,"payment_status" INTEGER NOT NULL,"staff_id" UUID NOT NULL,"customer_id" UUID NOT NULL,"store_id" UUID NOT NULL,"total_price" DECIMAL(21,2) NOT NULL);
+create table "transactions" ("id" UUID NOT NULL PRIMARY KEY,"payment_status" INTEGER NOT NULL,"staff_id" UUID,"customer_id" UUID,"total_price" DECIMAL(21,2) NOT NULL,"status" INTEGER NOT NULL);
 alter table "transactions" add constraint "customer_id" foreign key("customer_id") references "customer"("id") on update NO ACTION on delete NO ACTION;
 alter table "transactions" add constraint "staff_id" foreign key("staff_id") references "staff"("id") on update NO ACTION on delete NO ACTION;
-alter table "transactions" add constraint "store_id" foreign key("store_id") references "store"("id") on update NO ACTION on delete NO ACTION;
 
 
-create table "transaction_detail" ("id" UUID NOT NULL PRIMARY KEY,"transaction_id" UUID NOT NULL,"product_detail_id" UUID NOT NULL,"number_of_purchases" INTEGER NOT NULL,"subtotal_price" DECIMAL(21,2) NOT NULL);
+create table "transaction_detail" ("id" UUID NOT NULL PRIMARY KEY,"transaction_id" UUID NOT NULL,"product_detail_id" UUID NOT NULL,"number_of_purchases" INTEGER NOT NULL,"subtotal_price" DECIMAL(21,2) NOT NULL,"status" INTEGER NOT NULL);
 alter table "transaction_detail" add constraint "product_detail_id" foreign key("product_detail_id") references "product_detail"("id") on update NO ACTION on delete NO ACTION;
 alter table "transaction_detail" add constraint "transaction_id" foreign key("transaction_id") references "transactions"("id") on update NO ACTION on delete NO ACTION;
 

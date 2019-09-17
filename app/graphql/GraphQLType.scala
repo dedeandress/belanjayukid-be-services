@@ -5,8 +5,8 @@ import java.util.UUID
 import akka.http.scaladsl.model.DateTime
 import com.google.inject.Inject
 import graphql.`type`.ProductsResult
-import graphql.input.{ProductDetailInput, ProductInput, StaffInput, UserInput, UserProfileInput}
-import models.{Category, LoginUser, ProductDetail, ProductStock, Products, Role, Staff, User, UserProfile}
+import graphql.input.{ProductDetailInput, ProductInput, StaffInput, TransactionDetailInput, TransactionInput, UserInput, UserProfileInput}
+import models.{Category, CreateTransactionResult, LoginUser, ProductDetail, ProductStock, Products, Role, Staff, TransactionDetail, TransactionResult, User, UserProfile}
 import repositories.repositoryInterfaces.{CategoryRepository, ProductDetailRepository, ProductStockRepository, ProductsRepository, RoleRepository, UserProfileRepository, UserRepository}
 import sangria.macros.derive.{ReplaceInputField, _}
 import sangria.marshalling.sprayJson._
@@ -43,6 +43,12 @@ class GraphQLType @Inject()(userRepository: UserRepository
     ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id))
   )
 
+  implicit val TransactionDetailType: ObjectType[Unit, TransactionDetail] = deriveObjectType[Unit, TransactionDetail](
+    ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id)),
+    ReplaceField("transactionId", Field("transactionID", CustomScalar.UUIDType, resolve = _.value.transactionId)),
+    ReplaceField("productDetailId", Field("productDetailId", CustomScalar.UUIDType, resolve = _.value.productDetailId))
+  )
+
   implicit val ProductStockType: ObjectType[Unit, ProductStock] = deriveObjectType[Unit, ProductStock](
     ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id))
   )
@@ -70,6 +76,18 @@ class GraphQLType @Inject()(userRepository: UserRepository
   implicit val ProductsResultType: ObjectType[Unit, ProductsResult] = deriveObjectType[Unit, ProductsResult](
     ReplaceField("products",
       Field("product", ListType(ProductType), resolve = c => c.value.products)
+    )
+  )
+
+  implicit val TransactionResultType: ObjectType[Unit, TransactionResult] = deriveObjectType[Unit, TransactionResult](
+    ReplaceField("details",
+      Field("details", ListType(TransactionDetailType), resolve = c => c.value.details)
+    )
+  )
+
+  implicit val CreateTransactionResultType: ObjectType[Unit, CreateTransactionResult] = deriveObjectType[Unit, CreateTransactionResult](
+    ReplaceField("transactionId",
+      Field("transactionId", CustomScalar.UUIDType, resolve = c => c.value.transactionId)
     )
   )
 
@@ -104,22 +122,27 @@ class GraphQLType @Inject()(userRepository: UserRepository
 
   implicit val userProfileInputJsonProtocolFormat: JsonFormat[UserProfileInput] = jsonFormat5(UserProfileInput)
   implicit val staffInputJsonProtocolFormat: JsonFormat[StaffInput] = jsonFormat3(StaffInput)
+  implicit val transactionDetailInputJsonProtocolFormat: JsonFormat[TransactionDetailInput] = jsonFormat3(TransactionDetailInput)
+  implicit val transactionInputJsonProtocolFormat: JsonFormat[TransactionInput] = jsonFormat4(TransactionInput)
   implicit val productDetailInputJsonProtocolFormat: JsonFormat[ProductDetailInput] = jsonFormat5(ProductDetailInput)
   implicit val productInputJsonProtocolFormat: JsonFormat[ProductInput] = jsonFormat5(ProductInput)
   implicit val userProfileInputType : InputObjectType[UserProfileInput] = deriveInputObjectType[UserProfileInput]()
   implicit val UserInputType : InputObjectType[UserInput] = deriveInputObjectType[UserInput]()
   implicit val productInputType : InputObjectType[ProductInput] = deriveInputObjectType[ProductInput]()
   implicit val productDetailInputType : InputObjectType[ProductDetailInput] = deriveInputObjectType[ProductDetailInput]()
+  implicit val transactionInputType : InputObjectType[TransactionInput] = deriveInputObjectType[TransactionInput]()
+  implicit val transactionDetailInputType : InputObjectType[TransactionDetailInput] = deriveInputObjectType[TransactionDetailInput]()
+  implicit val StaffInputType: InputObjectType[StaffInput] = deriveInputObjectType[StaffInput](
+    ReplaceInputField("userInput", InputField("userInput", UserInputType)),
+    ReplaceInputField("userProfileInput", InputField("userProfileInput", userProfileInputType)),
+  )
 
   val UserInputArg = Argument("user", UserInputType)
   val UserProfileInputArg = Argument("userProfile", userProfileInputType)
   val ProductInputArg = Argument("product", productInputType)
   val ProductDetailInputArg = Argument("productDetail", productDetailInputType)
-
-  implicit val StaffInputType: InputObjectType[StaffInput] = deriveInputObjectType[StaffInput](
-    ReplaceInputField("userInput", InputField("userInput", UserInputType)),
-    ReplaceInputField("userProfileInput", InputField("userProfileInput", userProfileInputType)),
-  )
+  val TransactionDetailInputArg = Argument("transactionDetail", transactionDetailInputType)
+  val TransactionInputArg = Argument("transaction", transactionInputType)
 
   val StaffInputArg = Argument("staff", StaffInputType)
 }

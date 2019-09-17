@@ -34,7 +34,9 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-slick-evolutions" % "4.0.0",
   "com.typesafe.slick" %% "slick" % "3.3.0",
   "com.typesafe.slick" %% "slick-hikaricp" % "3.3.0",
-  "io.spray" %%  "spray-json" % "1.3.5"
+  "io.spray" %%  "spray-json" % "1.3.5",
+  "com.sendgrid" % "sendgrid-java" % "4.4.1",
+  "com.sendgrid" % "java-http-client" % "4.2.0"
 )
 
 // Adds additional packages into Twirl

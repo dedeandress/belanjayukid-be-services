@@ -5,7 +5,7 @@ import java.util.UUID
 import com.google.inject.Inject
 import errors.NotFound
 import graphql.`type`.ProductsResult
-import models.Products
+import models.{Products, TransactionDetail}
 import modules.AppDatabase
 import repositories.repositoryInterfaces.ProductsRepository
 import utilities.QueryUtility
@@ -32,6 +32,14 @@ class ProductsRepositoryImpl @Inject()(database: AppDatabase, implicit val execu
   override def getAllProductsWithPagination(limit: Int): Future[ProductsResult] = db.run(Actions.getAllProductsWithPagination(limit))
 
   override def getAllProducts: Future[Seq[Products]] = db.run(Actions.getAllProducts)
+
+  override def updateStock(productId: UUID, stock: Int): Future[Int] = db.run(Actions.updateStock(productId, stock))
+
+  override def decrementStock(details: Seq[TransactionDetail]): Unit = {
+    val update = for (detail <- details) {
+
+    }
+  }
 
   object Actions {
 
@@ -74,5 +82,8 @@ class ProductsRepositoryImpl @Inject()(database: AppDatabase, implicit val execu
       products <- QueryUtility.productQuery.filter(_.status === true).sortBy(_.name.asc).result
     }yield products
 
+    def updateStock(productId: UUID, stock: Int): DBIO[Int] = for{
+      update <- QueryUtility.productQuery.filter(_.id === productId).map(_.stock).update(stock)
+    }yield update
   }
 }
