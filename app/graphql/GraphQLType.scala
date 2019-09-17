@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.DateTime
 import com.google.inject.Inject
 import graphql.`type`.ProductsResult
 import graphql.input.{ProductDetailInput, ProductInput, StaffInput, TransactionDetailInput, TransactionInput, UserInput, UserProfileInput}
-import models.{Category, LoginUser, ProductDetail, ProductStock, Products, Role, Staff, TransactionDetail, TransactionResult, User, UserProfile}
+import models.{Category, CreateTransactionResult, LoginUser, ProductDetail, ProductStock, Products, Role, Staff, TransactionDetail, TransactionResult, User, UserProfile}
 import repositories.repositoryInterfaces.{CategoryRepository, ProductDetailRepository, ProductStockRepository, ProductsRepository, RoleRepository, UserProfileRepository, UserRepository}
 import sangria.macros.derive.{ReplaceInputField, _}
 import sangria.marshalling.sprayJson._
@@ -82,6 +82,12 @@ class GraphQLType @Inject()(userRepository: UserRepository
   implicit val TransactionResultType: ObjectType[Unit, TransactionResult] = deriveObjectType[Unit, TransactionResult](
     ReplaceField("details",
       Field("details", ListType(TransactionDetailType), resolve = c => c.value.details)
+    )
+  )
+
+  implicit val CreateTransactionResultType: ObjectType[Unit, CreateTransactionResult] = deriveObjectType[Unit, CreateTransactionResult](
+    ReplaceField("transactionId",
+      Field("transactionId", CustomScalar.UUIDType, resolve = c => c.value.transactionId)
     )
   )
 

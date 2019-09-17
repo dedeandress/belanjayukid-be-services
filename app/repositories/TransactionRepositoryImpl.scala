@@ -18,7 +18,7 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
   import profile.api._
 
 
-  override def addTransaction(transaction: Transaction): Future[Int] = {
+  override def addTransaction(transaction: Transaction): Future[UUID] = {
     play.Logger.warn(s"get TransactionStatus : $transaction")
     db.run(Action.addTransaction(transaction))
   }
@@ -35,9 +35,9 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
 
   object Action {
 
-    def addTransaction(transaction: Transaction) : DBIO[Int] = for {
-      status <- QueryUtility.transactionsQuery returning  QueryUtility.transactionsQuery.map(_.status) += transaction
-    }yield status
+    def addTransaction(transaction: Transaction) : DBIO[UUID] = for {
+      id <- QueryUtility.transactionsQuery returning  QueryUtility.transactionsQuery.map(_.id) += transaction
+    }yield id
 
     def updateTransaction(transactionId: UUID, status: Int): DBIO[Option[Int]] = for{
       _ <- QueryUtility.transactionsQuery.filter(_.id === transactionId).map(_.status).update(status)

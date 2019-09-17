@@ -17,7 +17,7 @@ class TransactionDetailRepositoryImpl @Inject()(database: AppDatabase, implicit 
 
   import profile.api._
 
-  override def addTransactionDetail(details: List[TransactionDetail]): Future[Int] = {
+  override def addTransactionDetails(details: List[TransactionDetail]): Future[Int] = {
     play.Logger.warn("add transactionDetail")
     val insert = for(detail <- details) yield {
       QueryUtility.transactionDetailQuery += detail
@@ -25,6 +25,8 @@ class TransactionDetailRepositoryImpl @Inject()(database: AppDatabase, implicit 
     db.run(DBIO.seq(insert: _*))
     Future.successful(1)
   }
+
+  override def addTransactionDetail(detail: TransactionDetail): Future[Int] = db.run(Action.addTransactionDetail(detail))
 
   override def updateTransactionDetailStatus(transactionDetailId: UUID, status: Int): Future[Option[Int]] = {
     play.Logger.warn("update transactionDetail status")
@@ -38,8 +40,8 @@ class TransactionDetailRepositoryImpl @Inject()(database: AppDatabase, implicit 
 
   object Action {
 
-    def addTransactionDetail(transactionDetail: TransactionDetail): DBIO[UUID] = for {
-      id <- QueryUtility.transactionDetailQuery returning QueryUtility.transactionDetailQuery.map(_.id) += transactionDetail
+    def addTransactionDetail(transactionDetail: TransactionDetail): DBIO[Int] = for {
+      id <- QueryUtility.transactionDetailQuery returning QueryUtility.transactionDetailQuery.map(_.status) += transactionDetail
     }yield id
 
     def findTransactionDetailByTransactionId(transactionId: UUID): DBIO[Seq[TransactionDetail]] = for {
@@ -50,6 +52,10 @@ class TransactionDetailRepositoryImpl @Inject()(database: AppDatabase, implicit 
       update <- QueryUtility.transactionDetailQuery.filter(_.id === transactionDetailId).map(_.status).update(status)
       status <- QueryUtility.transactionDetailQuery.filter(_.id === transactionDetailId).map(_.status).result.headOption
     }yield status
+
+    def getTransactionDetailStatus(transactionId: UUID): DBIO[Option[Int]] = for {
+      details <- QueryUtility.transactionDetailQuery.filter(_.id === transactionId).map(_.status).result.headOption
+    }yield details
   }
 
 }

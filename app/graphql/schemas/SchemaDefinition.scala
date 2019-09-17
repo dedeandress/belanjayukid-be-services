@@ -124,14 +124,14 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
     //transaction
     Field(
       name = "createTransaction",
-      fieldType = schema.IntType,
-      resolve = sangriaContext => transactionResolver.createTransaction()
+      fieldType = graphQLType.CreateTransactionResultType,
+      resolve = sangriaContext => transactionResolver.createTransaction(sangriaContext.ctx)
     ),
     Field(
-      name = "addTransactionDetail",
-      fieldType = schema.IntType,
+      name = "checkout",
+      fieldType = graphQLType.TransactionResultType,
       arguments = graphQLType.TransactionInputArg :: Nil,
-      resolve = sangriaContext => transactionResolver.createTransactionDetail(sangriaContext.arg(graphQLType.TransactionInputArg))
+      resolve = sangriaContext => transactionResolver.createTransactionDetail(sangriaContext.ctx, sangriaContext.arg(graphQLType.TransactionInputArg))
     ),
     Field(
       name = "completePayment",
@@ -139,7 +139,7 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       arguments = List(
         Argument("transactionId", schema.StringType)
       ),
-      resolve = sangriaContext => transactionResolver.completePayment(sangriaContext.arg[String]("transactionId"))
+      resolve = sangriaContext => transactionResolver.completePayment(sangriaContext.ctx, sangriaContext.arg[String]("transactionId"))
     )
   )
 
