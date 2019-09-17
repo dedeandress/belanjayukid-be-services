@@ -26,7 +26,7 @@ class TransactionDetailRepositoryImpl @Inject()(database: AppDatabase, implicit 
     Future.successful(1)
   }
 
-  override def updateTransactionDetailStatus(transactionDetailId: UUID, status: Int): Unit = {
+  override def updateTransactionDetailStatus(transactionDetailId: UUID, status: Int): Future[Option[Int]] = {
     play.Logger.warn("update transactionDetail status")
     db.run(Action.updateTransaction(transactionDetailId, status))
   }
@@ -46,9 +46,10 @@ class TransactionDetailRepositoryImpl @Inject()(database: AppDatabase, implicit 
       details <- QueryUtility.transactionDetailQuery.filter(_.transactionId === transactionId).result
     }yield details
 
-    def updateTransaction(transactionDetailId: UUID, status: Int): DBIO[Int] = for{
+    def updateTransaction(transactionDetailId: UUID, status: Int): DBIO[Option[Int]] = for{
       update <- QueryUtility.transactionDetailQuery.filter(_.id === transactionDetailId).map(_.status).update(status)
-    }yield update
+      status <- QueryUtility.transactionDetailQuery.filter(_.id === transactionDetailId).map(_.status).result.headOption
+    }yield status
   }
 
 }

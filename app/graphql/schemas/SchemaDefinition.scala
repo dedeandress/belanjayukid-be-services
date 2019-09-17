@@ -135,7 +135,7 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
     ),
     Field(
       name = "completePayment",
-      fieldType = schema.IntType,
+      fieldType = graphQLType.TransactionResultType,
       arguments = List(
         Argument("transactionId", schema.StringType)
       ),

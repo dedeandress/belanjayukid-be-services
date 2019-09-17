@@ -4,7 +4,7 @@ import java.util.UUID
 
 import com.google.inject.Inject
 import graphql.input.TransactionInput
-import models.{Transaction, TransactionDetail}
+import models.{Transaction, TransactionDetail, TransactionResult}
 import repositories.repositoryInterfaces.{ProductDetailRepository, ProductsRepository, TransactionDetailRepository, TransactionRepository}
 import utilities.{TransactionDetailStatus, TransactionStatus}
 
@@ -31,6 +31,7 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
         status = TransactionDetailStatus.NOT_EMPTY
       ))
     }
+    println(list.size)
 
     for {
       status <- transactionRepository.getTransactionStatus(transactionId)
@@ -41,7 +42,7 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
     }yield updateStatus.get
   }
 
-  def completePayment(transactionId: String): Future[Int] = {
+  def completePayment(transactionId: String): Future[TransactionResult] = {
 
     val transactionStatus = transactionRepository.getTransactionStatus(UUID.fromString(transactionId))
 
@@ -53,7 +54,8 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
               for {
                 productDetail <- productDetailRepository.findProductDetail(detail.productDetailId)
                 product <- productRepository.findProduct(productDetail.get.productId)
-                _ <- productRepository.updateStock(product.get.id, product.get.stock - (detail.numberOfPurchases * productDetail.get.value))
+                status <- if (product.get.stock < (detail.numberOfPurchases * productDetail.get.value)) transactionDetailRepository.updateTransactionDetailStatus(detail.id, TransactionDetailStatus.EMPTY) else Future.successful(TransactionDetailStatus.NOT_EMPTY)
+                _ <- if (status == TransactionDetailStatus.NOT_EMPTY) productRepository.updateStock(product.get.id, product.get.stock - (detail.numberOfPurchases * productDetail.get.value)) else Future.successful(TransactionDetailStatus.EMPTY)
               } yield ()
             }
         }
@@ -61,10 +63,18 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
         result.flatMap{
           _ =>
             transactionRepository.updateTransactionStatus(UUID.fromString(transactionId), TransactionStatus.ON_CHECKER).flatMap{
-              status => Future.successful(status.get)
+              status =>
+                transactionDetailRepository.findTransactionDetailByTransactionId(UUID.fromString(transactionId)).flatMap {
+                  transactionDetailList =>
+                    Future.successful(TransactionResult(status.get, transactionDetailList))
+                }
             }
         }
-      }else Future.successful(trStatus.get)
+      }else{
+        transactionDetailRepository.findTransactionDetailByTransactionId(UUID.fromString(transactionId)).flatMap{
+          transactionDetails => Future.successful(TransactionResult(trStatus.get, transactionDetails))
+        }
+      }
     }
   }
 }

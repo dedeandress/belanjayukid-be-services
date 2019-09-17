@@ -10,7 +10,7 @@ trait TransactionDetailRepository {
 
   def addTransactionDetail(details: List[TransactionDetail]): Future[Int]
 
-  def updateTransactionDetailStatus(transactionDetailId: UUID, status: Int)
+  def updateTransactionDetailStatus(transactionDetailId: UUID, status: Int): Future[Option[Int]]
 
   def findTransactionDetailByTransactionId(transactionId: UUID): Future[Seq[TransactionDetail]]
 

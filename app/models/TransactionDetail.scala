@@ -7,7 +7,6 @@ import models.Transaction.TransactionTable
 import slick.jdbc.PostgresProfile.api.{Table => SlickTable, _}
 import slick.lifted.{Tag => SlickTag}
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
-import utilities.TransactionDetailStatus
 
 case class TransactionDetail(id: UUID = UUID.randomUUID(), transactionId: UUID, productDetailId: UUID, numberOfPurchases: Int, subTotalPrice: BigDecimal, status: Int)
 

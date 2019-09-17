@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.DateTime
 import com.google.inject.Inject
 import graphql.`type`.ProductsResult
 import graphql.input.{ProductDetailInput, ProductInput, StaffInput, TransactionDetailInput, TransactionInput, UserInput, UserProfileInput}
-import models.{Category, LoginUser, ProductDetail, ProductStock, Products, Role, Staff, User, UserProfile}
+import models.{Category, LoginUser, ProductDetail, ProductStock, Products, Role, Staff, TransactionDetail, TransactionResult, User, UserProfile}
 import repositories.repositoryInterfaces.{CategoryRepository, ProductDetailRepository, ProductStockRepository, ProductsRepository, RoleRepository, UserProfileRepository, UserRepository}
 import sangria.macros.derive.{ReplaceInputField, _}
 import sangria.marshalling.sprayJson._
@@ -43,6 +43,12 @@ class GraphQLType @Inject()(userRepository: UserRepository
     ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id))
   )
 
+  implicit val TransactionDetailType: ObjectType[Unit, TransactionDetail] = deriveObjectType[Unit, TransactionDetail](
+    ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id)),
+    ReplaceField("transactionId", Field("transactionID", CustomScalar.UUIDType, resolve = _.value.transactionId)),
+    ReplaceField("productDetailId", Field("productDetailId", CustomScalar.UUIDType, resolve = _.value.productDetailId))
+  )
+
   implicit val ProductStockType: ObjectType[Unit, ProductStock] = deriveObjectType[Unit, ProductStock](
     ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id))
   )
@@ -70,6 +76,12 @@ class GraphQLType @Inject()(userRepository: UserRepository
   implicit val ProductsResultType: ObjectType[Unit, ProductsResult] = deriveObjectType[Unit, ProductsResult](
     ReplaceField("products",
       Field("product", ListType(ProductType), resolve = c => c.value.products)
+    )
+  )
+
+  implicit val TransactionResultType: ObjectType[Unit, TransactionResult] = deriveObjectType[Unit, TransactionResult](
+    ReplaceField("details",
+      Field("details", ListType(TransactionDetailType), resolve = c => c.value.details)
     )
   )
 
