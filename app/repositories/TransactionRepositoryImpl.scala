@@ -17,7 +17,6 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
 
   import profile.api._
 
-
   override def addTransaction(transaction: Transaction): Future[UUID] = {
     play.Logger.warn(s"get TransactionStatus : $transaction")
     db.run(Action.addTransaction(transaction))
@@ -31,6 +30,16 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
   override def getTransactionStatus(transactionId: UUID): Future[Option[Int]] = {
     play.Logger.warn(s"get TransactionStatus : $transactionId")
     db.run(Action.getTransactionStatus(transactionId))
+  }
+
+  override def getTransactions(status: Int): Future[Seq[Transaction]] = {
+    play.Logger.warn(s"get Transactions with status : $status")
+    db.run(Action.getAllTransaction(status))
+  }
+
+  override def getTransaction(transactionId: UUID): Future[Option[Transaction]] = {
+    play.Logger.warn(s"get Transaction : $transactionId")
+    db.run(Action.getTransaction(transactionId))
   }
 
   object Action {
@@ -48,5 +57,12 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
       status <- QueryUtility.transactionsQuery.filter(_.id === transactionId).map(_.status).result.headOption
     }yield status
 
+    def getAllTransaction(status: Int): DBIO[Seq[Transaction]] = for {
+      transactions <- QueryUtility.transactionsQuery.filter(_.status === status).result
+    }yield transactions
+
+    def getTransaction(transactionId: UUID) : DBIO[Option[Transaction]] = for{
+      transaction <- QueryUtility.transactionsQuery.filter(_.id === transactionId).result.headOption
+    }yield transaction
   }
 }

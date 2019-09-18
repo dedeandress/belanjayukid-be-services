@@ -141,4 +141,15 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
         }
     }
   }
+
+  def getAllTransaction(context: Context, status: Int): Future[Seq[Transaction]] = {
+    //    if(!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
+    transactionRepository.getTransactions(status)
+  }
+
+  def getTransaction(context: Context, transactionId: UUID): Future[Option[Transaction]] = {
+    //    if(!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
+    transactionRepository.getTransaction(transactionId)
+  }
+
 }

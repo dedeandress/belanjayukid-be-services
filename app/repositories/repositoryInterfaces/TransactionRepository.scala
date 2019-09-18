@@ -14,4 +14,8 @@ trait TransactionRepository {
 
   def getTransactionStatus(transactionId: UUID): Future[Option[Int]]
 
+  def getTransactions(status: Int): Future[Seq[Transaction]]
+
+  def getTransaction(transactionId: UUID): Future[Option[Transaction]]
+
 }

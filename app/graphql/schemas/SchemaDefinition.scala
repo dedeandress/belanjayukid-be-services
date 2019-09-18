@@ -140,6 +140,14 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
         Argument("transactionId", schema.StringType)
       ),
       resolve = sangriaContext => transactionResolver.completePayment(sangriaContext.ctx, sangriaContext.arg[String]("transactionId"))
+    ),
+    Field(
+      name = "transactions",
+      fieldType = ListType(graphQLType.TransactionType),
+      arguments = List(
+        Argument("status", schema.IntType)
+      ),
+      resolve = sangriaContext => transactionResolver.getTransactions(sangriaContext.ctx, sangriaContext.arg[Int]("status"))
     )
   )
 
