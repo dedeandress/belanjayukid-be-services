@@ -14,4 +14,6 @@ trait ProductStockRepository {
 
   def getAllProductStock: Future[Seq[ProductStock]]
 
+  def deleteProductStock(id: UUID): Future[Int]
+
 }

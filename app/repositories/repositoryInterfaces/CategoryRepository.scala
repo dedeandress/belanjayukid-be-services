@@ -14,4 +14,6 @@ trait CategoryRepository {
 
   def getAllCategory: Future[Seq[Category]]
 
+  def deleteCategory(id: UUID): Future[Int]
+
 }

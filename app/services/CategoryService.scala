@@ -11,21 +11,26 @@ import utilities.JWTUtility
 
 import scala.concurrent.Future
 
-class CategoryService @Inject()(categoryRepository: CategoryRepository){
+class CategoryService @Inject()(categoryRepository: CategoryRepository) {
 
   def findCategory(context: Context, id: UUID): Future[Option[Category]] = {
-    if(JWTUtility.isAdmin(context))categoryRepository.findCategory(id)
+    if (JWTUtility.isAdmin(context)) categoryRepository.findCategory(id)
     else throw AuthorizationException("You are not authorized")
   }
 
-  def createCategory(context: Context,category: Category): Future[Category] = {
-    if(JWTUtility.isAdmin(context))categoryRepository.addCategory(category)
+  def createCategory(context: Context, category: Category): Future[Category] = {
+    if (JWTUtility.isAdmin(context)) categoryRepository.addCategory(category)
     else throw AuthorizationException("You are not authorized")
   }
 
   def getAllCategory(context: Context): Future[Seq[Category]] = {
-    if(JWTUtility.isAdmin(context)) categoryRepository.getAllCategory
+    if (JWTUtility.isAdmin(context)) categoryRepository.getAllCategory
     else throw AuthorizationException("You are not authorized")
+  }
+
+  def deleteCategory(context: Context, id: UUID): Future[Int] = {
+    if (!JWTUtility.isAdmin(context)) throw AuthorizationException("You are not authorized")
+    categoryRepository.deleteCategory(id)
   }
 
 }

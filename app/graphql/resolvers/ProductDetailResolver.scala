@@ -18,4 +18,5 @@ class ProductDetailResolver @Inject()(productDetailService: ProductDetailService
 
   def addProductDetail(context: Context, productDetailInput: ProductDetailInput): Future[ProductDetail] = productDetailService.addProductDetail(context, productDetailInput)
 
+  def productDetail(context: Context, id: UUID): Future[Option[ProductDetail]] = productDetailService.findProductDetail(context, id)
 }
