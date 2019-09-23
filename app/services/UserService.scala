@@ -3,17 +3,12 @@ package services
 import java.util.UUID
 
 import com.google.inject.Inject
-import models.User
-import models.UserProfile
-import errors.AuthorizationException
+import models.{User, UserProfile}
 import repositories.repositoryInterfaces.{RoleRepository, UserProfileRepository, UserRepository}
-import utilities.BCryptUtility
-import utilities.JWTUtility
 
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
-class UserService @Inject()(roleRepository: RoleRepository, userProfileRepository: UserProfileRepository, userRepository: UserRepository, implicit val executionContext: ExecutionContext){
+class UserService @Inject()(roleRepository: RoleRepository, userProfileRepository: UserProfileRepository, userRepository: UserRepository, implicit val executionContext: ExecutionContext) {
 
 
   def users: Future[List[User]] = userRepository.findAll()

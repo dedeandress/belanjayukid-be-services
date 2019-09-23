@@ -2,7 +2,6 @@ package repositories
 
 import com.google.inject.{Inject, Singleton}
 import modules.AppDatabase
-import play.api.Logger
 import repositories.repositoryInterfaces.UserProfileRepository
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -31,24 +30,25 @@ class UserProfileRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
 
   override def findById(id: UUID): Future[Option[UserProfile]] = db.run(Actions.findById(id))
 
-  object Actions{
+  object Actions {
 
-    def findAll: DBIO[List[UserProfile]] = for{
+    def findAll: DBIO[List[UserProfile]] = for {
       userProfile <- userProfileQuery.result
-    }yield userProfile.toList
+    } yield userProfile.toList
 
-    def findByUserId(userId: UUID): DBIO[Option[UserProfile]] = for{
-      userProfile <- userProfileQuery.filter(_.userId===userId).result.headOption
-    }yield userProfile
+    def findByUserId(userId: UUID): DBIO[Option[UserProfile]] = for {
+      userProfile <- userProfileQuery.filter(_.userId === userId).result.headOption
+    } yield userProfile
 
-    def findById(id: UUID): DBIO[Option[UserProfile]] = for{
-      userProfile <- userProfileQuery.filter(_.id===id).result.headOption
-    }yield userProfile
-
-    def addUserProfile(userProfile: UserProfile): DBIO[UserProfile] = for{
+    def addUserProfile(userProfile: UserProfile): DBIO[UserProfile] = for {
       id <- userProfileQuery returning userProfileQuery.map(_.id) += userProfile
       result <- findById(id)
 
-    }yield result.get
+    } yield result.get
+
+    def findById(id: UUID): DBIO[Option[UserProfile]] = for {
+      userProfile <- userProfileQuery.filter(_.id === id).result.headOption
+    } yield userProfile
   }
+
 }

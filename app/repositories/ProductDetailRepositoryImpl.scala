@@ -3,7 +3,6 @@ package repositories
 import java.util.UUID
 
 import com.google.inject.Inject
-import errors.NotFound
 import graphql.input.ProductInput
 import models.ProductDetail
 import modules.AppDatabase
@@ -12,7 +11,7 @@ import utilities.QueryUtility
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ProductDetailRepositoryImpl @Inject()(database: AppDatabase, implicit val executionContext: ExecutionContext) extends ProductDetailRepository{
+class ProductDetailRepositoryImpl @Inject()(database: AppDatabase, implicit val executionContext: ExecutionContext) extends ProductDetailRepository {
 
   val db = database.db
   val profile = database.profile
@@ -26,14 +25,14 @@ class ProductDetailRepositoryImpl @Inject()(database: AppDatabase, implicit val 
 
   override def addProductDetail(productId: UUID, productInput: ProductInput): Future[Unit] = {
     play.Logger.warn("add ProductDetail")
-    val insert = for(productDetail <- productInput.productDetailInput) yield {
-        val productDetailRow = new ProductDetail(
-          value = productDetail.value,
-          purchasePrice = productDetail.purchasePrice,
-          sellingPrice = productDetail.sellingPrice,
-          productId = productId,
-          productStockId = UUID.fromString(productDetail.productStockId))
-        QueryUtility.productDetailQuery += productDetailRow
+    val insert = for (productDetail <- productInput.productDetailInput) yield {
+      val productDetailRow = new ProductDetail(
+        value = productDetail.value,
+        purchasePrice = productDetail.purchasePrice,
+        sellingPrice = productDetail.sellingPrice,
+        productId = productId,
+        productStockId = UUID.fromString(productDetail.productStockId))
+      QueryUtility.productDetailQuery += productDetailRow
     }
     db.run(DBIO.seq(insert: _*))
   }
@@ -49,22 +48,23 @@ class ProductDetailRepositoryImpl @Inject()(database: AppDatabase, implicit val 
 
   object Actions {
 
-    def findProductDetail(id: UUID): DBIO[Option[ProductDetail]] = for{
-      productDetail <- QueryUtility.productDetailQuery.filter(_.id === id).result.headOption
-    }yield productDetail
-
-    def findProductDetailByProductId(productId: UUID): DBIO[Seq[ProductDetail]] = for{
+    def findProductDetailByProductId(productId: UUID): DBIO[Seq[ProductDetail]] = for {
       productDetails <- QueryUtility.productDetailQuery.filter(_.productId === productId).result
-    }yield productDetails
+    } yield productDetails
 
-    def update(id: UUID) : DBIO[Int] = for {
+    def update(id: UUID): DBIO[Int] = for {
       update <- QueryUtility.productDetailQuery.filter(_.id === id).map(_.status).update(false)
-    }yield update
+    } yield update
 
-    def addProductDetail(productDetail: ProductDetail): DBIO[ProductDetail] = for{
+    def addProductDetail(productDetail: ProductDetail): DBIO[ProductDetail] = for {
       id <- QueryUtility.productDetailQuery returning QueryUtility.productDetailQuery.map(_.id) += productDetail
       productDetail <- findProductDetail(id)
-    }yield productDetail.get
+    } yield productDetail.get
+
+    def findProductDetail(id: UUID): DBIO[Option[ProductDetail]] = for {
+      productDetail <- QueryUtility.productDetailQuery.filter(_.id === id).result.headOption
+    } yield productDetail
 
   }
+
 }

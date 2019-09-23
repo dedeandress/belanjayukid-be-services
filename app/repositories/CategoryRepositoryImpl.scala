@@ -23,6 +23,8 @@ class CategoryRepositoryImpl @Inject()(database: AppDatabase, implicit val execu
 
   override def getAllCategory: Future[Seq[Category]] = db.run(Actions.getAllCategory)
 
+  override def deleteCategory(id: UUID): Future[Int] = db.run(Actions.delete(id))
+
   object Actions{
 
     def findCategory(id: UUID): DBIO[Option[Category]] = for{
@@ -34,7 +36,11 @@ class CategoryRepositoryImpl @Inject()(database: AppDatabase, implicit val execu
       category <- findCategory(id)
     }yield category.get
 
-    def getAllCategory: DBIO[Seq[Category]] = QueryUtility.categoryQuery.result
+    def getAllCategory: DBIO[Seq[Category]] = QueryUtility.categoryQuery.filter(_.status === true).result
+
+    def delete(id: UUID) : DBIO[Int] = for {
+      update <- QueryUtility.categoryQuery.filter(_.id === id).map(_.status).update(false)
+    }yield update
 
   }
 }

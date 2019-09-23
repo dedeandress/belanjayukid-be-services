@@ -2,7 +2,7 @@ package repositories.repositoryInterfaces
 
 import java.util.UUID
 
-import graphql.input.{ProductInput}
+import graphql.input.ProductInput
 import models.ProductDetail
 
 import scala.concurrent.Future

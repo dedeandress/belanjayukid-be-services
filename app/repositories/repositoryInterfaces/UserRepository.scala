@@ -1,12 +1,13 @@
 package repositories.repositoryInterfaces
 
+import java.util.UUID
+
 import models.User
 
 import scala.concurrent.Future
 
-trait UserRepository {
 
-  import java.util.UUID
+trait UserRepository {
 
   def findAll(): Future[List[User]]
 

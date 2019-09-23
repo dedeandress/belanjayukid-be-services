@@ -10,31 +10,42 @@ import utilities.QueryUtility
 
 case class ProductDetail(id: UUID = UUID.randomUUID(), productStockId: UUID, sellingPrice: BigDecimal, purchasePrice: BigDecimal, value: Int, productId: UUID, status: Boolean = true)
 
-object ProductDetail extends ((UUID, UUID, BigDecimal, BigDecimal, Int, UUID, Boolean)=>ProductDetail) {
+object ProductDetail extends ((UUID, UUID, BigDecimal, BigDecimal, Int, UUID, Boolean) => ProductDetail) {
 
   val products = TableQuery[ProductsTable]
 
   class ProductDetailTable(slickTag: SlickTag) extends SlickTable[ProductDetail](slickTag, "product_detail") {
-    def id = column[UUID]("id", O.PrimaryKey)
-    def productStockId = column[UUID]("product_stock_id")
-    def sellingPrice = column[BigDecimal]("selling_price")
-    def purchasePrice = column[BigDecimal]("purchase_price")
-    def value = column[Int]("value")
-    def status = column[Boolean]("status")
-    def productId = column[UUID]("product_id")
     def productIdFK = foreignKey("product_id", productId, products)(_.id)
+
+    def productId = column[UUID]("product_id")
+
     def productStockIdFK = foreignKey("product_stock_id", productStockId, QueryUtility.productStockQuery)(_.id)
+
     def * = (id, productStockId, sellingPrice, purchasePrice, value, productId, status).mapTo[ProductDetail]
+
+    def id = column[UUID]("id", O.PrimaryKey)
+
+    def productStockId = column[UUID]("product_stock_id")
+
+    def sellingPrice = column[BigDecimal]("selling_price")
+
+    def purchasePrice = column[BigDecimal]("purchase_price")
+
+    def value = column[Int]("value")
+
+    def status = column[Boolean]("status")
   }
+
 }
 
 object ProductDetailJsonProtocol extends DefaultJsonProtocol {
 
   implicit object UuidJsonFormat extends RootJsonFormat[UUID] {
     def write(x: UUID) = JsString(x.toString)
+
     def read(value: JsValue) = value match {
       case JsString(x) => UUID.fromString(x)
-      case x           => deserializationError("Expected UUID as JsString, but got " + x)
+      case x => deserializationError("Expected UUID as JsString, but got " + x)
     }
   }
 

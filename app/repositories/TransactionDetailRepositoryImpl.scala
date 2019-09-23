@@ -10,7 +10,7 @@ import utilities.QueryUtility
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class TransactionDetailRepositoryImpl @Inject()(database: AppDatabase, implicit val executionContext: ExecutionContext) extends TransactionDetailRepository{
+class TransactionDetailRepositoryImpl @Inject()(database: AppDatabase, implicit val executionContext: ExecutionContext) extends TransactionDetailRepository {
 
   val db = database.db
   val profile = database.profile
@@ -19,7 +19,7 @@ class TransactionDetailRepositoryImpl @Inject()(database: AppDatabase, implicit 
 
   override def addTransactionDetails(details: List[TransactionDetail]): Future[Int] = {
     play.Logger.warn("add transactionDetail")
-    val insert = for(detail <- details) yield {
+    val insert = for (detail <- details) yield {
       QueryUtility.transactionDetailQuery += detail
     }
     db.run(DBIO.seq(insert: _*))
@@ -42,20 +42,20 @@ class TransactionDetailRepositoryImpl @Inject()(database: AppDatabase, implicit 
 
     def addTransactionDetail(transactionDetail: TransactionDetail): DBIO[Int] = for {
       id <- QueryUtility.transactionDetailQuery returning QueryUtility.transactionDetailQuery.map(_.status) += transactionDetail
-    }yield id
+    } yield id
 
     def findTransactionDetailByTransactionId(transactionId: UUID): DBIO[Seq[TransactionDetail]] = for {
       details <- QueryUtility.transactionDetailQuery.filter(_.transactionId === transactionId).result
-    }yield details
+    } yield details
 
-    def updateTransaction(transactionDetailId: UUID, status: Int): DBIO[Option[Int]] = for{
+    def updateTransaction(transactionDetailId: UUID, status: Int): DBIO[Option[Int]] = for {
       update <- QueryUtility.transactionDetailQuery.filter(_.id === transactionDetailId).map(_.status).update(status)
       status <- QueryUtility.transactionDetailQuery.filter(_.id === transactionDetailId).map(_.status).result.headOption
-    }yield status
+    } yield status
 
     def getTransactionDetailStatus(transactionId: UUID): DBIO[Option[Int]] = for {
       details <- QueryUtility.transactionDetailQuery.filter(_.id === transactionId).map(_.status).result.headOption
-    }yield details
+    } yield details
   }
 
 }

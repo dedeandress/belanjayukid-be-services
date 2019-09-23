@@ -17,4 +17,6 @@ class CategoryResolver @Inject()(categoryService: CategoryService){
 
   def categories(context: Context): Future[Seq[Category]] = categoryService.getAllCategory(context)
 
+  def deleteCategory(context: Context, id: UUID): Future[Int] = categoryService.deleteCategory(context, id)
+
 }

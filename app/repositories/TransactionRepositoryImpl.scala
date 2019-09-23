@@ -17,7 +17,6 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
 
   import profile.api._
 
-
   override def addTransaction(transaction: Transaction): Future[UUID] = {
     play.Logger.warn(s"get TransactionStatus : $transaction")
     db.run(Action.addTransaction(transaction))
@@ -33,20 +32,63 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
     db.run(Action.getTransactionStatus(transactionId))
   }
 
+  override def getTransactions(status: Int): Future[Seq[Transaction]] = {
+    play.Logger.warn(s"get Transactions with status : $status")
+    db.run(Action.getAllTransaction(status))
+  }
+
+  override def getTransaction(transactionId: UUID): Future[Option[Transaction]] = {
+    play.Logger.warn(s"get Transaction : $transactionId")
+    db.run(Action.getTransaction(transactionId))
+  }
+
+  override def updateStaff(transactionId: UUID, staffId: UUID): Future[Option[UUID]] = {
+    play.Logger.warn(s"update staff: $staffId in Transaction : $transactionId")
+    db.run(Action.updateStaff(transactionId, staffId))
+  }
+
+  override def updateCustomer(transactionId: UUID, customerId: UUID): Future[Option[UUID]] = {
+    play.Logger.warn(s"update customer $customerId in Transaction : $transactionId")
+    db.run(Action.updateCustomer(transactionId, customerId))
+  }
+
+  override def updateTransaction(transactionId: UUID, status: Int, staffId: UUID): Future[Option[Int]] = {
+    db.run(Action.updateStaff(transactionId, staffId))
+    db.run(Action.updateTransaction(transactionId, status))
+  }
+
   object Action {
 
-    def addTransaction(transaction: Transaction) : DBIO[UUID] = for {
-      id <- QueryUtility.transactionsQuery returning  QueryUtility.transactionsQuery.map(_.id) += transaction
-    }yield id
+    def updateStaff(transactionId: UUID, staffId: UUID): DBIO[Option[UUID]] = for {
+      _ <- QueryUtility.transactionsQuery.filter(_.id === transactionId).map(_.staffId).update(Some(staffId))
+      staffId <- QueryUtility.transactionsQuery.filter(_.id === transactionId).map(_.staffId).result.headOption
+    } yield staffId.get
 
-    def updateTransaction(transactionId: UUID, status: Int): DBIO[Option[Int]] = for{
+    def updateCustomer(transactionId: UUID, customer: UUID): DBIO[Option[UUID]] = for {
+      _ <- QueryUtility.transactionsQuery.filter(_.id === transactionId).map(_.customerId).update(Some(customer))
+      customerId <- QueryUtility.transactionsQuery.filter(_.id === transactionId).map(_.customerId).result.headOption
+    } yield customerId.get
+
+    def addTransaction(transaction: Transaction): DBIO[UUID] = for {
+      id <- QueryUtility.transactionsQuery returning QueryUtility.transactionsQuery.map(_.id) += transaction
+    } yield id
+
+    def updateTransaction(transactionId: UUID, status: Int): DBIO[Option[Int]] = for {
       _ <- QueryUtility.transactionsQuery.filter(_.id === transactionId).map(_.status).update(status)
       transactionStatus <- QueryUtility.transactionsQuery.filter(_.id === transactionId).map(_.status).result.headOption
-    }yield transactionStatus
+    } yield transactionStatus
 
-    def getTransactionStatus(transactionId: UUID): DBIO[Option[Int]] = for{
+    def getTransactionStatus(transactionId: UUID): DBIO[Option[Int]] = for {
       status <- QueryUtility.transactionsQuery.filter(_.id === transactionId).map(_.status).result.headOption
-    }yield status
+    } yield status
 
+    def getAllTransaction(status: Int): DBIO[Seq[Transaction]] = for {
+      transactions <- QueryUtility.transactionsQuery.filter(_.status === status).result
+    } yield transactions
+
+    def getTransaction(transactionId: UUID): DBIO[Option[Transaction]] = for {
+      transaction <- QueryUtility.transactionsQuery.filter(_.id === transactionId).result.headOption
+    } yield transaction
   }
+
 }

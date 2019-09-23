@@ -10,13 +10,19 @@ import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonF
 case class User(id: UUID = randomUUID, username: String, password: String, email: String)
 
 object User extends ((UUID, String, String, String) => User) {
-  class UserTable(slickTag: SlickTag) extends SlickTable[User](slickTag, "users"){
-    def id = column[UUID]("id", O.PrimaryKey)
-    def username = column[String]("username")
-    def password = column[String]("password")
-    def email = column[String]("email")
+
+  class UserTable(slickTag: SlickTag) extends SlickTable[User](slickTag, "users") {
     def * = (id, username, password, email).mapTo[User]
+
+    def id = column[UUID]("id", O.PrimaryKey)
+
+    def username = column[String]("username")
+
+    def password = column[String]("password")
+
+    def email = column[String]("email")
   }
+
 }
 
 object UserJsonProtocol extends DefaultJsonProtocol {
@@ -25,7 +31,7 @@ object UserJsonProtocol extends DefaultJsonProtocol {
     def write(x: UUID) = JsString(x.toString) //Never execute this line
     def read(value: JsValue) = value match {
       case JsString(x) => UUID.fromString(x)
-      case x           => deserializationError("Expected UUID as JsString, but got " + x)
+      case x => deserializationError("Expected UUID as JsString, but got " + x)
     }
   }
 

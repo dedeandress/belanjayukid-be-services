@@ -3,11 +3,12 @@ package graphql.schemas
 import java.util.UUID
 
 import com.google.inject.Inject
+import graphql.resolvers._
 import graphql.{Context, GraphQLType}
-import graphql.resolvers.{CategoryResolver, ProductDetailResolver, ProductResolver, ProductStockResolver, RoleResolver, StaffResolver, TransactionResolver, UserProfileResolver, UserResolver}
 import models.{Category, ProductStock}
 import sangria.schema
 import sangria.schema.{Argument, Field, ListType, OptionType}
+import utilities.CustomScalar
 
 
 class SchemaDefinition @Inject()(staffResolver: StaffResolver
@@ -15,7 +16,7 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
                                  , roleResolver: RoleResolver, categoryResolver: CategoryResolver
                                  , productResolver: ProductResolver, productStockResolver: ProductStockResolver
                                  , productDetailResolver: ProductDetailResolver, transactionResolver: TransactionResolver
-                                 , graphQLType: GraphQLType){
+                                 , graphQLType: GraphQLType) {
 
   val Queries: List[Field[Context, Unit]] = List(
     Field(
@@ -46,6 +47,23 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       name = "products",
       fieldType = ListType(graphQLType.ProductType),
       resolve = sangriaContext => productResolver.products(sangriaContext.ctx)
+    ),
+    //transaction
+    Field(
+      name = "transactions",
+      fieldType = ListType(graphQLType.TransactionType),
+      arguments = List(
+        Argument("status", schema.IntType)
+      ),
+      resolve = sangriaContext => transactionResolver.getTransactions(sangriaContext.ctx, sangriaContext.arg[Int]("status"))
+    ),
+    Field(
+      name = "transaction",
+      fieldType = OptionType(graphQLType.TransactionType),
+      arguments = List(
+        Argument("transactionId", schema.StringType)
+      ),
+      resolve = sangriaContext => transactionResolver.getTransaction(sangriaContext.ctx, UUID.fromString(sangriaContext.arg[String]("transactionId")))
     )
   )
 
@@ -71,6 +89,7 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       arguments = graphQLType.ProductInputArg :: Nil,
       resolve = sangriaContext => productResolver.createProduct(sangriaContext.ctx, sangriaContext.arg(graphQLType.ProductInputArg))
     ),
+    //category
     Field(
       name = "createCategory",
       fieldType = graphQLType.CategoryType,
@@ -80,12 +99,29 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       resolve = sangriaContext => categoryResolver.category(sangriaContext.ctx, new Category(name = sangriaContext.arg[String]("name")))
     ),
     Field(
+      name = "deleteCategory",
+      fieldType = schema.IntType,
+      arguments = List(
+        Argument("id", schema.StringType)
+      ),
+      resolve = sangriaContext => categoryResolver.deleteCategory(sangriaContext.ctx, UUID.fromString(sangriaContext.arg[String]("id")))
+    ),
+    //productStock
+    Field(
       name = "createProductStock",
       fieldType = graphQLType.ProductStockType,
       arguments = List(
         Argument("name", schema.StringType)
       ),
       resolve = sangriaContext => productStockResolver.createProductStock(sangriaContext.ctx, new ProductStock(name = sangriaContext.arg[String]("name")))
+    ),
+    Field(
+      name = "deleteProductStock",
+      fieldType = schema.IntType,
+      arguments = List(
+        Argument("id", schema.StringType)
+      ),
+      resolve = sangriaContext => productStockResolver.deleteProductStock(sangriaContext.ctx, UUID.fromString(sangriaContext.arg[String]("id")))
     ),
     //product
     Field(
@@ -121,6 +157,14 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       arguments = graphQLType.ProductDetailInputArg :: Nil,
       resolve = sangriaContext => productDetailResolver.addProductDetail(sangriaContext.ctx, sangriaContext.arg(graphQLType.ProductDetailInputArg))
     ),
+    Field(
+      name = "productDetail",
+      fieldType = OptionType(graphQLType.ProductDetailType),
+      arguments = List(
+        Argument("id", schema.StringType)
+      ),
+      resolve = sangriaContext => productDetailResolver.productDetail(sangriaContext.ctx, UUID.fromString(sangriaContext.arg[String]("id")))
+    ),
     //transaction
     Field(
       name = "createTransaction",
@@ -140,6 +184,24 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
         Argument("transactionId", schema.StringType)
       ),
       resolve = sangriaContext => transactionResolver.completePayment(sangriaContext.ctx, sangriaContext.arg[String]("transactionId"))
+    ),
+    Field(
+      name = "updateStaffTransaction",
+      fieldType = OptionType(CustomScalar.UUIDType),
+      arguments = List(
+        Argument("transactionId", schema.StringType),
+        Argument("staffId", schema.StringType)
+      ),
+      resolve = sangriaContext => transactionResolver.updateStaff(sangriaContext.ctx, UUID.fromString(sangriaContext.arg[String]("transactionId")), UUID.fromString(sangriaContext.arg[String]("staffId")))
+    ),
+    Field(
+      name = "updateCustomerTransaction",
+      fieldType = OptionType(CustomScalar.UUIDType),
+      arguments = List(
+        Argument("transactionId", schema.StringType),
+        Argument("customerId", schema.StringType)
+      ),
+      resolve = sangriaContext => transactionResolver.updateCustomer(sangriaContext.ctx, UUID.fromString(sangriaContext.arg[String]("transactionId")), UUID.fromString(sangriaContext.arg[String]("customerId")))
     )
   )
 

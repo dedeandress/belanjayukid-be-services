@@ -43,10 +43,6 @@ class ProductsRepositoryImpl @Inject()(database: AppDatabase, implicit val execu
 
   object Actions {
 
-    def findProduct(id: UUID): DBIO[Option[Products]] = for {
-      product <- QueryUtility.productQuery.filter(_.id === id).result.headOption
-    } yield product
-
     def addProduct(product: Products): DBIO[Products] = for {
       id <- QueryUtility.productQuery returning QueryUtility.productQuery.map(_.id) += product
       product <- findProduct(id)
@@ -61,18 +57,22 @@ class ProductsRepositoryImpl @Inject()(database: AppDatabase, implicit val execu
       product <- findProduct(products.id)
     } yield product
 
+    def findProduct(id: UUID): DBIO[Option[Products]] = for {
+      product <- QueryUtility.productQuery.filter(_.id === id).result.headOption
+    } yield product
+
     def update(id: UUID): DBIO[Int] = for {
       update <- QueryUtility.productQuery.filter(_.id === id).map(_.status).update(false)
     } yield update
 
     def findProduct(name: String): DBIO[Seq[Products]] = for {
-      products <- QueryUtility.productQuery.filter(p=>(p.name.toLowerCase like s"%${name.toLowerCase}%") && (p.status === true)).result
-    }yield products
+      products <- QueryUtility.productQuery.filter(p => (p.name.toLowerCase like s"%${name.toLowerCase}%") && (p.status === true)).result
+    } yield products
 
     def getAllProductsWithPagination(limit: Int): DBIO[ProductsResult] = for {
       products <- QueryUtility.productQuery.filter(_.status === true).sortBy(_.name.asc).take(limit).result
       numberOfProduct <- QueryUtility.productQuery.filter(_.status === true).length.result
-    }yield ProductsResult(
+    } yield ProductsResult(
       products = products,
       totalCount = numberOfProduct,
       hasNextData = numberOfProduct > limit
@@ -80,10 +80,11 @@ class ProductsRepositoryImpl @Inject()(database: AppDatabase, implicit val execu
 
     def getAllProducts: DBIO[Seq[Products]] = for {
       products <- QueryUtility.productQuery.filter(_.status === true).sortBy(_.name.asc).result
-    }yield products
+    } yield products
 
-    def updateStock(productId: UUID, stock: Int): DBIO[Int] = for{
+    def updateStock(productId: UUID, stock: Int): DBIO[Int] = for {
       update <- QueryUtility.productQuery.filter(_.id === productId).map(_.stock).update(stock)
-    }yield update
+    } yield update
   }
+
 }
