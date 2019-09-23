@@ -1,5 +1,6 @@
 package models
 
+import java.sql.Timestamp
 import java.util.UUID
 
 import akka.http.scaladsl.model.DateTime
@@ -14,6 +15,11 @@ case class Session(id: UUID, secretToken: String, secretTokenExp: DateTime, user
 object Session extends ((UUID, String, DateTime, UUID) => Session) {
 
   val users = TableQuery[UserTable]
+
+  implicit val dateTimeColumnType = MappedColumnType.base[DateTime, Timestamp](
+    dt => new Timestamp(dt.clicks),
+    ts => DateTime(ts.getTime)
+  )
 
   class SessionTable(slickTag: SlickTag) extends SlickTable[Session](slickTag, "session") {
     def userIdFK = foreignKey("user_id", userId, users)(_.id)
