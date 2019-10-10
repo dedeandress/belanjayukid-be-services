@@ -29,6 +29,8 @@ class StaffRepositoryImpl @Inject()(database: AppDatabase, implicit val executio
 
   override def findByUserId(userId: UUID): Future[Option[Staff]] = db.run(Action.findByUserId(userId))
 
+  override def findAll(): Future[Seq[Staff]] = db.run(Action.findAll())
+
   object Action {
 
     def addStaff(staff: Staff): DBIO[Option[Staff]] = for {
@@ -43,6 +45,10 @@ class StaffRepositoryImpl @Inject()(database: AppDatabase, implicit val executio
     def findByUserId(userId: UUID): DBIO[Option[Staff]] = for {
       staff <- QueryUtility.staffQuery.filter(_.userId === userId).result.headOption
     } yield staff
+
+    def findAll(): DBIO[Seq[Staff]] = for {
+      staff <- QueryUtility.staffQuery.result
+    }yield staff
 
   }
 

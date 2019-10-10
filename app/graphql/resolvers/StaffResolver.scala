@@ -1,5 +1,7 @@
 package graphql.resolvers
 
+import java.util.UUID
+
 import com.google.inject.Inject
 import graphql.Context
 import graphql.input.StaffInput
@@ -15,4 +17,7 @@ class StaffResolver @Inject()(staffService: StaffService, userService: UserServi
 
   def roles(context: Context): Future[List[Role]] = staffService.roles(context)
 
+  def findAll(context: Context): Future[Seq[Staff]] = staffService.findAllStaff(context)
+
+  def findStaffById(context: Context, staffId: String): Future[Option[Staff]] = staffService.findStaffById(context, UUID.fromString(staffId))
 }
