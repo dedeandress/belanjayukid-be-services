@@ -125,171 +125,191 @@ while(noSuccess) {
 ## GraphQL Schema
 ```graphql
 
-# for `dateOfBirth` argument, please use full ISO 8601 "yyyy-MM-dd'T'HH:mm:ssXXX" format but insert with epoch (LongType)
-
 scalar BigDecimal
+scalar Long
+scalar UUID
 
-type Category{
-    id: ID
-    name: String
+type Category {
+  name: String!
+  status: Boolean!
+  id: UUID!
 }
 
-type Product{
-    id: ID
-    SKU: String
-    name: String
-    stock: Int
-    category: Category
-    productDetail: [ProductDetail]
+type CreateTransactionResult {
+  status: Int!
+  transactionId: UUID!
 }
 
-type ProductDetail{
-    id: ID
-    productStock: ProductStock
-    price: BigDecimal
-    value: Int
-    product: Product
+type Credential {
+  bearerToken: String!
+  username: String!
+  roleName: String!
 }
 
-type ProductStock{
-    id: ID
-    name: String
+type Mutation {
+  login(username: String!, password: String!): Credential!
+  createStaff(staff: StaffInput!): Staff
+  createProduct(product: ProductInput!): Products!
+  createCategory(name: String!): Category!
+  deleteCategory(id: String!): Int!
+  createProductStock(name: String!): ProductStock!
+  deleteProductStock(id: String!): Int!
+  updateProduct(
+    productId: String!
+    categoryId: String!
+    name: String!
+  ): Products
+  deleteProduct(id: String!): Boolean!
+  deleteProductDetail(id: String!): Boolean!
+  createProductDetail(productDetail: ProductDetailInput!): ProductDetail!
+  productDetail(id: String!): ProductDetail
+  createTransaction: CreateTransactionResult!
+  checkout(transaction: TransactionInput!): TransactionResult!
+  completePayment(transactionId: String!): TransactionResult!
+  updateStaffTransaction(transactionId: String!, staffId: String!): UUID
+  updateCustomerTransaction(transactionId: String!, customerId: String!): UUID
 }
 
-type UserProfile{
-    id: ID
-    fullName: String
-    address: String
-    phoneNumber: String
-    noNik: String
-    dateOfBirth: Long
+type ProductDetail {
+  value: Int!
+  status: Boolean!
+  id: UUID!
+  productStock: ProductStock
+  sellingPrice: BigDecimal!
+  purchasePrice: BigDecimal!
+  product: Products
 }
 
-type User{
-    id: ID
-    username: String
-    password: String
-    email: String
-}
-
-type Staff {
-    id: ID
-    user: User
-    role: Role
-}
-
-input UserProfileInput {
-    fullname: String
-    phoneNumber: String
-    address: String
-    noNik: String
-    dateOfBirth: Long
-}
-
-input UserInput {
-    username: String
-    password: String
-    email: String
-}
-
-input ProductDetailInput{
-    productStockId: ID
-    sellingPrice: BigDecimal
-    purchasePrice: BigDecimal
-    value: Int
+input ProductDetailInput {
+  productStockId: String!
+  sellingPrice: BigDecimal!
+  purchasePrice: BigDecimal!
+  value: Int!
+  productId: String!
 }
 
 input ProductInput {
-    SKU: String
-    name: String
-    categoryId: ID
-    productDetailInput: [ProductDetailInput]
+  name: String!
+  SKU: String!
+  stock: Int!
+  categoryId: String!
+  productDetailInput: [ProductDetailInput!]!
+}
+
+type Products {
+  SKU: String!
+  name: String!
+  stock: Int!
+  status: Boolean!
+  id: UUID!
+  category: Category
+  productDetail: [ProductDetail!]!
+}
+
+type ProductStock {
+  name: String!
+  status: Boolean!
+  id: UUID!
+}
+
+type Query {
+  categories: [Category!]!
+  productStocks: [ProductStock!]!
+  roles: [Role!]!
+  product(name: String!): [Products!]!
+  products: [Products!]!
+  transactions(status: Int!): [Transaction!]!
+  transaction(transactionId: String!): Transaction
+  staffs: [Staff!]!
+  staff(staffId: String!): Staff
+}
+
+type Role {
+  name: String!
+  id: UUID!
+}
+
+type Staff {
+  status: Boolean!
+  id: UUID!
+  user: User
+  role: Role
 }
 
 input StaffInput {
-    userInput: UserInput !
-    userProfileInput: UserProfileInput !
-    roleId: String!
+  roleId: String!
+  userInput: UserInput!
+  userProfileInput: UserProfileInput!
 }
 
-# Query
-
-query productStocks{
-    id
-    name
+type Transaction {
+  paymentStatus: Int!
+  totalPrice: BigDecimal!
+  status: Int!
+  date: Long!
+  id: UUID!
+  transactionDetail: [TransactionDetail!]!
+  staff: Staff
+  customer: Staff
 }
 
-query categories{
-    id
-    name
+type TransactionDetail {
+  numberOfPurchases: Int!
+  subTotalPrice: BigDecimal!
+  status: Int!
+  id: UUID!
+  transactionID: UUID!
+  productDetail: ProductDetail
 }
 
-# Mutation
-
-mutation createStaff($input: StaffInput!){
-    addStaff(staff: $input){
-        id
-        user{
-          username
-          password
-          email
-          userProfile{
-            address
-            fullName
-            dateOfBirth
-            noNik
-            phoneNumber
-          }
-        }
-        role{
-          name
-        }
-    }
+input TransactionDetailInput {
+  productDetailId: String!
+  numberOfPurchase: Int!
+  subTotalPrice: BigDecimal!
 }
 
-mutation createProduct($input: ProductInput!){
-    addProduct(product: $input){
-        id
-        name
-        SKU
-        stock
-        category{
-            id
-            name
-        }
-        productDetail{
-            purchasePrice
-            sellingPrice
-            productStock{
-                id
-                name
-            }
-            value
-        }
-    }
+input TransactionInput {
+  transactionId: String!
+  customerId: String!
+  staffId: String!
+  detail: [TransactionDetailInput!]!
 }
 
-mutation createProductStock($input: String!){
-    addProductStock(name: $input){
-        id
-        name
-    }
+type TransactionResult {
+  status: Int!
+  details: [TransactionDetail!]!
 }
 
-mutation createCategory($input: String!){
-    addProductStock(name: $input){
-        id
-        name
-    }
+type User {
+  username: String!
+  password: String!
+  email: String!
+  userProfile: UserProfile
 }
 
-mutation login($username: String!, $password: String!){
-    login(username: $username, password: $password){
-        bearerToken
-        roleName
-        username
-    }
+input UserInput {
+  username: String!
+  password: String!
+  email: String!
 }
+
+type UserProfile {
+  fullName: String!
+  phoneNumber: String!
+  address: String!
+  noNik: String!
+  dateOfBirth: Long!
+  id: UUID!
+}
+
+input UserProfileInput {
+  fullName: String!
+  phoneNumber: String!
+  address: String!
+  noNik: String!
+  dateOfBirth: Long!
+}
+
 
 ```
 > pardon my english. - DA99 -
