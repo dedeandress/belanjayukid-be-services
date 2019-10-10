@@ -122,6 +122,25 @@ while(noSuccess) {
     if(dead) break
 }
 ```
+
+## BelanjaYuk Constant Variable
+* Transaction Status 
+  * INITIAL = 0
+  * ON_PROCESS = 1
+  * ON_CHECKER = 2
+  * COMPLETED = 3
+  * ON_REFUND = 4
+* PaymentStatus
+  * UNPAID = 0
+  * PAID = 1
+
+* TransactionDetailStatus
+  * EMPTY = 0
+  * NOT_EMPTY = 1
+  * COMPLETED = 2
+  * CANCELED = 3
+  * RETURNED = 4
+
 ## GraphQL Schema
 ```graphql
 
