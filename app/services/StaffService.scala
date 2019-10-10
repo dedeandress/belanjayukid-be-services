@@ -55,4 +55,14 @@ class StaffService @Inject()(staffRepository: StaffRepository, userRepository: U
     if (!JWTUtility.isAdmin(context)) throw AuthorizationException("You are not authorized")
     roleRepository.findAll()
   }
+
+  def findAllStaff(context: Context): Future[Seq[Staff]] = {
+    if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
+    staffRepository.findAll()
+  }
+
+  def findStaffById(context: Context, staffId: UUID): Future[Option[Staff]] = {
+    if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
+    staffRepository.findById(staffId)
+  }
 }

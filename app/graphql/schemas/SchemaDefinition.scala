@@ -64,6 +64,20 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
         Argument("transactionId", schema.StringType)
       ),
       resolve = sangriaContext => transactionResolver.getTransaction(sangriaContext.ctx, UUID.fromString(sangriaContext.arg[String]("transactionId")))
+    ),
+    //staff
+    Field(
+      name = "staffs",
+      fieldType = ListType(graphQLType.StaffType),
+      resolve = sangriaContext => staffResolver.findAll(sangriaContext.ctx)
+    ),
+    Field(
+      name = "staff",
+      fieldType = OptionType(graphQLType.StaffType),
+      arguments = List(
+        Argument("staffId", schema.StringType)
+      ),
+      resolve = sangriaContext => staffResolver.findStaffById(sangriaContext.ctx, sangriaContext.arg[String]("staffId"))
     )
   )
 
