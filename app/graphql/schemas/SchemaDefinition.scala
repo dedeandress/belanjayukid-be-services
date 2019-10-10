@@ -37,11 +37,11 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
     //product
     Field(
       name = "product",
-      fieldType = ListType(graphQLType.ProductType),
+      fieldType = OptionType(graphQLType.ProductType),
       arguments = List(
-        Argument("name", schema.StringType)
+        Argument("productId", schema.StringType)
       ),
-      resolve = sangriaContext => productResolver.products(sangriaContext.ctx, sangriaContext.arg[String]("name"))
+      resolve = sangriaContext => productResolver.product(sangriaContext.ctx, UUID.fromString(sangriaContext.arg[String]("productId")))
     ),
     Field(
       name = "products",
@@ -78,6 +78,15 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
         Argument("staffId", schema.StringType)
       ),
       resolve = sangriaContext => staffResolver.findStaffById(sangriaContext.ctx, sangriaContext.arg[String]("staffId"))
+    ),
+    //product detail
+    Field(
+      name = "productDetails",
+      fieldType = ListType(graphQLType.ProductDetailType),
+      arguments = List(
+        Argument("productId", schema.StringType)
+      ),
+      resolve = sangriaContext => productDetailResolver.productDetailByProductId(sangriaContext.ctx, UUID.fromString(sangriaContext.arg[String]("productId")))
     )
   )
 
