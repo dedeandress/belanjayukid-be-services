@@ -2,11 +2,12 @@ package repositories
 
 import java.util.UUID
 
+import graphql.`type`.TransactionsResult
 import javax.inject.Inject
 import models.Transaction
 import modules.AppDatabase
 import repositories.repositoryInterfaces.TransactionRepository
-import utilities.QueryUtility
+import utilities.{QueryUtility, TransactionStatus}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -57,6 +58,8 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
     db.run(Action.updateTransaction(transactionId, status))
   }
 
+  override def getAllTransactionWithLimit(limit: Int): Future[TransactionsResult] = db.run(Action.getAllTransactionWithLimit(limit))
+
   object Action {
 
     def updateStaff(transactionId: UUID, staffId: UUID): DBIO[Option[UUID]] = for {
@@ -89,6 +92,16 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
     def getTransaction(transactionId: UUID): DBIO[Option[Transaction]] = for {
       transaction <- QueryUtility.transactionsQuery.filter(_.id === transactionId).result.headOption
     } yield transaction
+
+    def getAllTransactionWithLimit(limit: Int): DBIO[TransactionsResult] = for {
+      transactions <- QueryUtility.transactionsQuery.filter(_.status =!= TransactionStatus.INITIAL).sortBy(_.date.desc).take(limit).result
+      numberOfProduct <- QueryUtility.transactionsQuery.filter(_.status =!= TransactionStatus.INITIAL).length.result
+    } yield TransactionsResult(
+      transactions = transactions,
+      totalCount = numberOfProduct,
+      hasNextData = numberOfProduct > limit
+    )
+
   }
 
 }

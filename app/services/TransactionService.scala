@@ -5,6 +5,7 @@ import java.util.UUID
 import com.google.inject.Inject
 import errors.AuthorizationException
 import graphql.Context
+import graphql.`type`.TransactionsResult
 import graphql.input.TransactionInput
 import models.{CreateTransactionResult, Transaction, TransactionDetail, TransactionResult}
 import repositories.repositoryInterfaces.{ProductDetailRepository, ProductsRepository, TransactionDetailRepository, TransactionRepository}
@@ -162,6 +163,11 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
   def getTransaction(context: Context, transactionId: UUID): Future[Option[Transaction]] = {
     if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
     transactionRepository.getTransaction(transactionId)
+  }
+
+  def getTransactionsWithLimit(context: Context, limit: Int): Future[TransactionsResult] = {
+    if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
+    transactionRepository.getAllTransactionWithLimit(limit)
   }
 
 }
