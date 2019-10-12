@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.http.scaladsl.model.DateTime
 import com.google.inject.Inject
-import graphql.`type`.ProductsResult
+import graphql.`type`.{ProductsResult, TransactionsResult}
 import graphql.input._
 import models._
 import repositories.repositoryInterfaces._
@@ -82,18 +82,6 @@ class GraphQLType @Inject()(userRepository: UserRepository
     ReplaceField("productDetailId", Field("productDetail", OptionType(ProductDetailType), resolve = c => productDetailRepository.findProductDetail(c.value.productDetailId)))
   )
 
-  implicit val ProductsResultType: ObjectType[Unit, ProductsResult] = deriveObjectType[Unit, ProductsResult](
-    ReplaceField("products",
-      Field("product", ListType(ProductType), resolve = c => c.value.products)
-    )
-  )
-
-  implicit val TransactionResultType: ObjectType[Unit, TransactionResult] = deriveObjectType[Unit, TransactionResult](
-    ReplaceField("details",
-      Field("details", ListType(TransactionDetailType), resolve = c => c.value.details)
-    )
-  )
-
   implicit val TransactionType: ObjectType[Unit, Transaction] = deriveObjectType[Unit, Transaction](
     ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id)),
     AddFields(
@@ -101,6 +89,25 @@ class GraphQLType @Inject()(userRepository: UserRepository
     ),
     ReplaceField("staffId", Field("staff", OptionType(StaffType), resolve = c => staffRepository.findById(c.value.staffId.get))),
     ReplaceField("customerId", Field("customer", OptionType(StaffType), resolve = c => staffRepository.findById(c.value.staffId.get)))
+  )
+
+  implicit val ProductsResultType: ObjectType[Unit, ProductsResult] = deriveObjectType[Unit, ProductsResult](
+    ReplaceField("products",
+      Field("product", ListType(ProductType), resolve = c => c.value.products)
+    )
+  )
+
+  implicit val TransactionsResultType: ObjectType[Unit, TransactionsResult] = deriveObjectType[Unit, TransactionsResult](
+    ReplaceField("transactions",
+      Field("transactions", ListType(TransactionType), resolve = c => c.value.transactions)
+
+    )
+  )
+
+  implicit val TransactionResultType: ObjectType[Unit, TransactionResult] = deriveObjectType[Unit, TransactionResult](
+    ReplaceField("details",
+      Field("details", ListType(TransactionDetailType), resolve = c => c.value.details)
+    )
   )
 
   implicit val CreateTransactionResultType: ObjectType[Unit, CreateTransactionResult] = deriveObjectType[Unit, CreateTransactionResult](

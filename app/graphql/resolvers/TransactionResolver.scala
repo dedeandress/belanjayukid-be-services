@@ -3,6 +3,7 @@ package graphql.resolvers
 import java.util.UUID
 
 import graphql.Context
+import graphql.`type`.TransactionsResult
 import graphql.input.TransactionInput
 import javax.inject.Inject
 import models.{CreateTransactionResult, Transaction, TransactionResult}
@@ -26,5 +27,7 @@ class TransactionResolver @Inject()(transactionService: TransactionService, impl
   def updateStaff(context: Context, transactionId: UUID, staffId: UUID): Future[Option[UUID]] = transactionService.updateStaff(context, transactionId, staffId)
 
   def updateCustomer(context: Context, transactionId: UUID, customerId: UUID): Future[Option[UUID]] = transactionService.updateCustomer(context, transactionId, customerId)
+
+  def getTransactionsWithLimit(context: Context, limit: Int): Future[TransactionsResult] = transactionService.getTransactionsWithLimit(context, limit)
 
 }

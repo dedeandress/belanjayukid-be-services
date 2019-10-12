@@ -2,6 +2,7 @@ package repositories.repositoryInterfaces
 
 import java.util.UUID
 
+import graphql.`type`.TransactionsResult
 import models.Transaction
 
 import scala.concurrent.Future
@@ -23,5 +24,7 @@ trait TransactionRepository {
   def updateCustomer(transactionId: UUID, customerId: UUID): Future[Option[UUID]]
 
   def updateTransaction(transactionId: UUID, status: Int, staffId: UUID): Future[Option[Int]]
+
+  def getAllTransactionWithLimit(limit: Int): Future[TransactionsResult]
 
 }
