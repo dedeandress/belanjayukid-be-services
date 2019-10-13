@@ -2,6 +2,7 @@ package repositories
 
 import java.util.UUID
 
+import errors.NotFound
 import javax.inject.Inject
 import models.Staff
 import models.Staff.StaffTable
@@ -25,11 +26,22 @@ class StaffRepositoryImpl @Inject()(database: AppDatabase, implicit val executio
     db.run(Action.addStaff(staff))
   }
 
-  override def findById(id: UUID): Future[Option[Staff]] = db.run(Action.findById(id))
+  override def findById(id: UUID): Future[Option[Staff]] = {
+    play.Logger.warn(s"find staff id: $id")
+    db.run(Action.findById(id))
+  }
 
-  override def findByUserId(userId: UUID): Future[Option[Staff]] = db.run(Action.findByUserId(userId))
+  override def findByUserId(userId: UUID): Future[Option[Staff]] = {
+    play.Logger.warn(s"find staff id: $userId")
+    db.run(Action.findByUserId(userId))
+  }
 
   override def findAll(): Future[Seq[Staff]] = db.run(Action.findAll())
+
+  override def updateRole(userId: UUID, roleId: UUID): Future[Int] = {
+    play.Logger.warn(s"update role userid: $userId")
+    db.run(Action.updateRole(userId, roleId))
+  }
 
   object Action {
 
@@ -49,6 +61,14 @@ class StaffRepositoryImpl @Inject()(database: AppDatabase, implicit val executio
     def findAll(): DBIO[Seq[Staff]] = for {
       staff <- QueryUtility.staffQuery.result
     }yield staff
+
+    def updateRole(userId: UUID, roleId: UUID): DBIO[Int] = for {
+      update <- QueryUtility.staffQuery.filter(_.userId === userId).map(_.roleId).update(roleId)
+      _ <- update match {
+        case 0 => DBIO.failed(NotFound("not found user id"))
+        case _ => DBIO.successful(())
+      }
+    }yield update
 
   }
 

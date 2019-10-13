@@ -13,4 +13,6 @@ trait UserProfileRepository {
   def addUserProfile(userProfile: UserProfile): Future[UserProfile]
 
   def findById(id: UUID): Future[Option[UserProfile]]
+
+  def updateUserProfile(userProfile: UserProfile): Future[Int]
 }

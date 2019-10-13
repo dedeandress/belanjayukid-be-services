@@ -30,7 +30,7 @@ class GraphQLType @Inject()(userRepository: UserRepository
 
   implicit val UserType: ObjectType[Unit, User] = deriveObjectType[Unit, User](
     ObjectTypeName("User"),
-    AddFields(Field("userProfile", OptionType(UserProfileType), resolve = c => userProfileRepository.findById(c.value.id))),
+    AddFields(Field("userProfile", OptionType(UserProfileType), resolve = c => userProfileRepository.findByUserId(c.value.id))),
     ExcludeFields("id")
   )
 
