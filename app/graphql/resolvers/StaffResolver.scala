@@ -20,4 +20,7 @@ class StaffResolver @Inject()(staffService: StaffService, userService: UserServi
   def findAll(context: Context): Future[Seq[Staff]] = staffService.findAllStaff(context)
 
   def findStaffById(context: Context, staffId: String): Future[Option[Staff]] = staffService.findStaffById(context, UUID.fromString(staffId))
+
+  def updateStaff(context: Context, staffId: String, fullName: String, phoneNumber: String
+                  , address: String, noNik: String, dateOfBirth: Long, roleId: String): Future[Option[Staff]] = staffService.updateStaff(context, staffId, fullName, phoneNumber, address, noNik, dateOfBirth, roleId: String)
 }

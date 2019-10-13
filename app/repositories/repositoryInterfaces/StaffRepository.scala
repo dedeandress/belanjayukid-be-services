@@ -14,4 +14,6 @@ trait StaffRepository {
   def findByUserId(userId: UUID): Future[Option[Staff]]
 
   def findAll(): Future[Seq[Staff]]
+
+  def updateRole(userId: UUID, roleId: UUID): Future[Int]
 }

@@ -3,7 +3,7 @@ package services
 import java.util.UUID
 
 import com.google.inject.Inject
-import errors.{AlreadyExists, AuthorizationException}
+import errors.{AlreadyExists, AuthorizationException, NotFound}
 import graphql.Context
 import graphql.input.StaffInput
 import models._
@@ -64,5 +64,42 @@ class StaffService @Inject()(staffRepository: StaffRepository, userRepository: U
   def findStaffById(context: Context, staffId: UUID): Future[Option[Staff]] = {
     if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
     staffRepository.findById(staffId)
+  }
+
+  def updateStaff(context: Context, staffId: String, fullName: String, phoneNumber: String
+                  , address: String, noNik: String, dateOfBirth: Long, roleId: String): Future[Option[Staff]] ={
+    if (!JWTUtility.isAdmin(context)) throw AuthorizationException("You are not authorized")
+    staffRepository.findById(UUID.fromString(staffId)).flatMap{
+      staff =>
+        if (staff.nonEmpty) {
+          userProfileRepository.findByUserId(staff.get.userId).flatMap {
+            userProfile =>
+              if (userProfile.nonEmpty) {
+                val newUserProfile = UserProfile(
+                  userId = staff.get.userId,
+                  fullName = fullName,
+                  phoneNumber = phoneNumber,
+                  address = address,
+                  noNik = noNik,
+                  dateOfBirth = dateOfBirth,
+                  id = userProfile.get.id
+                )
+                staffRepository.updateRole(staff.get.userId, UUID.fromString(roleId)).flatMap {
+                  updateRole =>
+                    if (updateRole != 0) {
+                      userProfileRepository.updateUserProfile(newUserProfile).flatMap {
+                        _ =>
+                          staffRepository.findByUserId(staff.get.userId)
+                      }
+                    }
+                    else Future.failed(NotFound("Not Found"))
+                }
+              }
+              else Future.failed(NotFound("Not Found"))
+          }
+        }
+        else Future.failed(NotFound("Not Found"))
+    }
+
   }
 }

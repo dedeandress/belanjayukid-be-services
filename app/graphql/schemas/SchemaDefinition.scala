@@ -100,6 +100,7 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
 
   val Mutations: List[Field[Context, Unit]] = List(
     Field(
+      //staff
       name = "login",
       fieldType = graphQLType.LoginUserType,
       arguments = List(
@@ -113,6 +114,25 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       fieldType = OptionType(graphQLType.StaffType),
       arguments = graphQLType.StaffInputArg :: Nil,
       resolve = sangriaContext => staffResolver.createStaff(sangriaContext.ctx, sangriaContext.arg(graphQLType.StaffInputArg))
+    ),
+    Field(
+      name = "updateStaff",
+      fieldType = OptionType(graphQLType.StaffType),
+      arguments = List(
+        Argument("staffId", schema.StringType),
+        Argument("fullName", schema.StringType),
+        Argument("phoneNumber", schema.StringType),
+        Argument("address", schema.StringType),
+        Argument("noNik", schema.StringType),
+        Argument("dateOfBirth", schema.LongType),
+        Argument("roleId", schema.StringType)
+      ),
+      resolve = sangriaContext => staffResolver.updateStaff(
+        sangriaContext.ctx, sangriaContext.arg[String]("staffId"),
+        sangriaContext.arg[String]("fullName"), sangriaContext.arg[String]("phoneNumber"),
+        sangriaContext.arg[String]("address"), sangriaContext.arg[String]("noNik"),
+        sangriaContext.arg[Long]("dateOfBirth"), sangriaContext.arg[String]("roleId")
+      )
     ),
     Field(
       name = "createProduct",
