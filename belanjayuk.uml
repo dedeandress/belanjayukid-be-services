@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>DATABASE</ID>
+  <OriginalElement>469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.category</OriginalElement>
+  <nodes>
+    <node x="419.0" y="831.0">469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.store</node>
+    <node x="703.0" y="209.0">469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.customer</node>
+    <node x="481.0" y="198.0">469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.session</node>
+    <node x="748.0961538461539" y="396.0">469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.transactions</node>
+    <node x="810.3461538461539" y="649.0">469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.shipment</node>
+    <node x="291.0" y="165.0">469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.user_profile</node>
+    <node x="204.0" y="831.0">469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.supplier</node>
+    <node x="0.0" y="831.0">469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.play_evolutions</node>
+    <node x="603.25" y="0.0">469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.users</node>
+    <node x="141.0" y="176.0">469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.products</node>
+    <node x="146.5" y="11.0">469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.category</node>
+    <node x="35.846153846153925" y="396.0">469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.product_detail</node>
+    <node x="0.0" y="209.0">469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.product_stock</node>
+    <node x="842.0" y="198.0">469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.staff</node>
+    <node x="85.16351071725165" y="622.6347137421955">469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.transaction_detail</node>
+    <node x="875.75" y="22.0">469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.role</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.shipment" target="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.transactions">
+      <point x="0.0" y="-57.5" />
+      <point x="45.25" y="90.5" />
+    </edge>
+    <edge source="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.staff" target="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.role">
+      <point x="29.75" y="-57.5" />
+      <point x="0.0" y="35.5" />
+    </edge>
+    <edge source="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.transaction_detail" target="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.transactions">
+      <point x="52.5" y="-79.5" />
+      <point x="244.84615384615392" y="602.0" />
+      <point x="793.3461538461539" y="602.0" />
+      <point x="-45.25" y="90.5" />
+    </edge>
+    <edge source="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.product_detail" target="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.product_stock">
+      <point x="-52.0" y="-90.5" />
+      <point x="87.84615384615392" y="371.0" />
+      <point x="60.5" y="371.0" />
+      <point x="0.0" y="46.5" />
+    </edge>
+    <edge source="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.product_detail" target="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.products">
+      <point x="52.0" y="-90.5" />
+      <point x="191.84615384615392" y="371.0" />
+      <point x="206.0" y="371.0" />
+      <point x="0.0" y="79.5" />
+    </edge>
+    <edge source="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.session" target="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.users">
+      <point x="0.0" y="-57.5" />
+      <point x="582.0" y="145.0" />
+      <point x="655.0" y="145.0" />
+      <point x="-17.25" y="57.5" />
+    </edge>
+    <edge source="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.transactions" target="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.staff">
+      <point x="45.25" y="-90.5" />
+      <point x="883.8461538461539" y="371.0" />
+      <point x="901.5" y="371.0" />
+      <point x="0.0" y="57.5" />
+    </edge>
+    <edge source="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.staff" target="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.users">
+      <point x="-29.75" y="-57.5" />
+      <point x="871.75" y="135.0" />
+      <point x="724.0" y="135.0" />
+      <point x="51.75" y="57.5" />
+    </edge>
+    <edge source="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.user_profile" target="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.users">
+      <point x="-5.6843418860808015E-14" y="-90.5" />
+      <point x="376.0" y="135.0" />
+      <point x="620.5" y="135.0" />
+      <point x="-51.75" y="57.5" />
+    </edge>
+    <edge source="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.transaction_detail" target="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.product_detail">
+      <point x="-52.5" y="-79.5" />
+      <point x="0.0" y="90.5" />
+    </edge>
+    <edge source="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.products" target="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.category">
+      <point x="0.0" y="-79.5" />
+      <point x="0.0" y="46.5" />
+    </edge>
+    <edge source="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.transactions" target="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.customer">
+      <point x="-45.25" y="-90.5" />
+      <point x="793.3461538461539" y="371.0" />
+      <point x="762.5" y="371.0" />
+      <point x="0.0" y="46.5" />
+    </edge>
+    <edge source="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.customer" target="469753b1-8451-4721-8a59-3a68ef4b81a8.TABLE:dabotnvchf5ul2.public.users">
+      <point x="0.0" y="-46.5" />
+      <point x="762.5" y="145.0" />
+      <point x="689.5" y="145.0" />
+      <point x="17.25" y="57.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="0.7411384408608518" x="440.3319798256449" y="434.9783426756648" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Key columns</Category>
+    <Category>Columns</Category>
+  </Categories>
+</Diagram>
+
