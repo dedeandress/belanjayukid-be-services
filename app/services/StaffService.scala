@@ -43,7 +43,7 @@ class StaffService @Inject()(staffRepository: StaffRepository, userRepository: U
               play.Logger.warn("staff found")
               roleRepository.findById(staff.get.roleId).map {
                 role =>
-                  LoginUser(JWTUtility.generateJWT(user.get, role.get.name), user.get.username, role.get.name)
+                  LoginUser(JWTUtility.generateJWT(user.get, role.get.name), user.get.username, role.get.name, staff.get.id)
               }
           }
         }

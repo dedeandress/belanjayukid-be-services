@@ -122,7 +122,10 @@ class GraphQLType @Inject()(userRepository: UserRepository
   )
 
   implicit val LoginUserType: ObjectType[Unit, LoginUser] = deriveObjectType[Unit, LoginUser](
-    ObjectTypeName("Credential")
+    ObjectTypeName("Credential"),
+    ReplaceField("staffId",
+      Field("id", CustomScalar.UUIDType, resolve = c => c.value.staffId)
+    )
   )
 
   implicit val userJsonProtocolFormat: JsonFormat[UserInput] = jsonFormat3(UserInput)
