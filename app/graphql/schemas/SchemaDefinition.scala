@@ -16,7 +16,7 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
                                  , roleResolver: RoleResolver, categoryResolver: CategoryResolver
                                  , productResolver: ProductResolver, productStockResolver: ProductStockResolver
                                  , productDetailResolver: ProductDetailResolver, transactionResolver: TransactionResolver
-                                 , graphQLType: GraphQLType) {
+                                 , customerResolver: CustomerResolver, graphQLType: GraphQLType) {
 
   val Queries: List[Field[Context, Unit]] = List(
     Field(
@@ -95,6 +95,20 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
         Argument("productId", schema.StringType)
       ),
       resolve = sangriaContext => productDetailResolver.productDetailByProductId(sangriaContext.ctx, UUID.fromString(sangriaContext.arg[String]("productId")))
+    ),
+    //customer
+    Field(
+      name = "customers",
+      fieldType = ListType(graphQLType.CustomerType),
+      resolve = sangriaContext => customerResolver.customers(sangriaContext.ctx)
+    ),
+    Field(
+      name = "customer",
+      fieldType = OptionType(graphQLType.CustomerType),
+      arguments = List(
+        Argument("customerId", schema.StringType)
+      ),
+      resolve = sangriaContext => customerResolver.customer(sangriaContext.ctx, sangriaContext.arg[String]("customerId"))
     )
   )
 
@@ -255,6 +269,37 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
         Argument("customerId", schema.StringType)
       ),
       resolve = sangriaContext => transactionResolver.updateCustomer(sangriaContext.ctx, UUID.fromString(sangriaContext.arg[String]("transactionId")), UUID.fromString(sangriaContext.arg[String]("customerId")))
+    ),
+    //customer
+    Field(
+      name = "createCustomer",
+      fieldType = OptionType(graphQLType.CustomerType),
+      arguments = graphQLType.CustomerInputArg :: Nil,
+      resolve = sangriaContext => customerResolver.addCustomer(sangriaContext.ctx, sangriaContext.arg(graphQLType.CustomerInputArg))
+    ),
+    Field(
+      name = "updateCustomer",
+      fieldType = OptionType(graphQLType.CustomerType),
+      arguments = List(
+        Argument("customerId", schema.StringType),
+        Argument("fullName", schema.StringType),
+        Argument("phoneNumber", schema.StringType),
+        Argument("address", schema.StringType),
+        Argument("noNik", schema.StringType),
+        Argument("dateOfBirth", schema.LongType),
+      ),
+      resolve = sangriaContext => customerResolver.updateCustomer(sangriaContext.ctx, sangriaContext.arg[String]("customerId"),
+        sangriaContext.arg[String]("fullName"), sangriaContext.arg[String]("phoneNumber"),
+        sangriaContext.arg[String]("address"), sangriaContext.arg[String]("noNik"),
+        sangriaContext.arg[Long]("dateOfBirth"))
+    ),
+    Field(
+      name = "deleteCustomer",
+      fieldType = schema.IntType,
+      arguments = List(
+        Argument("id", schema.StringType)
+      ),
+      resolve = sangriaContext => customerResolver.deleteCustomer(sangriaContext.ctx, sangriaContext.arg[String]("id"))
     )
   )
 

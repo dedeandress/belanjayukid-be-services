@@ -7,7 +7,7 @@ import slick.jdbc.PostgresProfile.api.{Table => SlickTable, _}
 import slick.lifted.{Tag => SlickTag}
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
 
-case class User(id: UUID = randomUUID, username: String, password: String, email: String)
+case class User(id: UUID = randomUUID, username: String = "BelanjaYukUser", password: String = "123456789", email: String = "user@belanjayuk.com")
 
 object User extends ((UUID, String, String, String) => User) {
 
