@@ -15,5 +15,5 @@ trait StaffRepository {
 
   def findAll(): Future[Seq[Staff]]
 
-  def updateRole(userId: UUID, roleId: UUID): Future[Int]
+  def updateRoleAndEmail(userId: UUID, roleId: UUID, email: String): Future[Int]
 }

@@ -67,7 +67,7 @@ class StaffService @Inject()(staffRepository: StaffRepository, userRepository: U
   }
 
   def updateStaff(context: Context, staffId: String, fullName: String, phoneNumber: String
-                  , address: String, noNik: String, dateOfBirth: Long, roleId: String): Future[Option[Staff]] ={
+                  , address: String, noNik: String, dateOfBirth: Long, roleId: String, staffEmail: String): Future[Option[Staff]] ={
     if (!JWTUtility.isAdmin(context)) throw AuthorizationException("You are not authorized")
     staffRepository.findById(UUID.fromString(staffId)).flatMap{
       staff =>
@@ -84,7 +84,7 @@ class StaffService @Inject()(staffRepository: StaffRepository, userRepository: U
                   dateOfBirth = dateOfBirth,
                   id = userProfile.get.id
                 )
-                staffRepository.updateRole(staff.get.userId, UUID.fromString(roleId)).flatMap {
+                staffRepository.updateRoleAndEmail(staff.get.userId, UUID.fromString(roleId), staffEmail).flatMap {
                   updateRole =>
                     if (updateRole != 0) {
                       userProfileRepository.updateUserProfile(newUserProfile).flatMap {

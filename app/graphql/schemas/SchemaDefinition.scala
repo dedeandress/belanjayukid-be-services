@@ -125,13 +125,15 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
         Argument("address", schema.StringType),
         Argument("noNik", schema.StringType),
         Argument("dateOfBirth", schema.LongType),
-        Argument("roleId", schema.StringType)
+        Argument("roleId", schema.StringType),
+        Argument("staffEmail", schema.StringType)
       ),
       resolve = sangriaContext => staffResolver.updateStaff(
         sangriaContext.ctx, sangriaContext.arg[String]("staffId"),
         sangriaContext.arg[String]("fullName"), sangriaContext.arg[String]("phoneNumber"),
         sangriaContext.arg[String]("address"), sangriaContext.arg[String]("noNik"),
-        sangriaContext.arg[Long]("dateOfBirth"), sangriaContext.arg[String]("roleId")
+        sangriaContext.arg[Long]("dateOfBirth"), sangriaContext.arg[String]("roleId"),
+        sangriaContext.arg[String]("staffEmail")
       )
     ),
     Field(
