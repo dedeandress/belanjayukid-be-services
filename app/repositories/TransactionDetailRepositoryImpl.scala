@@ -6,7 +6,7 @@ import com.google.inject.Inject
 import models.TransactionDetail
 import modules.AppDatabase
 import repositories.repositoryInterfaces.TransactionDetailRepository
-import utilities.QueryUtility
+import utilities.{QueryUtility, TransactionStatus}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -17,13 +17,15 @@ class TransactionDetailRepositoryImpl @Inject()(database: AppDatabase, implicit 
 
   import profile.api._
 
-  override def addTransactionDetails(details: List[TransactionDetail]): Future[Int] = {
+  override def addTransactionDetails(details: List[TransactionDetail]): Future[Option[Int]] = {
     play.Logger.warn("add transactionDetail")
+    val transactionId = details.head.transactionId
     val insert = for (detail <- details) yield {
-      QueryUtility.transactionDetailQuery += detail
+      Action.addTransactionDetail(detail)
     }
     db.run(DBIO.seq(insert: _*))
-    Future.successful(1)
+    db.run(QueryUtility.transactionsQuery.filter(_.id ===transactionId ).map(_.status).update(TransactionStatus.ON_PROCESS))
+    Future.successful(Option(1))
   }
 
   override def addTransactionDetail(detail: TransactionDetail): Future[Int] = db.run(Action.addTransactionDetail(detail))
@@ -40,9 +42,9 @@ class TransactionDetailRepositoryImpl @Inject()(database: AppDatabase, implicit 
 
   object Action {
 
-    def addTransactionDetail(transactionDetail: TransactionDetail): DBIO[Int] = for {
-      id <- QueryUtility.transactionDetailQuery returning QueryUtility.transactionDetailQuery.map(_.status) += transactionDetail
-    } yield id
+//    def addTransactionDetail(transactionDetail: TransactionDetail): DBIO[Int] = for {
+//      id <- QueryUtility.transactionDetailQuery returning QueryUtility.transactionDetailQuery.map(_.status) += transactionDetail
+//    } yield id
 
     def findTransactionDetailByTransactionId(transactionId: UUID): DBIO[Seq[TransactionDetail]] = for {
       details <- QueryUtility.transactionDetailQuery.filter(_.transactionId === transactionId).result
@@ -56,6 +58,12 @@ class TransactionDetailRepositoryImpl @Inject()(database: AppDatabase, implicit 
     def getTransactionDetailStatus(transactionId: UUID): DBIO[Option[Int]] = for {
       details <- QueryUtility.transactionDetailQuery.filter(_.id === transactionId).map(_.status).result.headOption
     } yield details
+
+    def addTransactionDetail(detail: TransactionDetail): DBIO[Int] = for {
+      productDetail <- QueryUtility.productDetailQuery.filter(_.id === detail.productDetailId).result.headOption
+      transactionDetailId <- QueryUtility.transactionDetailQuery returning QueryUtility.transactionDetailQuery.map(_.id) += detail
+      updateSubTotalPrice <- QueryUtility.transactionDetailQuery.filter(_.id === transactionDetailId).map(_.subTotalPrice).update(productDetail.get.sellingPrice * detail.numberOfPurchases)
+    }yield updateSubTotalPrice
   }
 
 }

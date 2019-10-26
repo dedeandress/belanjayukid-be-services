@@ -111,11 +111,8 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
 
     val addTransaction = for {
       status <- transactionRepository.getTransactionStatus(transactionId)
-      updateStatus <- if (status.get == TransactionStatus.INITIAL) {
-        transactionRepository.updateTransaction(transactionId, TransactionStatus.ON_PROCESS, staffId)
-      } else Future.successful(status)
-      _ <- if (status.get == TransactionStatus.INITIAL) transactionDetailRepository.addTransactionDetails(list.toList) else Future.successful(status)
-    } yield updateStatus.get
+      trStatus <- if (status.get == TransactionStatus.INITIAL) transactionDetailRepository.addTransactionDetails(list.toList) else Future.successful(status)
+    } yield trStatus.get
 
     addTransaction.flatMap {
       status =>
