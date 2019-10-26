@@ -34,6 +34,11 @@ class GraphQLType @Inject()(userRepository: UserRepository
     ExcludeFields("id")
   )
 
+  implicit val CustomerType: ObjectType[Unit, Customer] = deriveObjectType[Unit, Customer](
+    ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id)),
+    ReplaceField("userId", Field("user", OptionType(UserType), resolve = c => userRepository.find(c.value.userId))),
+  )
+
   implicit val StaffType: ObjectType[Unit, Staff] = deriveObjectType[Unit, Staff](
     ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id)),
     ReplaceField("userId", Field("user", OptionType(UserType), resolve = c => userRepository.find(c.value.userId))),
@@ -161,6 +166,7 @@ class GraphQLType @Inject()(userRepository: UserRepository
   val ProductDetailInputArg = Argument("productDetail", productDetailInputType)
   val TransactionDetailInputArg = Argument("transactionDetail", transactionDetailInputType)
   val TransactionInputArg = Argument("transaction", transactionInputType)
+  val CustomerInputArg = Argument("customer", userProfileInputType)
 
   val StaffInputArg = Argument("staff", StaffInputType)
 }
