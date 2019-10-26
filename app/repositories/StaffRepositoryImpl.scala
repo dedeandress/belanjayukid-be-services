@@ -38,9 +38,10 @@ class StaffRepositoryImpl @Inject()(database: AppDatabase, implicit val executio
 
   override def findAll(): Future[Seq[Staff]] = db.run(Action.findAll())
 
-  override def updateRole(userId: UUID, roleId: UUID): Future[Int] = {
+  override def updateRoleAndEmail(userId: UUID, roleId: UUID, email: String): Future[Int] = {
     play.Logger.warn(s"update role userid: $userId")
     db.run(Action.updateRole(userId, roleId))
+    db.run(Action.updateEmail(userId, email))
   }
 
   object Action {
@@ -69,6 +70,14 @@ class StaffRepositoryImpl @Inject()(database: AppDatabase, implicit val executio
         case _ => DBIO.successful(())
       }
     }yield update
+
+    def updateEmail(userId: UUID, email: String): DBIO[Int] = for {
+      update <- QueryUtility.userQuery.filter(_.id === userId).map(_.email).update(email)
+      _ <- update match {
+        case 0 => DBIO.failed(NotFound("not found user id"))
+        case _ => DBIO.successful(())
+      }
+    } yield update
 
   }
 

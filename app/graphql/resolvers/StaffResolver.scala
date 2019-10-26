@@ -10,7 +10,7 @@ import services.{StaffService, UserService}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class StaffResolver @Inject()(staffService: StaffService, userService: UserService, implicit val executionContext: ExecutionContext){
+class StaffResolver @Inject()(staffService: StaffService, userService: UserService, implicit val executionContext: ExecutionContext) {
   def createStaff(context: Context, staffInput: StaffInput): Future[Option[Staff]] = staffService.createStaff(context, staffInput)
 
   def login(username: String, password: String): Future[LoginUser] = staffService.login(username, password)
@@ -22,5 +22,5 @@ class StaffResolver @Inject()(staffService: StaffService, userService: UserServi
   def findStaffById(context: Context, staffId: String): Future[Option[Staff]] = staffService.findStaffById(context, UUID.fromString(staffId))
 
   def updateStaff(context: Context, staffId: String, fullName: String, phoneNumber: String
-                  , address: String, noNik: String, dateOfBirth: Long, roleId: String): Future[Option[Staff]] = staffService.updateStaff(context, staffId, fullName, phoneNumber, address, noNik, dateOfBirth, roleId: String)
+                  , address: String, noNik: String, dateOfBirth: Long, roleId: String, staffEmail: String): Future[Option[Staff]] = staffService.updateStaff(context, staffId, fullName, phoneNumber, address, noNik, dateOfBirth, roleId, staffEmail)
 }
