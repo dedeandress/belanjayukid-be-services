@@ -60,6 +60,8 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
 
   override def getAllTransactionWithLimit(limit: Int): Future[TransactionsResult] = db.run(Action.getAllTransactionWithLimit(limit))
 
+  override def updateTotalPrice(transactionId: UUID): Future[BigDecimal] = db.run(Action.updateTotalPrice(transactionId))
+
   object Action {
 
     def updateStaff(transactionId: UUID, staffId: UUID): DBIO[Option[UUID]] = for {
@@ -101,6 +103,11 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
       totalCount = numberOfProduct,
       hasNextData = numberOfProduct > limit
     )
+
+    def updateTotalPrice(transactionId: UUID):DBIO[BigDecimal] = for {
+      totalPrice <- QueryUtility.transactionDetailQuery.filter(_.transactionId === transactionId).map(_.subTotalPrice).sum.result
+      _ <- QueryUtility.transactionsQuery.filter(_.id === transactionId).map(_.totalPrice).update(totalPrice.get)
+    }yield totalPrice.get
 
   }
 

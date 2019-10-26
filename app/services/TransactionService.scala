@@ -82,13 +82,18 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
                 status =>
                   transactionDetailRepository.findTransactionDetailByTransactionId(UUID.fromString(transactionId)).flatMap {
                     transactionDetailList =>
-                      Future.successful(TransactionResult(status.get, transactionDetailList))
+                      transactionRepository.updateTotalPrice(UUID.fromString(transactionId)).flatMap{
+                        totalPrice => Future.successful(TransactionResult(status.get, transactionDetailList, totalPrice))
+                      }
                   }
               }
           }
         } else {
           transactionDetailRepository.findTransactionDetailByTransactionId(UUID.fromString(transactionId)).flatMap {
-            transactionDetails => Future.successful(TransactionResult(trStatus.get, transactionDetails))
+            transactionDetails =>
+              transactionRepository.updateTotalPrice(UUID.fromString(transactionId)).flatMap{
+                totalPrice => Future.successful(TransactionResult(trStatus.get, transactionDetails, totalPrice))
+              }
           }
         }
     }
@@ -134,12 +139,18 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
             _ =>
               transactionDetailRepository.findTransactionDetailByTransactionId(transactionId).flatMap {
                 transactionDetailList =>
-                  Future.successful(TransactionResult(status, transactionDetailList))
+                  transactionRepository.updateTotalPrice(transactionId).flatMap{
+                    totalPrice => Future.successful(TransactionResult(status, transactionDetailList, totalPrice))
+                  }
               }
           }
         } else {
           transactionDetailRepository.findTransactionDetailByTransactionId(transactionId).flatMap {
-            details => Future.successful(TransactionResult(status, details))
+            details =>
+              transactionRepository.updateTotalPrice(transactionId).flatMap{
+                totalPrice=>
+                  Future.successful(TransactionResult(status, details, totalPrice))
+              }
           }
         }
     }
