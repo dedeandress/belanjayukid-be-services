@@ -11,9 +11,9 @@ import slick.lifted.{Tag => SlickTag}
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
 import utilities.{PaymentStatus, TransactionStatus}
 
-case class Transaction(id: UUID = UUID.randomUUID(), paymentStatus: Int = PaymentStatus.UNPAID, staffId: Option[UUID] = null, customerId: Option[UUID] = null, totalPrice: BigDecimal = 0, status: Int = TransactionStatus.INITIAL, date: Long = ZonedDateTime.now().toEpochSecond)
+case class Transaction(id: UUID = UUID.randomUUID(), paymentStatus: Int = PaymentStatus.UNPAID, staffId: Option[UUID] = null, customerId: Option[UUID] = null, totalPrice: BigDecimal = 0, profit: BigDecimal = 0, status: Int = TransactionStatus.INITIAL, date: Long = ZonedDateTime.now().toEpochSecond)
 
-object Transaction extends ((UUID, Int, Option[UUID], Option[UUID], BigDecimal, Int, Long) => Transaction) {
+object Transaction extends ((UUID, Int, Option[UUID], Option[UUID], BigDecimal, BigDecimal, Int, Long) => Transaction) {
 
   val customers = TableQuery[CustomerTable]
   val staffs = TableQuery[StaffTable]
@@ -28,13 +28,15 @@ object Transaction extends ((UUID, Int, Option[UUID], Option[UUID], BigDecimal, 
 
     def customerId = column[Option[UUID]]("customer_id")
 
-    def * = (id, paymentStatus, staffId, customerId, totalPrice, status, date).mapTo[Transaction]
+    def * = (id, paymentStatus, staffId, customerId, totalPrice, profit, status, date).mapTo[Transaction]
 
     def id = column[UUID]("id", O.PrimaryKey)
 
     def paymentStatus = column[Int]("payment_status")
 
     def totalPrice = column[BigDecimal]("total_price")
+
+    def profit = column[BigDecimal]("profit")
 
     def status = column[Int]("status")
 
@@ -54,5 +56,5 @@ object TransactionJsonProtocol extends DefaultJsonProtocol {
     }
   }
 
-  implicit val transactionsJsonProtocolFormat: JsonFormat[Transaction] = jsonFormat7(Transaction)
+  implicit val transactionsJsonProtocolFormat: JsonFormat[Transaction] = jsonFormat8(Transaction)
 }
