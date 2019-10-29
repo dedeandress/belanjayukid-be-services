@@ -2,6 +2,7 @@ package repositories
 
 import java.util.UUID
 
+import errors.NotFound
 import graphql.`type`.TransactionsResult
 import javax.inject.Inject
 import models.Transaction
@@ -39,7 +40,7 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
   }
 
   override def getTransaction(transactionId: UUID): Future[Option[Transaction]] = {
-    play.Logger.warn(s"get Transaction : $transactionId")
+    play.Logger.warn(s"get Transactions with id : ${transactionId.toString}")
     db.run(Action.getTransaction(transactionId))
   }
 
@@ -53,14 +54,41 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
     db.run(Action.updateCustomer(transactionId, customerId))
   }
 
-  override def updateTransaction(transactionId: UUID, status: Int, staffId: UUID): Future[Option[Int]] = {
-    db.run(Action.updateStaff(transactionId, staffId))
-    db.run(Action.updateTransaction(transactionId, status))
+  override def updateTransaction(transactionId: UUID, status: Int, staffId: UUID, customerId: UUID): Future[Option[Int]] = {
+    play.Logger.warn(s"update Transactions with status : $status, staffId: ${staffId.toString}, customerId: ${customerId.toString}")
+    db.run(Action.updateTransaction(transactionId, status, staffId, customerId))
   }
 
   override def getAllTransactionWithLimit(limit: Int): Future[TransactionsResult] = db.run(Action.getAllTransactionWithLimit(limit))
 
-  override def updateTotalPrice(transactionId: UUID): Future[BigDecimal] = db.run(Action.updateTotalPrice(transactionId))
+  override def updateTotalPrice(transactionId: UUID): Future[BigDecimal] = {
+    db.run(sql"select purchase_price, selling_price, number_of_purchases from transaction_detail td join product_detail pd on td.product_detail_id = pd.id where td.transaction_id::varchar = ${transactionId.toString()}".as[(BigDecimal, BigDecimal, Int)]).flatMap {
+      list =>
+        play.Logger.warn(list.toString())
+        var profit: BigDecimal = 0
+        var totalPrice: BigDecimal = 0
+        for (item <- list) {
+          profit += (item._3 * item._2) - (item._3 * item._1)
+          totalPrice += item._3 * item._2
+        }
+        play.Logger.warn(s"Profit : $profit, totalPrice: $totalPrice")
+        db.run(Action.updateProfitAndTotalPrice(transactionId, totalPrice, profit))
+    }
+  }
+
+  override def updateStock(transactionId: UUID): Future[Unit] = {
+    db.run(sql"select p.id::varchar, p.stock, td.number_of_purchases, pd.value from transaction_detail td join product_detail pd on td.product_detail_id = pd.id join products p on pd.product_id = p.id where ${transactionId.toString()} = td.transaction_id::varchar".as[(String, Int, Int, Int)]).flatMap {
+      list =>
+        play.Logger.warn(s"list of transactionDetail : ${list.toString()}")
+        var stock = 0
+        val update = for (item <- list) yield {
+          stock = item._2 - (item._3 * item._4)
+          play.Logger.warn(s"stock : $stock")
+          QueryUtility.productQuery.filter(_.id === UUID.fromString(item._1)).map(_.stock).update(stock)
+        }
+        db.run(DBIO.seq(update: _*))
+    }
+  }
 
   object Action {
 
@@ -91,10 +119,6 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
       transactions <- QueryUtility.transactionsQuery.filter(_.status === status).result
     } yield transactions
 
-    def getTransaction(transactionId: UUID): DBIO[Option[Transaction]] = for {
-      transaction <- QueryUtility.transactionsQuery.filter(_.id === transactionId).result.headOption
-    } yield transaction
-
     def getAllTransactionWithLimit(limit: Int): DBIO[TransactionsResult] = for {
       transactions <- QueryUtility.transactionsQuery.filter(_.status =!= TransactionStatus.INITIAL).sortBy(_.date.desc).take(limit).result
       numberOfProduct <- QueryUtility.transactionsQuery.filter(_.status =!= TransactionStatus.INITIAL).length.result
@@ -104,10 +128,27 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
       hasNextData = numberOfProduct > limit
     )
 
-    def updateTotalPrice(transactionId: UUID):DBIO[BigDecimal] = for {
-      totalPrice <- QueryUtility.transactionDetailQuery.filter(_.transactionId === transactionId).map(_.subTotalPrice).sum.result
-      _ <- QueryUtility.transactionsQuery.filter(_.id === transactionId).map(_.totalPrice).update(totalPrice.get)
-    }yield totalPrice.get
+    def updateProfitAndTotalPrice(transactionId: UUID, totalPrice: BigDecimal, profit: BigDecimal): DBIO[BigDecimal] = for {
+      update <- QueryUtility.transactionsQuery.filter(_.id === transactionId).map(transaction => (transaction.totalPrice, transaction.profit)).update(totalPrice, profit)
+      transaction <- getTransaction(transactionId)
+      result <- update match {
+        case 0 => DBIO.failed(NotFound("not found transaction id"))
+        case _ => DBIO.successful(transaction.get.totalPrice)
+      }
+    } yield result
+
+    def getTransaction(transactionId: UUID): DBIO[Option[Transaction]] = for {
+      transaction <- QueryUtility.transactionsQuery.filter(_.id === transactionId).result.headOption
+    } yield transaction
+
+    def updateTransaction(transactionId: UUID, status: Int, staffId: UUID, customerId: UUID): DBIO[Option[Int]] = for {
+      update <- QueryUtility.transactionsQuery.filter(_.id === transactionId).map(transaction => (transaction.staffId, transaction.customerId)).update(Some(staffId), Some(customerId))
+      transactionStatus <- QueryUtility.transactionsQuery.filter(_.id === transactionId).map(_.status).result.headOption
+      result <- update match {
+        case 0 => DBIO.failed(NotFound("not found transaction id"))
+        case _ => DBIO.successful(transactionStatus)
+      }
+    } yield result
 
   }
 

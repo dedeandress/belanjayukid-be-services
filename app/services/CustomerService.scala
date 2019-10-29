@@ -15,6 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class CustomerService @Inject()(customerRepository: CustomerRepository, userRepository: UserRepository, userProfileRepository: UserProfileRepository, implicit val executionContext: ExecutionContext) {
 
   def addCustomer(context: Context, userProfileInput: UserProfileInput): Future[Option[Customer]] = {
+    if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
     val user = User()
     val userDetail = userProfileInput
     for {
@@ -49,6 +50,7 @@ class CustomerService @Inject()(customerRepository: CustomerRepository, userRepo
 
   def updateCustomer(context: Context, customerId: UUID, fullName: String, phoneNumber: String
                      , address: String, noNik: String, dateOfBirth: Long) = {
+    if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
     val updateUserProfile = UserProfile(address = address, userId = customerId, fullName = fullName, noNik =noNik, phoneNumber= phoneNumber,dateOfBirth = dateOfBirth)
     val update = for {
       customer <- customerRepository.findById(customerId)

@@ -19,7 +19,8 @@ class GraphQLType @Inject()(userRepository: UserRepository
                             , userProfileRepository: UserProfileRepository, roleRepository: RoleRepository
                             , categoryRepository: CategoryRepository, productStockRepository: ProductStockRepository
                             , productRepository: ProductsRepository, productDetailRepository: ProductDetailRepository
-                            , transactionDetailRepository: TransactionDetailRepository, staffRepository: StaffRepository) {
+                            , transactionDetailRepository: TransactionDetailRepository, staffRepository: StaffRepository
+                            , customerRepository: CustomerRepository) {
 
   implicit val RoleType: ObjectType[Unit, Role] = deriveObjectType[Unit, Role](ObjectTypeName("Role"), ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id)))
 
@@ -93,7 +94,7 @@ class GraphQLType @Inject()(userRepository: UserRepository
       Field("transactionDetail", ListType(TransactionDetailType), resolve = c => transactionDetailRepository.findTransactionDetailByTransactionId(c.value.id))
     ),
     ReplaceField("staffId", Field("staff", OptionType(StaffType), resolve = c => staffRepository.findById(c.value.staffId.get))),
-    ReplaceField("customerId", Field("customer", OptionType(StaffType), resolve = c => staffRepository.findById(c.value.staffId.get)))
+    ReplaceField("customerId", Field("customer", OptionType(CustomerType), resolve = c => customerRepository.findById(c.value.customerId.get)))
   )
 
   implicit val ProductsResultType: ObjectType[Unit, ProductsResult] = deriveObjectType[Unit, ProductsResult](
@@ -148,7 +149,7 @@ class GraphQLType @Inject()(userRepository: UserRepository
 
   implicit val userProfileInputJsonProtocolFormat: JsonFormat[UserProfileInput] = jsonFormat5(UserProfileInput)
   implicit val staffInputJsonProtocolFormat: JsonFormat[StaffInput] = jsonFormat3(StaffInput)
-  implicit val transactionDetailInputJsonProtocolFormat: JsonFormat[TransactionDetailInput] = jsonFormat3(TransactionDetailInput)
+  implicit val transactionDetailInputJsonProtocolFormat: JsonFormat[TransactionDetailInput] = jsonFormat2(TransactionDetailInput)
   implicit val transactionInputJsonProtocolFormat: JsonFormat[TransactionInput] = jsonFormat4(TransactionInput)
   implicit val productDetailInputJsonProtocolFormat: JsonFormat[ProductDetailInput] = jsonFormat5(ProductDetailInput)
   implicit val productInputJsonProtocolFormat: JsonFormat[ProductInput] = jsonFormat5(ProductInput)

@@ -34,30 +34,6 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
     transactionRepository.updateTransactionStatus(transactionId, status)
   }
 
-  def addTransactionDetailOldFlow(context: Context, transactionInput: TransactionInput): Future[Int] = {
-    if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
-    var list = new mutable.MutableList[TransactionDetail]()
-    val transactionId = UUID.fromString(transactionInput.transactionId)
-    for (detail <- transactionInput.detail) {
-      list.+=(new TransactionDetail(
-        transactionId = UUID.fromString(transactionInput.transactionId),
-        numberOfPurchases = detail.numberOfPurchase,
-        productDetailId = UUID.fromString(detail.productDetailId),
-        subTotalPrice = detail.subTotalPrice,
-        status = TransactionDetailStatus.NOT_EMPTY
-      ))
-    }
-    println(list.size)
-
-    for {
-      status <- transactionRepository.getTransactionStatus(transactionId)
-      updateStatus <- if (status.get == TransactionStatus.INITIAL) {
-        transactionRepository.updateTransactionStatus(transactionId, TransactionStatus.ON_PROCESS)
-      } else Future.successful(status)
-      _ <- if (updateStatus.get == TransactionStatus.ON_PROCESS) transactionDetailRepository.addTransactionDetails(list.toList) else Future.successful(status)
-    } yield updateStatus.get
-  }
-
   def completePayment(context: Context, transactionId: String): Future[TransactionResult] = {
     if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
     val transactionStatus = transactionRepository.getTransactionStatus(UUID.fromString(transactionId))
@@ -65,18 +41,7 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
     transactionStatus.flatMap {
       trStatus =>
         if (trStatus.get == TransactionStatus.ON_PROCESS) {
-          val result = transactionDetailRepository.findTransactionDetailByTransactionId(UUID.fromString(transactionId)).map {
-            details =>
-              for (detail <- details) {
-                for {
-                  productDetail <- productDetailRepository.findProductDetail(detail.productDetailId)
-                  product <- productRepository.findProduct(productDetail.get.productId)
-                  _ <- if (detail.status == TransactionDetailStatus.NOT_EMPTY) productRepository.updateStock(product.get.id, product.get.stock - (detail.numberOfPurchases * productDetail.get.value)) else Future.successful(TransactionDetailStatus.EMPTY)
-                } yield ()
-              }
-          }
-
-          result.flatMap {
+          transactionRepository.updateStock(UUID.fromString(transactionId)).flatMap {
             _ =>
               transactionRepository.updateTransactionStatus(UUID.fromString(transactionId), TransactionStatus.ON_CHECKER).flatMap {
                 status =>
@@ -104,20 +69,37 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
     var list = new mutable.MutableList[TransactionDetail]()
     val transactionId = UUID.fromString(transactionInput.transactionId)
     val staffId = UUID.fromString(transactionInput.staffId)
+    val customerId = UUID.fromString(transactionInput.customerId)
     for (detail <- transactionInput.detail) {
-      list.+=(new TransactionDetail(
-        transactionId = UUID.fromString(transactionInput.transactionId),
-        numberOfPurchases = detail.numberOfPurchase,
-        productDetailId = UUID.fromString(detail.productDetailId),
-        subTotalPrice = detail.subTotalPrice,
-        status = TransactionDetailStatus.NOT_EMPTY
-      ))
+      val productDetailId = UUID.fromString(detail.productDetailId)
+      if (list.exists(item => item.productDetailId == productDetailId)){
+        val numberOfPurchases = list.find(item => item.productDetailId == productDetailId).get.numberOfPurchases + detail.numberOfPurchase
+        val index = list.indexWhere(item => item.productDetailId == productDetailId)
+        val transactionDetail = new TransactionDetail(
+          transactionId = UUID.fromString(transactionInput.transactionId),
+          numberOfPurchases = numberOfPurchases,
+          productDetailId = productDetailId,
+          status = TransactionDetailStatus.NOT_EMPTY
+        )
+        play.Logger.warn(s"index : $index, numberOfPurchases: $numberOfPurchases, transactionDetail: ${transactionDetail.toString}")
+        list.update(index, transactionDetail)
+        play.Logger.warn(s"${list.toList}")
+      }
+      else {
+        play.Logger.warn(s"add transactionDetail to list")
+        list.+=(new TransactionDetail(
+          transactionId = UUID.fromString(transactionInput.transactionId),
+          numberOfPurchases = detail.numberOfPurchase,
+          productDetailId = UUID.fromString(detail.productDetailId),
+          status = TransactionDetailStatus.NOT_EMPTY
+        ))
+      }
     }
 
     val addTransaction = for {
       status <- transactionRepository.getTransactionStatus(transactionId)
       updateStatus <- if (status.get == TransactionStatus.INITIAL) {
-        transactionRepository.updateTransaction(transactionId, TransactionStatus.ON_PROCESS, staffId)
+        transactionRepository.updateTransaction(transactionId, TransactionStatus.ON_PROCESS, staffId, customerId)
       } else Future.successful(status)
       _ <- if (status.get == TransactionStatus.INITIAL) transactionDetailRepository.addTransactionDetails(list.toList) else Future.successful(status)
     } yield updateStatus.get
