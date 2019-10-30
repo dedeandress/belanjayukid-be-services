@@ -1,0 +1,35 @@
+@startuml
+title: Init PurchasesTransaction SequenceDiagram
+
+BelanjaYukFE -> BelanjaYukBE: create transaction init
+BelanjaYukBE -> PurchasesTransactionService: call service for generate init purchases transaction
+PurchasesTransactionService -> PurchasesTransactionRepository: call function addPuchasesTransaction
+
+PurchasesTransactionRepository --> PurchasesTransactionService: return PurchasesTransaction id (UUID) with INIT status
+PurchasesTransactionService --> BelanjaYukBE: return response PurchasesTransaction id
+BelanjaYukBE --> BelanjaYukFE: response PurchasesTransaction id
+@enduml
+
+@startuml
+title: Checkout PurchasesTransaction
+
+BelanjaYukFE -> BelanjaYukBE: checkout PurchasesTransaction \nwith list of transactionDetail
+BelanjaYukBE -> PurchasesTransactionService: call service for handling add \npurchases transactionDetail
+PurchasesTransactionService -> PurchasesTransactionRepository: call function addPuchasesTransactionDetail
+
+PurchasesTransactionRepository --> PurchasesTransactionService: return PurchasesTransaction \nON_PROCESS status and list of PurchasesTransactionDetail
+PurchasesTransactionService --> BelanjaYukBE: return response PurchasesTransactionResult with \nparam listOfPurchasesTransactionDetail, status, and totalPrice
+BelanjaYukBE --> BelanjaYukFE: response PurchasesTransactionResult
+@enduml
+
+@startuml
+title: CompletePurchasesTransaction
+
+BelanjaYukFE -> BelanjaYukBE: CompletePayment with param DEBT status(true/false), \ntotalPay(if DEBT status true), and PurchasesTransaction id
+BelanjaYukBE -> PurchasesTransactionService: call service for complete payment
+PurchasesTransactionService -> PurchasesTransactionRepository: call repository for adding stock for all product in \nPurchasesTransaction and insert debt when DEBT \nstatus true
+
+PurchasesTransactionRepository --> PurchasesTransactionService: return COMPLETED status
+PurchasesTransactionService --> BelanjaYukBE: return response with PurchasesTransaction status
+BelanjaYukBE --> BelanjaYukFE: return PurchasesTransaction status response
+@enduml

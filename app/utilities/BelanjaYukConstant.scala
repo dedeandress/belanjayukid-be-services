@@ -15,6 +15,7 @@ object TransactionStatus{
 object PaymentStatus{
   val UNPAID = 0
   val PAID = 1
+  val DEBT = 2
 }
 
 object TransactionDetailStatus{
