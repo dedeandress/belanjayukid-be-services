@@ -9,9 +9,9 @@ import models.Supplier.SupplierTable
 import slick.jdbc.PostgresProfile.api.{Table => SlickTable, _}
 import slick.lifted.{Tag => SlickTag}
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
-import utilities.{PaymentStatus, TransactionStatus}
+import utilities.{PaymentStatus, PurchasesTransactionStatus}
 
-case class PurchasesTransaction(id: UUID = UUID.randomUUID(), paymentStatus: Int = PaymentStatus.UNPAID, staffId: Option[UUID] = null, supplierId: Option[UUID] = null, totalPrice: BigDecimal = 0, status: Int = TransactionStatus.INITIAL, date: Long = ZonedDateTime.now().toEpochSecond)
+case class PurchasesTransaction(id: UUID = UUID.randomUUID(), paymentStatus: Int = PaymentStatus.UNPAID, staffId: Option[UUID] = null, supplierId: Option[UUID] = null, totalPrice: BigDecimal = 0, status: Int = PurchasesTransactionStatus.INITIAL, date: Long = ZonedDateTime.now().toEpochSecond)
 
 object PurchasesTransaction extends ((UUID, Int, Option[UUID], Option[UUID], BigDecimal, Int, Long) => PurchasesTransaction) {
 

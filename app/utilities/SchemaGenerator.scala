@@ -41,11 +41,15 @@ object SchemaGenerator{
     sb.append("\n\n")
     QueryUtility.shipmentsQuery.schema.create.statements.foreach(st => sb.append(st.toString + ";\n"))
     sb.append("\n\n")
+    QueryUtility.purchasesTransactionQuery.schema.create.statements.foreach(st => sb.append(st.toString + ";\n"))
+    sb.append("\n\n")
 
     sb.append("\n\n")
     sb.append("# --- !Downs")
     sb.append("\n\n")
 
+    QueryUtility.purchasesTransactionQuery.schema.dropIfExists.statements.foreach(st => sb.append(st.toString + ";\n"))
+    sb.append("\n\n")
     QueryUtility.suppliersQuery.schema.dropIfExists.statements.foreach(st => sb.append(st.toString + ";\n"))
     sb.append("\n\n")
     QueryUtility.storesQuery.schema.dropIfExists.statements.foreach(st => sb.append(st.toString + ";\n"))

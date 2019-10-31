@@ -17,13 +17,16 @@ class PurchasesTransactionRepositoryImpl @Inject()(database: AppDatabase, implic
 
   import profile.api._
 
-  override def addPurchasesTransaction(purchasesTransaction: PurchasesTransaction): Future[UUID] = db.run(Actions.addPurchasesTransaction(purchasesTransaction))
+  override def addPurchasesTransaction(purchasesTransaction: PurchasesTransaction): Future[(UUID, Int)] = db.run(Actions.addPurchasesTransaction(purchasesTransaction))
+
+  override def getPurchasesTransactionStatus(id: UUID): Future[Option[Int]] = db.run(Actions.getPurchasesTransactionStatus(id))
 
   object Actions {
 
-    def addPurchasesTransaction(purchasesTransaction: PurchasesTransaction): DBIO[UUID] = for{
+    def addPurchasesTransaction(purchasesTransaction: PurchasesTransaction): DBIO[(UUID, Int)] = for{
       id <- QueryUtility.purchasesTransactionQuery returning QueryUtility.purchasesTransactionQuery.map(_.id) += purchasesTransaction
-    }yield id
+      status <- getPurchasesTransactionStatus(id)
+    }yield (id,status.get)
 
     def getPurchasesTransactionStatus(transactionId: UUID): DBIO[Option[Int]] = for {
       status <- QueryUtility.purchasesTransactionQuery.filter(_.id === transactionId).map(_.status).result.headOption

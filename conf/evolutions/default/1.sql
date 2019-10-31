@@ -58,9 +58,17 @@ create table "shipment" ("id" UUID NOT NULL PRIMARY KEY,"address" VARCHAR NOT NU
 alter table "shipment" add constraint "transaction_id" foreign key("transaction_id") references "transactions"("id") on update NO ACTION on delete NO ACTION;
 
 
+create table "purchases_transactions" ("id" UUID NOT NULL PRIMARY KEY,"payment_status" INTEGER NOT NULL,"staff_id" UUID,"supplier_id" UUID,"total_price" DECIMAL(21,2) NOT NULL,"status" INTEGER NOT NULL,"date" BIGINT NOT NULL);
+alter table "purchases_transactions" add constraint "staff_id" foreign key("staff_id") references "staff"("id") on update NO ACTION on delete NO ACTION;
+alter table "purchases_transactions" add constraint "supplier_id" foreign key("supplier_id") references "supplier"("id") on update NO ACTION on delete NO ACTION;
+
+
 
 
 # --- !Downs
+
+drop table if exists "purchases_transactions";
+
 
 drop table if exists "supplier";
 

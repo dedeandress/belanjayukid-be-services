@@ -25,3 +25,9 @@ object TransactionDetailStatus{
   val CANCELED = 3
   val RETURNED = 4
 }
+
+object PurchasesTransactionStatus{
+  val INITIAL = 0
+  val ON_PROCESS = 1
+  val COMPLETED = 3
+}
