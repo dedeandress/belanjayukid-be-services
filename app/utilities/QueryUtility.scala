@@ -2,6 +2,7 @@ package utilities
 
 import models.Category.CategoryTable
 import models.Customer.CustomerTable
+import models.Payment.PaymentTable
 import models.ProductDetail.ProductDetailTable
 import models.ProductStock.ProductStockTable
 import models.Products.ProductsTable
@@ -35,4 +36,5 @@ object QueryUtility {
   val transactionDetailQuery = TableQuery[TransactionDetailTable]
   val shipmentsQuery = TableQuery[ShipmentTable]
   val purchasesTransactionQuery = TableQuery[PurchasesTransactionTable]
+  val paymentQuery = TableQuery[PaymentTable]
 }
