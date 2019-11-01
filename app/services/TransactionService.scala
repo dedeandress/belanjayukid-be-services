@@ -22,13 +22,17 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
 
   def addTransaction(context: Context): Future[CreateTransactionResult] = {
     if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
-    transactionRepository.addTransaction(new Transaction()).flatMap {
-      id =>
-        transactionRepository.getTransactionStatus(id).map {
-          status =>
-            CreateTransactionResult(id, status.get)
+    paymentRepository.addPayment(Payment()).flatMap{
+      paymentId =>
+        transactionRepository.addTransaction(new Transaction(paymentId = paymentId)).flatMap {
+          id =>
+            transactionRepository.getTransactionStatus(id).map {
+              status =>
+                CreateTransactionResult(id, status.get)
+            }
         }
     }
+
   }
 
   def updateTransaction(context: Context, transactionId: UUID, status: Int): Future[Option[Int]] = {
@@ -43,7 +47,7 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
 
     transactionStatus.flatMap {
       trStatus =>
-        play.Logger.warn(s"completePayment: Status = ${trStatus}")
+        play.Logger.warn(s"completePayment: Status = $trStatus")
         if (trStatus.get == TransactionStatus.ON_PROCESS) {
           transactionRepository.updateStock(transactionId).flatMap {
             _ =>
@@ -60,7 +64,7 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
                             paymentStatus = PaymentStatus.PAID
                           }
                           else paymentStatus = PaymentStatus.DEBT
-                          paymentRepository.addPayment(Payment(transactionId = transactionId, debt =  debt, amountOfPayment = amountOfPayment), paymentStatus).flatMap{
+                          paymentRepository.updatePayment(transactionId = transactionId, debt =  debt, amountOfPayment = amountOfPayment, paymentStatus).flatMap{
                             debt =>
                               Future.successful(TransactionResult(status.get, transactionDetailList, totalPrice, debt))
                           }

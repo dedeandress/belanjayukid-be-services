@@ -8,29 +8,28 @@ import slick.jdbc.PostgresProfile.api.{Table => SlickTable, _}
 import slick.lifted.{Tag => SlickTag}
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
 
-case class PurchasesTransactionDetail(id: UUID = UUID.randomUUID(), purchasesTransactionId: UUID, productDetailId: UUID, numberOfPurchases: Int, status: Int)
+case class PurchasesTransactionDetail(id: UUID = UUID.randomUUID(), purchasesTransactionId: UUID, productDetailId: UUID, numberOfPurchases: Int)
 
-object PurchasesTransactionDetail extends ((UUID, UUID, UUID, Int, Int) => PurchasesTransactionDetail) {
+object PurchasesTransactionDetail extends ((UUID, UUID, UUID, Int) => PurchasesTransactionDetail) {
 
   val purchasesTransactions = TableQuery[PurchasesTransactionTable]
   val productDetails = TableQuery[ProductDetailTable]
 
-  class PurchasesTransactionDetailTable(slickTag: SlickTag) extends SlickTable[PurchasesTransactionDetail](slickTag, "transaction_detail") {
-    def purchasesTransactionIdFK = foreignKey("transaction_id", purchasesTransactionId, purchasesTransactions)(_.id)
+  class PurchasesTransactionDetailTable(slickTag: SlickTag) extends SlickTable[PurchasesTransactionDetail](slickTag, "purchases_transaction_detail") {
+    def purchasesTransactionIdFK = foreignKey("purchases_transaction_id", purchasesTransactionId, purchasesTransactions)(_.id)
 
-    def purchasesTransactionId = column[UUID]("transaction_id")
+    def purchasesTransactionId = column[UUID]("purchases_transaction_id")
 
     def productDetailIdFK = foreignKey("product_detail_id", productDetailId, productDetails)(_.id)
 
     def productDetailId = column[UUID]("product_detail_id")
 
-    def * = (id, purchasesTransactionId, productDetailId, numberOfPurchases, status).mapTo[PurchasesTransactionDetail]
+    def * = (id, purchasesTransactionId, productDetailId, numberOfPurchases).mapTo[PurchasesTransactionDetail]
 
     def id = column[UUID]("id", O.PrimaryKey)
 
     def numberOfPurchases = column[Int]("number_of_purchases")
 
-    def status = column[Int]("status")
   }
 
 }
@@ -46,5 +45,5 @@ object PurchasesTransactionDetailJsonProtocol extends DefaultJsonProtocol {
     }
   }
 
-  implicit val purchasesTransactionDetailJsonProtocolFormat: JsonFormat[PurchasesTransactionDetail] = jsonFormat5(PurchasesTransactionDetail)
+  implicit val purchasesTransactionDetailJsonProtocolFormat: JsonFormat[PurchasesTransactionDetail] = jsonFormat4(PurchasesTransactionDetail)
 }

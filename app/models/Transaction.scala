@@ -4,6 +4,7 @@ import java.time.ZonedDateTime
 import java.util.UUID
 
 import models.Customer.CustomerTable
+import models.Payment.PaymentTable
 import models.Staff.StaffTable
 import models.Store.StoreTable
 import slick.jdbc.PostgresProfile.api.{Table => SlickTable, _}
@@ -11,13 +12,14 @@ import slick.lifted.{Tag => SlickTag}
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
 import utilities.{PaymentStatus, TransactionStatus}
 
-case class Transaction(id: UUID = UUID.randomUUID(), paymentStatus: Int = PaymentStatus.UNPAID, staffId: Option[UUID] = null, customerId: Option[UUID] = null, totalPrice: BigDecimal = 0, profit: BigDecimal = 0, status: Int = TransactionStatus.INITIAL, date: Long = ZonedDateTime.now().toEpochSecond)
+case class Transaction(id: UUID = UUID.randomUUID(), paymentStatus: Int = PaymentStatus.UNPAID, staffId: Option[UUID] = null, customerId: Option[UUID] = null, totalPrice: BigDecimal = 0, profit: BigDecimal = 0, status: Int = TransactionStatus.INITIAL, date: Long = ZonedDateTime.now().toEpochSecond, paymentId: UUID)
 
-object Transaction extends ((UUID, Int, Option[UUID], Option[UUID], BigDecimal, BigDecimal, Int, Long) => Transaction) {
+object Transaction extends ((UUID, Int, Option[UUID], Option[UUID], BigDecimal, BigDecimal, Int, Long, UUID) => Transaction) {
 
   val customers = TableQuery[CustomerTable]
   val staffs = TableQuery[StaffTable]
   val stores = TableQuery[StoreTable]
+  val payments = TableQuery[PaymentTable]
 
   class TransactionTable(slickTag: SlickTag) extends SlickTable[Transaction](slickTag, "transactions") {
     def staffIdFK = foreignKey("staff_id", staffId, staffs)(_.id)
@@ -28,7 +30,11 @@ object Transaction extends ((UUID, Int, Option[UUID], Option[UUID], BigDecimal, 
 
     def customerId = column[Option[UUID]]("customer_id")
 
-    def * = (id, paymentStatus, staffId, customerId, totalPrice, profit, status, date).mapTo[Transaction]
+    def paymentIdFK = foreignKey("payment_id", paymentId, payments)(_.id)
+
+    def paymentId = column[UUID]("payment_id")
+
+    def * = (id, paymentStatus, staffId, customerId, totalPrice, profit, status, date, paymentId).mapTo[Transaction]
 
     def id = column[UUID]("id", O.PrimaryKey)
 
@@ -56,5 +62,5 @@ object TransactionJsonProtocol extends DefaultJsonProtocol {
     }
   }
 
-  implicit val transactionsJsonProtocolFormat: JsonFormat[Transaction] = jsonFormat8(Transaction)
+  implicit val transactionsJsonProtocolFormat: JsonFormat[Transaction] = jsonFormat9(Transaction)
 }
