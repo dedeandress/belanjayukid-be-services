@@ -33,6 +33,7 @@ class TransactionDetailRepositoryImpl @Inject()(database: AppDatabase, implicit 
                 status = TransactionDetailStatus.EMPTY
               }
               else status = TransactionDetailStatus.NOT_EMPTY
+              play.Logger.warn(s"transactionDetailId: ${item._1}, status: $status")
               QueryUtility.transactionDetailQuery.filter(_.id === UUID.fromString(item._1)).map(_.status).update(status)
             }
             db.run(DBIO.seq(updateStatus: _*)).flatMap{
