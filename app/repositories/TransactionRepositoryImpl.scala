@@ -8,7 +8,7 @@ import javax.inject.Inject
 import models.Transaction
 import modules.AppDatabase
 import repositories.repositoryInterfaces.TransactionRepository
-import utilities.{QueryUtility, TransactionStatus}
+import utilities.{QueryUtility, TransactionDetailStatus, TransactionStatus}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -65,7 +65,7 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
   }
 
   override def updateTotalPrice(transactionId: UUID): Future[BigDecimal] = {
-    db.run(sql"select purchase_price, selling_price, number_of_purchases from transaction_detail td join product_detail pd on td.product_detail_id = pd.id where td.transaction_id::varchar = ${transactionId.toString()}".as[(BigDecimal, BigDecimal, Int)]).flatMap {
+    db.run(sql"select purchase_price, selling_price, number_of_purchases from transaction_detail td join product_detail pd on td.product_detail_id = pd.id where td.transaction_id::varchar = ${transactionId.toString()} and td.status = ${TransactionDetailStatus.NOT_EMPTY}".as[(BigDecimal, BigDecimal, Int)]).flatMap {
       list =>
         play.Logger.warn(list.toString())
         var profit: BigDecimal = 0
@@ -80,7 +80,7 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
   }
 
   override def updateStock(transactionId: UUID): Future[Unit] = {
-    db.run(sql"select p.id::varchar, p.stock, td.number_of_purchases, pd.value from transaction_detail td join product_detail pd on td.product_detail_id = pd.id join products p on pd.product_id = p.id where ${transactionId.toString()} = td.transaction_id::varchar".as[(String, Int, Int, Int)]).flatMap {
+    db.run(sql"select p.id::varchar, p.stock, td.number_of_purchases, pd.value from transaction_detail td join product_detail pd on td.product_detail_id = pd.id join products p on pd.product_id = p.id where ${transactionId.toString()} = td.transaction_id::varchar and td.status = ${TransactionDetailStatus.NOT_EMPTY}".as[(String, Int, Int, Int)]).flatMap {
       list =>
         play.Logger.warn(s"list of transactionDetail : ${list.toString()}")
         var stock = 0
