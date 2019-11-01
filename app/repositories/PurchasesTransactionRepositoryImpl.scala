@@ -18,11 +18,18 @@ class PurchasesTransactionRepositoryImpl @Inject()(database: AppDatabase, implic
 
   import profile.api._
 
-  override def addPurchasesTransaction(purchasesTransaction: PurchasesTransaction): Future[(UUID, Int)] = db.run(Actions.addPurchasesTransaction(purchasesTransaction))
+  override def addPurchasesTransaction(purchasesTransaction: PurchasesTransaction): Future[(UUID, Int)] = {
+    play.Logger.warn(s"add PurchasesTransaction : $purchasesTransaction")
+    db.run(Actions.addPurchasesTransaction(purchasesTransaction))
+  }
 
-  override def getPurchasesTransactionStatus(id: UUID): Future[Option[Int]] = db.run(Actions.getPurchasesTransactionStatus(id))
+  override def getPurchasesTransactionStatus(id: UUID): Future[Option[Int]] = {
+    play.Logger.warn(s"get PurchasesTransactionStatus : $id")
+    db.run(Actions.getPurchasesTransactionStatus(id))
+  }
 
   override def getTotalPriceAndDebt(purchasesTransactionId: UUID): Future[(BigDecimal, BigDecimal)] = {
+    play.Logger.warn(s"get totalPrice and debt : $purchasesTransactionId")
     db.run(sql"select pt.total_price, p.debt from purchases_transactions pt join payments p on pt.payment_id = p.id where pt.id::varchar = ${purchasesTransactionId.toString()}".as[(BigDecimal, BigDecimal)]).map{
       result =>
         (result.head._1, result.head._2)
@@ -30,10 +37,12 @@ class PurchasesTransactionRepositoryImpl @Inject()(database: AppDatabase, implic
   }
 
   override def updatePurchasesTransaction(purchasesTransactionId: UUID, status: Int, staffId: UUID, supplierId: UUID): Future[Option[Int]] = {
+    play.Logger.warn(s"update PurchasesTransaction : $purchasesTransactionId, status: $status, staffId: $staffId, supplierId: $supplierId")
     db.run(Actions.updatePurchasesTransaction(purchasesTransactionId, status, staffId, supplierId))
   }
 
-  override def updateStock(transactionId: UUID): Future[Unit] = {
+  override def updateStock(purchasesTransactionId: UUID): Future[Unit] = {
+    play.Logger.warn(s"updateStock Purchases: $purchasesTransactionId")
     db.run(sql"select p.id::varchar, p.stock, ptd.number_of_purchases, pd.value from purchases_transaction_detail ptd join product_detail pd on ptd.product_detail_id = pd.id join products p on pd.product_id = p.id where ${transactionId.toString()} = ptd.purchases_transaction_id::varchar".as[(String, Int, Int, Int)]).flatMap {
       list =>
         play.Logger.warn(s"list of transactionDetail : ${list.toString()}")
@@ -48,6 +57,7 @@ class PurchasesTransactionRepositoryImpl @Inject()(database: AppDatabase, implic
   }
 
   override def updateTotalPrice(purchasesTransactionId: UUID): Future[BigDecimal] = {
+    play.Logger.warn(s"updateTotalPrice Purchases: $purchasesTransactionId")
     db.run(sql"select purchase_price, number_of_purchases from purchases_transaction_detail ptd join product_detail pd on ptd.product_detail_id = pd.id join products p on pd.product_id = p.id where ${purchasesTransactionId.toString()} = ptd.purchases_transaction_id::varchar".as[(BigDecimal, Int)]).flatMap {
       list =>
         play.Logger.warn(list.toString())
@@ -61,10 +71,12 @@ class PurchasesTransactionRepositoryImpl @Inject()(database: AppDatabase, implic
   }
 
   override def updatePurchasesTransactionStatus(purchasesTransactionId: UUID, status: Int): Future[Option[Int]] = {
+    play.Logger.warn(s"updatePurchasesTransactionStatus Purchases: $purchasesTransactionId, status: $status")
     db.run(Actions.updatePurchasesTransaction(purchasesTransactionId, status))
   }
 
   override def getTotalPrice(purchasesTransactionId: UUID): Future[Option[BigDecimal]] = {
+    play.Logger.warn(s"get totalPrice and debt : $purchasesTransactionId")
     db.run(Actions.getTotalPrice(purchasesTransactionId))
   }
 

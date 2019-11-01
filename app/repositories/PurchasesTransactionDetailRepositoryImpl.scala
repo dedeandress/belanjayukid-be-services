@@ -21,13 +21,13 @@ class PurchasesTransactionDetailRepositoryImpl @Inject()(database: AppDatabase, 
     (QueryUtility.purchasesTransactionDetailQuery returning QueryUtility.purchasesTransactionDetailQuery.map(_.id)).into((transactionDetail, id) => transactionDetail.copy(id = id))
 
   override def addPurchasesTransactionDetails(purchasesTransactionId: UUID, purchasesTransactionDetails: Seq[PurchasesTransactionDetail]): Future[Seq[PurchasesTransactionDetail]] = {
-    play.Logger.warn(s"add transactionDetail with transactionId: $purchasesTransactionId")
+    play.Logger.warn(s"add PurchasesTransactionDetail with transactionId: $purchasesTransactionId")
     play.Logger.warn(s"transactionDetails : ${purchasesTransactionDetails.toString()}")
     db.run{ purchasesTransactionDetailTableWithObject ++= purchasesTransactionDetails }
   }
 
   override def findPurchasesTransactionDetailByPurchasesTransactionId(purchasesTransactionId: UUID): Future[Seq[PurchasesTransactionDetail]] = {
-    play.Logger.warn(s"find transactionDetail with id: $purchasesTransactionId")
+    play.Logger.warn(s"find PurchasesTransactionDetail with id: $purchasesTransactionId")
     db.run(Actions.findPurchasesTransactionDetailByPurchasesTransactionId(purchasesTransactionId))
   }
 
