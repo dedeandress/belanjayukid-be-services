@@ -9,7 +9,7 @@ object SchemaGenerator{
   def run = {
     println("---------------------GENERATING SCHEMA.....")
 
-    val file = File("/Users/dedeandres/Documents/Skripsi_Project_BE/api-belanjayuk.id/belanjayukid-be-services/conf/evolutions/default/1.sql")
+    val file = File("/Users/andresd/Documents/Skripsi/API BelanjaYuk/belanjayukid-be-services/conf/evolutions/default/1.sql")
     val sb = new StringBuilder("# --- !Ups  \n\n")
     QueryUtility.roleQuery.schema.create.statements.foreach(st => sb.append(st.toString + ";\n"))
     sb.append("\n\n")
@@ -43,11 +43,15 @@ object SchemaGenerator{
     sb.append("\n\n")
     QueryUtility.purchasesTransactionQuery.schema.create.statements.foreach(st => sb.append(st.toString + ";\n"))
     sb.append("\n\n")
+    QueryUtility.paymentQuery.schema.create.statements.foreach(st => sb.append(st.toString + ";\n"))
+    sb.append("\n\n")
 
     sb.append("\n\n")
     sb.append("# --- !Downs")
     sb.append("\n\n")
 
+    QueryUtility.paymentQuery.schema.dropIfExists.statements.foreach(st => sb.append(st.toString + ";\n"))
+    sb.append("\n\n")
     QueryUtility.purchasesTransactionQuery.schema.dropIfExists.statements.foreach(st => sb.append(st.toString + ";\n"))
     sb.append("\n\n")
     QueryUtility.suppliersQuery.schema.dropIfExists.statements.foreach(st => sb.append(st.toString + ";\n"))
@@ -73,11 +77,12 @@ object SchemaGenerator{
     QueryUtility.staffQuery.schema.dropIfExists.statements.foreach(st => sb.append(st.toString + ";\n"))
     sb.append("\n\n")
     QueryUtility.shipmentsQuery.schema.dropIfExists.statements.foreach(st => sb.append(st.toString + ";\n"))
-    file.writeAll(sb.toString)
+    sb.append("\n\n")
     QueryUtility.roleQuery.schema.dropIfExists.statements.foreach(st => sb.append(st.toString + ";\n"))
     sb.append("\n\n")
     QueryUtility.categoryQuery.schema.dropIfExists.statements.foreach(st => sb.append(st.toString + ";\n"))
     sb.append("\n\n")
+    file.writeAll(sb.toString)
     play.Logger.info("----------------------FINISHED GENERATING SCHEMA--------------------------")
   }
 }

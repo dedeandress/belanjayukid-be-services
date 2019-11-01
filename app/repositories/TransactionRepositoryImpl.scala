@@ -59,7 +59,10 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
     db.run(Action.updateTransaction(transactionId, status, staffId, customerId))
   }
 
-  override def getAllTransactionWithLimit(limit: Int): Future[TransactionsResult] = db.run(Action.getAllTransactionWithLimit(limit))
+  override def getAllTransactionWithLimit(limit: Int): Future[TransactionsResult] = {
+    play.Logger.warn(s"getAllTransactionWith Limit: $limit")
+    db.run(Action.getAllTransactionWithLimit(limit))
+  }
 
   override def updateTotalPrice(transactionId: UUID): Future[BigDecimal] = {
     db.run(sql"select purchase_price, selling_price, number_of_purchases from transaction_detail td join product_detail pd on td.product_detail_id = pd.id where td.transaction_id::varchar = ${transactionId.toString()}".as[(BigDecimal, BigDecimal, Int)]).flatMap {
@@ -89,6 +92,16 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
         db.run(DBIO.seq(update: _*))
     }
   }
+
+  override def getTotalPriceAndDebt(transactionId: UUID): Future[(BigDecimal, BigDecimal)] = {
+    db.run(sql"select t.total_price, p.debt from transactions t join payments p on t.id = p.transaction_id where ${transactionId.toString()} = t.id::varchar".as[(BigDecimal, BigDecimal)]).map{
+      result =>
+        play.Logger.warn(s"result : ${result.toList.toString()}")
+        (result.head._1, result.head._2)
+    }
+  }
+
+  override def updatePaymentStatus(transactionId: UUID): Future[Int] = ???
 
   object Action {
 
@@ -142,14 +155,13 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
     } yield transaction
 
     def updateTransaction(transactionId: UUID, status: Int, staffId: UUID, customerId: UUID): DBIO[Option[Int]] = for {
-      update <- QueryUtility.transactionsQuery.filter(_.id === transactionId).map(transaction => (transaction.staffId, transaction.customerId)).update(Some(staffId), Some(customerId))
+      update <- QueryUtility.transactionsQuery.filter(_.id === transactionId).map(transaction => (transaction.staffId, transaction.customerId, transaction.status)).update(Some(staffId), Some(customerId), status)
       transactionStatus <- QueryUtility.transactionsQuery.filter(_.id === transactionId).map(_.status).result.headOption
       result <- update match {
         case 0 => DBIO.failed(NotFound("not found transaction id"))
         case _ => DBIO.successful(transactionStatus)
       }
     } yield result
-
   }
 
 }

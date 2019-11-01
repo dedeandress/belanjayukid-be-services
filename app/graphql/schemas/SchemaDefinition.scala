@@ -249,9 +249,10 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       name = "completePayment",
       fieldType = graphQLType.TransactionResultType,
       arguments = List(
-        Argument("transactionId", schema.StringType)
+        Argument("transactionId", schema.StringType),
+        Argument("amountOfPayment", schema.BigDecimalType)
       ),
-      resolve = sangriaContext => transactionResolver.completePayment(sangriaContext.ctx, sangriaContext.arg[String]("transactionId"))
+      resolve = sangriaContext => transactionResolver.completePayment(sangriaContext.ctx, sangriaContext.arg[String]("transactionId"), sangriaContext.arg[BigDecimal]("amountOfPayment"))
     ),
     Field(
       name = "updateStaffTransaction",

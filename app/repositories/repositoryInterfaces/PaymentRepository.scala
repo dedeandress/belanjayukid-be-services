@@ -6,6 +6,6 @@ import scala.concurrent.Future
 
 trait PaymentRepository {
 
-  def addPayment(payment: Payment): Future[BigDecimal]
+  def addPayment(payment: Payment, paymentStatus: Int): Future[BigDecimal]
 
 }

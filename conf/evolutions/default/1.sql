@@ -63,9 +63,16 @@ alter table "purchases_transactions" add constraint "staff_id" foreign key("staf
 alter table "purchases_transactions" add constraint "supplier_id" foreign key("supplier_id") references "supplier"("id") on update NO ACTION on delete NO ACTION;
 
 
+create table "payments" ("id" UUID NOT NULL,"transaction_id" UUID NOT NULL,"debt" DECIMAL(21,2) NOT NULL,"amount_of_payment" DECIMAL(21,2) NOT NULL);
+alter table "payments" add constraint "transaction_id" foreign key("transaction_id") references "transactions"("id") on update NO ACTION on delete NO ACTION;
+
+
 
 
 # --- !Downs
+
+drop table if exists "payments";
+
 
 drop table if exists "purchases_transactions";
 
@@ -104,3 +111,11 @@ drop table if exists "staff";
 
 
 drop table if exists "shipment";
+
+
+drop table if exists "role";
+
+
+drop table if exists "category";
+
+
