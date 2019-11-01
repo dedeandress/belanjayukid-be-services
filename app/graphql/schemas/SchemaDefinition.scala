@@ -308,6 +308,21 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       name = "createPurchasesTransaction",
       fieldType = graphQLType.CreatePurchasesTransactionResultType,
       resolve = sangriaContext => purchasesTransactionResolver.createPurchasesTransaction(sangriaContext.ctx)
+    ),
+    Field(
+      name = "checkoutPurchases",
+      fieldType = graphQLType.PurchasesTransactionResultType,
+      arguments = graphQLType.PurchasesTransactionInputArg :: Nil,
+      resolve = sangriaContext => purchasesTransactionResolver.checkout(sangriaContext.ctx, sangriaContext.arg(graphQLType.PurchasesTransactionInputArg))
+    ),
+    Field(
+      name = "completePaymentPurchases",
+      fieldType = graphQLType.PurchasesTransactionResultType,
+      arguments = List(
+        Argument("purchasesTransactionId", schema.StringType),
+        Argument("amountOfPayment", schema.BigDecimalType)
+      ),
+      resolve = sangriaContext => purchasesTransactionResolver.completePayment(sangriaContext.ctx, sangriaContext.arg[String]("purchasesTransactionId"), sangriaContext.arg[BigDecimal]("amountOfPayment"))
     )
   )
 

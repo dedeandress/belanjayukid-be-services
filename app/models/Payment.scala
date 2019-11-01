@@ -7,20 +7,18 @@ import slick.jdbc.PostgresProfile.api.{Table => SlickTable, _}
 import slick.lifted.{Tag => SlickTag}
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
 
-case class Payment(id: UUID = UUID.randomUUID(), transactionId: UUID, debt: BigDecimal = 0, amountOfPayment: BigDecimal)
+case class Payment(id: UUID = UUID.randomUUID(), debt: BigDecimal = 0, amountOfPayment: BigDecimal = 0)
 
-object Payment extends ((UUID, UUID, BigDecimal, BigDecimal)=>Payment) {
+object Payment extends ((UUID, BigDecimal, BigDecimal)=>Payment) {
 
   val transactions = TableQuery[TransactionTable]
 
   class PaymentTable(slickTag: SlickTag) extends SlickTable[Payment](slickTag, "payments") {
 
-    def id = column[UUID]("id")
-    def transactionId = column[UUID]("transaction_id")
+    def id = column[UUID]("id", O.PrimaryKey)
     def debt = column[BigDecimal]("debt")
     def amountOfPayment = column[BigDecimal]("amount_of_payment")
-    def * = (id, transactionId, debt, amountOfPayment).mapTo[Payment]
-    def transactionIdFK = foreignKey("transaction_id", transactionId, transactions)(_.id)
+    def * = (id, debt, amountOfPayment).mapTo[Payment]
 
   }
 
@@ -37,5 +35,5 @@ object PaymentJsonProtocol extends DefaultJsonProtocol {
     }
   }
 
-  implicit val paymentJsonProtocolFormat: JsonFormat[Payment] = jsonFormat4(Payment)
+  implicit val paymentJsonProtocolFormat: JsonFormat[Payment] = jsonFormat3(Payment)
 }

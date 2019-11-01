@@ -7,6 +7,7 @@ import models.ProductDetail.ProductDetailTable
 import models.ProductStock.ProductStockTable
 import models.Products.ProductsTable
 import models.PurchasesTransaction.PurchasesTransactionTable
+import models.PurchasesTransactionDetail.PurchasesTransactionDetailTable
 import models.Role.RoleTable
 import models.Session.SessionTable
 import models.Shipment.ShipmentTable
@@ -36,5 +37,6 @@ object QueryUtility {
   val transactionDetailQuery = TableQuery[TransactionDetailTable]
   val shipmentsQuery = TableQuery[ShipmentTable]
   val purchasesTransactionQuery = TableQuery[PurchasesTransactionTable]
+  val purchasesTransactionDetailQuery = TableQuery[PurchasesTransactionDetailTable]
   val paymentQuery = TableQuery[PaymentTable]
 }

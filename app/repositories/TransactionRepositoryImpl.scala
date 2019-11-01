@@ -20,7 +20,7 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
   import profile.api._
 
   override def addTransaction(transaction: Transaction): Future[UUID] = {
-    play.Logger.warn(s"get TransactionStatus : $transaction")
+    play.Logger.warn(s"add Transaction : $transaction")
     db.run(Action.addTransaction(transaction))
   }
 

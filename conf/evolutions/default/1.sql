@@ -44,8 +44,12 @@ create table "supplier" ("id" UUID NOT NULL PRIMARY KEY,"name" VARCHAR NOT NULL,
 create table "store" ("id" UUID NOT NULL PRIMARY KEY,"store_name" VARCHAR NOT NULL,"phone_number" VARCHAR NOT NULL,"address" VARCHAR NOT NULL);
 
 
-create table "transactions" ("id" UUID NOT NULL PRIMARY KEY,"payment_status" INTEGER NOT NULL,"staff_id" UUID,"customer_id" UUID,"total_price" DECIMAL(21,2) NOT NULL,"profit" DECIMAL(21,2) NOT NULL,"status" INTEGER NOT NULL,"date" BIGINT NOT NULL);
+create table "payments" ("id" UUID NOT NULL PRIMARY KEY,"debt" DECIMAL(21,2) NOT NULL,"amount_of_payment" DECIMAL(21,2) NOT NULL);
+
+
+create table "transactions" ("id" UUID NOT NULL PRIMARY KEY,"payment_status" INTEGER NOT NULL,"staff_id" UUID,"customer_id" UUID,"total_price" DECIMAL(21,2) NOT NULL,"profit" DECIMAL(21,2) NOT NULL,"status" INTEGER NOT NULL,"date" BIGINT NOT NULL,"payment_id" UUID NOT NULL);
 alter table "transactions" add constraint "customer_id" foreign key("customer_id") references "customer"("id") on update NO ACTION on delete NO ACTION;
+alter table "transactions" add constraint "payment_id" foreign key("payment_id") references "payments"("id") on update NO ACTION on delete NO ACTION;
 alter table "transactions" add constraint "staff_id" foreign key("staff_id") references "staff"("id") on update NO ACTION on delete NO ACTION;
 
 
@@ -58,20 +62,22 @@ create table "shipment" ("id" UUID NOT NULL PRIMARY KEY,"address" VARCHAR NOT NU
 alter table "shipment" add constraint "transaction_id" foreign key("transaction_id") references "transactions"("id") on update NO ACTION on delete NO ACTION;
 
 
-create table "purchases_transactions" ("id" UUID NOT NULL PRIMARY KEY,"payment_status" INTEGER NOT NULL,"staff_id" UUID,"supplier_id" UUID,"total_price" DECIMAL(21,2) NOT NULL,"status" INTEGER NOT NULL,"date" BIGINT NOT NULL);
+create table "purchases_transactions" ("id" UUID NOT NULL PRIMARY KEY,"payment_status" INTEGER NOT NULL,"staff_id" UUID,"supplier_id" UUID,"total_price" DECIMAL(21,2) NOT NULL,"status" INTEGER NOT NULL,"date" BIGINT NOT NULL,"payment_id" UUID NOT NULL);
+alter table "purchases_transactions" add constraint "payment_id" foreign key("payment_id") references "payments"("id") on update NO ACTION on delete NO ACTION;
 alter table "purchases_transactions" add constraint "staff_id" foreign key("staff_id") references "staff"("id") on update NO ACTION on delete NO ACTION;
 alter table "purchases_transactions" add constraint "supplier_id" foreign key("supplier_id") references "supplier"("id") on update NO ACTION on delete NO ACTION;
 
 
-create table "payments" ("id" UUID NOT NULL,"transaction_id" UUID NOT NULL,"debt" DECIMAL(21,2) NOT NULL,"amount_of_payment" DECIMAL(21,2) NOT NULL);
-alter table "payments" add constraint "transaction_id" foreign key("transaction_id") references "transactions"("id") on update NO ACTION on delete NO ACTION;
+create table "purchases_transaction_detail" ("id" UUID NOT NULL PRIMARY KEY,"purchases_transaction_id" UUID NOT NULL,"product_detail_id" UUID NOT NULL,"number_of_purchases" INTEGER NOT NULL);
+alter table "purchases_transaction_detail" add constraint "product_detail_id" foreign key("product_detail_id") references "product_detail"("id") on update NO ACTION on delete NO ACTION;
+alter table "purchases_transaction_detail" add constraint "purchases_transaction_id" foreign key("purchases_transaction_id") references "purchases_transactions"("id") on update NO ACTION on delete NO ACTION;
 
 
 
 
 # --- !Downs
 
-drop table if exists "payments";
+drop table if exists "purchases_transaction_detail";
 
 
 drop table if exists "purchases_transactions";
@@ -117,5 +123,8 @@ drop table if exists "role";
 
 
 drop table if exists "category";
+
+
+drop table if exists "payments";
 
 
