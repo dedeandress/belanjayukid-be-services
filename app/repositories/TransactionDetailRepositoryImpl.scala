@@ -6,7 +6,7 @@ import com.google.inject.Inject
 import models.TransactionDetail
 import modules.AppDatabase
 import repositories.repositoryInterfaces.TransactionDetailRepository
-import utilities.QueryUtility
+import utilities.{QueryUtility, TransactionDetailStatus}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -17,28 +17,58 @@ class TransactionDetailRepositoryImpl @Inject()(database: AppDatabase, implicit 
 
   import profile.api._
 
-  override def addTransactionDetails(details: List[TransactionDetail]): Future[Int] = {
-    play.Logger.warn("add transactionDetail")
+  override def addTransactionDetails(details: List[TransactionDetail], transactionId: UUID): Future[Seq[TransactionDetail]] = {
+    play.Logger.warn(s"add transactionDetail with transactionId: $transactionId")
+    play.Logger.warn(s"transactionDetails : ${details.toString()}")
     val insert = for (detail <- details) yield {
       QueryUtility.transactionDetailQuery += detail
     }
-    db.run(DBIO.seq(insert: _*))
-    Future.successful(1)
+    db.run(DBIO.seq(insert: _*)).flatMap{
+      _ =>
+        db.run(sql"select td.id, pd.value, td.number_of_purchases, p.stock from transaction_detail td join product_detail pd on td.product_detail_id = pd.id join products p on pd.product_id = p.id where td.transaction_id::varchar = ${transactionId.toString()}".as[(String, Int, Int, Int)]).flatMap{
+          list =>
+            var status = 0
+            val updateStatus = for (item <- list) yield {
+              if (item._4 < (item._3 * item._2)) {
+                status = TransactionDetailStatus.EMPTY
+              }
+              else status = TransactionDetailStatus.NOT_EMPTY
+              QueryUtility.transactionDetailQuery.filter(_.id === UUID.fromString(item._1)).map(_.status).update(status)
+            }
+            db.run(DBIO.seq(updateStatus: _*)).flatMap{
+              _ => db.run(Action.findTransactionDetailByTransactionId(transactionId))
+            }
+        }
+    }
   }
 
-  override def addTransactionDetail(detail: TransactionDetail): Future[Int] = db.run(Action.addTransactionDetail(detail))
-
-  override def updateTransactionDetailStatus(transactionDetailId: UUID, status: Int): Future[Option[Int]] = {
-    play.Logger.warn("update transactionDetail status")
-    db.run(Action.updateTransaction(transactionDetailId, status))
+  override def updateTransactionDetailStatus(transactionId: UUID): Future[Unit] = {
+    play.Logger.warn(s"update transactionDetail status with transactionId: $transactionId")
+    db.run(sql"select td.id, pd.value, td.number_of_purchases, p.stock from transaction_detail td join product_detail pd on td.product_detail_id = pd.id join products p on pd.product_id = p.id where td.transaction_id::varchar = ${transactionId.toString()}".as[(String, Int, Int, Int)]).map{
+      list =>
+        var status = 0
+        val updateStatus = for (item <- list) yield {
+          if (item._4 < (item._3 * item._2)) {
+            status = TransactionDetailStatus.EMPTY
+          }
+          else status = TransactionDetailStatus.NOT_EMPTY
+          QueryUtility.transactionDetailQuery.filter(_.id === UUID.fromString(item._1)).map(_.status).update(status)
+        }
+        db.run(DBIO.seq(updateStatus: _*))
+    }
   }
 
   override def findTransactionDetailByTransactionId(transactionId: UUID): Future[Seq[TransactionDetail]] = {
-    play.Logger.warn("find transactionDetail")
+    play.Logger.warn(s"find transactionDetail with id: $transactionId")
     db.run(Action.findTransactionDetailByTransactionId(transactionId))
   }
 
   object Action {
+
+    private def transactionDetailTableWithObject =
+      (QueryUtility.transactionDetailQuery returning QueryUtility.transactionDetailQuery.map(_.id)).into((person, id) => person.copy(id = id))
+
+    def insertAll(list: Seq[TransactionDetail]): Future[Seq[TransactionDetail]] = db.run{ transactionDetailTableWithObject ++= list }
 
     def addTransactionDetail(transactionDetail: TransactionDetail): DBIO[Int] = for {
       id <- QueryUtility.transactionDetailQuery returning QueryUtility.transactionDetailQuery.map(_.status) += transactionDetail

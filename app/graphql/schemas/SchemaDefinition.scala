@@ -16,7 +16,8 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
                                  , roleResolver: RoleResolver, categoryResolver: CategoryResolver
                                  , productResolver: ProductResolver, productStockResolver: ProductStockResolver
                                  , productDetailResolver: ProductDetailResolver, transactionResolver: TransactionResolver
-                                 , customerResolver: CustomerResolver, graphQLType: GraphQLType) {
+                                 , customerResolver: CustomerResolver, purchasesTransactionResolver: PurchasesTransactionResolver
+                                 , graphQLType: GraphQLType) {
 
   val Queries: List[Field[Context, Unit]] = List(
     Field(
@@ -248,9 +249,10 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       name = "completePayment",
       fieldType = graphQLType.TransactionResultType,
       arguments = List(
-        Argument("transactionId", schema.StringType)
+        Argument("transactionId", schema.StringType),
+        Argument("amountOfPayment", schema.BigDecimalType)
       ),
-      resolve = sangriaContext => transactionResolver.completePayment(sangriaContext.ctx, sangriaContext.arg[String]("transactionId"))
+      resolve = sangriaContext => transactionResolver.completePayment(sangriaContext.ctx, sangriaContext.arg[String]("transactionId"), sangriaContext.arg[BigDecimal]("amountOfPayment"))
     ),
     Field(
       name = "updateStaffTransaction",
@@ -300,6 +302,12 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
         Argument("id", schema.StringType)
       ),
       resolve = sangriaContext => customerResolver.deleteCustomer(sangriaContext.ctx, sangriaContext.arg[String]("id"))
+    ),
+    //purchases transaction
+    Field(
+      name = "createPurchasesTransaction",
+      fieldType = graphQLType.CreatePurchasesTransactionResultType,
+      resolve = sangriaContext => purchasesTransactionResolver.createPurchasesTransaction(sangriaContext.ctx)
     )
   )
 

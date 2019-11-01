@@ -2,9 +2,11 @@ package utilities
 
 import models.Category.CategoryTable
 import models.Customer.CustomerTable
+import models.Payment.PaymentTable
 import models.ProductDetail.ProductDetailTable
 import models.ProductStock.ProductStockTable
 import models.Products.ProductsTable
+import models.PurchasesTransaction.PurchasesTransactionTable
 import models.Role.RoleTable
 import models.Session.SessionTable
 import models.Shipment.ShipmentTable
@@ -33,4 +35,6 @@ object QueryUtility {
   val transactionsQuery = TableQuery[TransactionTable]
   val transactionDetailQuery = TableQuery[TransactionDetailTable]
   val shipmentsQuery = TableQuery[ShipmentTable]
+  val purchasesTransactionQuery = TableQuery[PurchasesTransactionTable]
+  val paymentQuery = TableQuery[PaymentTable]
 }

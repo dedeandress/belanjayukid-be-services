@@ -31,4 +31,8 @@ trait TransactionRepository {
 
   def updateStock(transactionId: UUID): Future[Unit]
 
+  def getTotalPriceAndDebt(transactionId: UUID): Future[(BigDecimal, BigDecimal)]
+
+  def updatePaymentStatus(transactionId: UUID): Future[Int]
+
 }

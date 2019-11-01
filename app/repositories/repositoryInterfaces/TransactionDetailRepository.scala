@@ -8,12 +8,10 @@ import scala.concurrent.Future
 
 trait TransactionDetailRepository {
 
-  def addTransactionDetails(details: List[TransactionDetail]): Future[Int]
+  def addTransactionDetails(details: List[TransactionDetail], transactionId: UUID): Future[Seq[TransactionDetail]]
 
-  def updateTransactionDetailStatus(transactionDetailId: UUID, status: Int): Future[Option[Int]]
+  def updateTransactionDetailStatus(transactionId: UUID): Future[Unit]
 
   def findTransactionDetailByTransactionId(transactionId: UUID): Future[Seq[TransactionDetail]]
-
-  def addTransactionDetail(detail: TransactionDetail): Future[Int]
 
 }

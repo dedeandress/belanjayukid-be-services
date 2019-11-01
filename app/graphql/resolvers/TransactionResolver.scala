@@ -17,8 +17,8 @@ class TransactionResolver @Inject()(transactionService: TransactionService, impl
 
   def createTransactionDetail(context: Context, transactionInput: TransactionInput): Future[TransactionResult] = transactionService.addTransactionDetails(context, transactionInput)
 
-  def completePayment(context: Context, transactionId: String): Future[TransactionResult] = transactionService.completePayment(context,
-    transactionId)
+  def completePayment(context: Context, transactionId: String, amountOfPayment: BigDecimal): Future[TransactionResult] = transactionService.completePayment(context,
+    transactionId, amountOfPayment)
 
   def getTransactions(context: Context, status: Int): Future[Seq[Transaction]] = transactionService.getAllTransaction(context, status)
 

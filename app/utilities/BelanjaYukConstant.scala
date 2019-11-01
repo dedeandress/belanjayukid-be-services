@@ -15,6 +15,7 @@ object TransactionStatus{
 object PaymentStatus{
   val UNPAID = 0
   val PAID = 1
+  val DEBT = 2
 }
 
 object TransactionDetailStatus{
@@ -23,4 +24,10 @@ object TransactionDetailStatus{
   val COMPLETED = 2
   val CANCELED = 3
   val RETURNED = 4
+}
+
+object PurchasesTransactionStatus{
+  val INITIAL = 0
+  val ON_PROCESS = 1
+  val COMPLETED = 3
 }

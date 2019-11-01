@@ -122,6 +122,12 @@ class GraphQLType @Inject()(userRepository: UserRepository
     )
   )
 
+  implicit val CreatePurchasesTransactionResultType: ObjectType[Unit, CreatePurchasesTransactionResult] = deriveObjectType[Unit, CreatePurchasesTransactionResult](
+    ReplaceField("purchasesTransactionId",
+      Field("purchasesTransactionId", CustomScalar.UUIDType, resolve = c => c.value.purchasesTransactionId)
+    )
+  )
+
   implicit val LoginUserType: ObjectType[Unit, LoginUser] = deriveObjectType[Unit, LoginUser](
     ObjectTypeName("Credential"),
     ReplaceField("staffId",
