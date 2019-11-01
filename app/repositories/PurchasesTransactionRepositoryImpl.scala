@@ -43,7 +43,7 @@ class PurchasesTransactionRepositoryImpl @Inject()(database: AppDatabase, implic
 
   override def updateStock(purchasesTransactionId: UUID): Future[Unit] = {
     play.Logger.warn(s"updateStock Purchases: $purchasesTransactionId")
-    db.run(sql"select p.id::varchar, p.stock, ptd.number_of_purchases, pd.value from purchases_transaction_detail ptd join product_detail pd on ptd.product_detail_id = pd.id join products p on pd.product_id = p.id where ${transactionId.toString()} = ptd.purchases_transaction_id::varchar".as[(String, Int, Int, Int)]).flatMap {
+    db.run(sql"select p.id::varchar, p.stock, ptd.number_of_purchases, pd.value from purchases_transaction_detail ptd join product_detail pd on ptd.product_detail_id = pd.id join products p on pd.product_id = p.id where ${purchasesTransactionId.toString()} = ptd.purchases_transaction_id::varchar".as[(String, Int, Int, Int)]).flatMap {
       list =>
         play.Logger.warn(s"list of transactionDetail : ${list.toString()}")
         var stock = 0
