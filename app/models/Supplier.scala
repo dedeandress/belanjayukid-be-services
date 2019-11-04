@@ -6,7 +6,7 @@ import slick.jdbc.PostgresProfile.api.{Table => SlickTable, _}
 import slick.lifted.{Tag => SlickTag}
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
 
-case class Supplier(id: UUID, name: String, phoneNumber: String, address: String, status: Boolean = true)
+case class Supplier(id: UUID = UUID.randomUUID(), name: String, phoneNumber: String, address: String, status: Boolean = true)
 
 object Supplier extends ((UUID, String, String, String, Boolean) => Supplier) {
 

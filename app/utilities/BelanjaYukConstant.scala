@@ -23,7 +23,7 @@ object TransactionDetailStatus{
   val NOT_EMPTY = 1
   val COMPLETED = 2
   val CANCELED = 3
-  val RETURNED = 4
+  val REFUNDED = 4
 }
 
 object PurchasesTransactionStatus{

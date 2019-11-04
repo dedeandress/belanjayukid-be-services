@@ -3,6 +3,7 @@ package repositories
 import java.util.UUID
 
 import com.google.inject.Inject
+import graphql.input.CheckTransactionDetailInput
 import models.TransactionDetail
 import modules.AppDatabase
 import repositories.repositoryInterfaces.TransactionDetailRepository
@@ -62,6 +63,13 @@ class TransactionDetailRepositoryImpl @Inject()(database: AppDatabase, implicit 
   override def findTransactionDetailByTransactionId(transactionId: UUID): Future[Seq[TransactionDetail]] = {
     play.Logger.warn(s"find transactionDetail with id: $transactionId")
     db.run(Action.findTransactionDetailByTransactionId(transactionId))
+  }
+
+  override def updateTransactionDetailStatusBulk(transactionDetails: Seq[CheckTransactionDetailInput]): Future[Unit] = {
+    val updateStatus = for (item <- transactionDetails) yield {
+      QueryUtility.transactionDetailQuery.filter(_.id === UUID.fromString(item.transactionDetailId)).map(_.status).update(item.status)
+    }
+    db.run(DBIO.seq(updateStatus: _*))
   }
 
   object Action {

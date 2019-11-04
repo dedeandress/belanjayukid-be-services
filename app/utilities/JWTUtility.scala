@@ -66,6 +66,12 @@ object JWTUtility {
     false
   }
 
+  def isAdminOrChecker(context: Context): Boolean = {
+    if(JWTUtility.getRole(JWTUtility.getToken(context)).equals("Admin") ||
+      JWTUtility.getRole(JWTUtility.getToken(context)).equals("Checker")) return true
+    false
+  }
+
   def isAdmin(context: Context): Boolean = {
     if(JWTUtility.getRole(JWTUtility.getToken(context)).equals("Admin")) return true
     false

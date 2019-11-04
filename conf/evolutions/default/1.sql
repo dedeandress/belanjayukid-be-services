@@ -26,7 +26,7 @@ create table "customer" ("id" UUID NOT NULL PRIMARY KEY,"user_id" UUID NOT NULL,
 alter table "customer" add constraint "user_id" foreign key("user_id") references "users"("id") on update NO ACTION on delete NO ACTION;
 
 
-create table "products" ("id" UUID NOT NULL PRIMARY KEY,"sku" VARCHAR NOT NULL,"name" VARCHAR NOT NULL,"stock" INTEGER NOT NULL,"category_id" UUID NOT NULL,"status" BOOLEAN NOT NULL);
+create table "products" ("id" UUID NOT NULL PRIMARY KEY,"sku" VARCHAR NOT NULL,"name" VARCHAR NOT NULL,"stock" INTEGER NOT NULL,"category_id" UUID NOT NULL,"image_url" VARCHAR NOT NULL,"status" BOOLEAN NOT NULL);
 alter table "products" add constraint "category_id" foreign key("category_id") references "category"("id") on update NO ACTION on delete NO ACTION;
 
 

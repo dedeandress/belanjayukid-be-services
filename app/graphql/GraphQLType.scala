@@ -58,6 +58,10 @@ class GraphQLType @Inject()(userRepository: UserRepository
     ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id))
   )
 
+  implicit val SupplierType: ObjectType[Unit, Supplier] = deriveObjectType[Unit, Supplier](
+    ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id))
+  )
+
   implicit val PaymentType: ObjectType[Unit, Payment] = deriveObjectType[Unit, Payment](
     ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id))
   )
@@ -176,7 +180,9 @@ class GraphQLType @Inject()(userRepository: UserRepository
   implicit val purchasesTransactionDetailInputJsonProtocolFormat: JsonFormat[PurchasesTransactionDetailInput] = jsonFormat2(PurchasesTransactionDetailInput)
   implicit val purchasesTransactionInputJsonProtocolFormat: JsonFormat[PurchasesTransactionInput] = jsonFormat4(PurchasesTransactionInput)
   implicit val productDetailInputJsonProtocolFormat: JsonFormat[ProductDetailInput] = jsonFormat5(ProductDetailInput)
-  implicit val productInputJsonProtocolFormat: JsonFormat[ProductInput] = jsonFormat5(ProductInput)
+  implicit val productInputJsonProtocolFormat: JsonFormat[ProductInput] = jsonFormat6(ProductInput)
+  implicit val checkTransactionDetailInputJsonProtocolFormat: JsonFormat[CheckTransactionDetailInput] = jsonFormat2(CheckTransactionDetailInput)
+  implicit val checkTransactionInputJsonProtocolFormat: JsonFormat[CheckTransactionInput] = jsonFormat2(CheckTransactionInput)
   implicit val userProfileInputType: InputObjectType[UserProfileInput] = deriveInputObjectType[UserProfileInput]()
   implicit val UserInputType: InputObjectType[UserInput] = deriveInputObjectType[UserInput]()
   implicit val productInputType: InputObjectType[ProductInput] = deriveInputObjectType[ProductInput]()
@@ -185,6 +191,8 @@ class GraphQLType @Inject()(userRepository: UserRepository
   implicit val transactionDetailInputType: InputObjectType[TransactionDetailInput] = deriveInputObjectType[TransactionDetailInput]()
   implicit val purchasesTransactionInputType: InputObjectType[PurchasesTransactionInput] = deriveInputObjectType[PurchasesTransactionInput]()
   implicit val purchasesTransactionDetailInputType: InputObjectType[PurchasesTransactionDetailInput] = deriveInputObjectType[PurchasesTransactionDetailInput]()
+  implicit val checkTransactionInputType: InputObjectType[CheckTransactionInput] = deriveInputObjectType[CheckTransactionInput]()
+  implicit val checkTransactionDetailInputType: InputObjectType[CheckTransactionDetailInput] = deriveInputObjectType[CheckTransactionDetailInput]()
   implicit val StaffInputType: InputObjectType[StaffInput] = deriveInputObjectType[StaffInput](
     ReplaceInputField("userInput", InputField("userInput", UserInputType)),
     ReplaceInputField("userProfileInput", InputField("userProfileInput", userProfileInputType)),
@@ -198,6 +206,8 @@ class GraphQLType @Inject()(userRepository: UserRepository
   val TransactionInputArg = Argument("transaction", transactionInputType)
   val PurchasesTransactionInputArg = Argument("purchasesTransaction", purchasesTransactionInputType)
   val PurchasesTransactionDetailInputArg = Argument("purchasesTransactionDetail", purchasesTransactionDetailInputType)
+  val CheckTransactionInputArg = Argument("checkTransaction", checkTransactionInputType)
+  val CheckTransactionDetailInputArg = Argument("checkTransactionDetail", checkTransactionDetailInputType)
   val CustomerInputArg = Argument("customer", userProfileInputType)
   val StaffInputArg = Argument("staff", StaffInputType)
 }

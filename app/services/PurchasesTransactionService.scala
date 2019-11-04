@@ -18,6 +18,7 @@ class PurchasesTransactionService @Inject()(purchasesTransactionRepository: Purc
                                             , paymentRepository: PaymentRepository, implicit val executionContext: ExecutionContext){
 
   def createTransaction(context: Context): Future[CreatePurchasesTransactionResult] ={
+    if (!JWTUtility.isAdmin(context)) throw AuthorizationException("You are not authorized")
     paymentRepository.addPayment(Payment()).flatMap{
       id =>
         purchasesTransactionRepository.addPurchasesTransaction(PurchasesTransaction(paymentId = id)).map{
@@ -28,7 +29,7 @@ class PurchasesTransactionService @Inject()(purchasesTransactionRepository: Purc
   }
 
   def checkoutPurchases(context: Context, purchasesTransactionInput: PurchasesTransactionInput): Future[PurchasesTransactionsResult] = {
-    if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
+    if (!JWTUtility.isAdmin(context)) throw AuthorizationException("You are not authorized")
     var list = new mutable.MutableList[PurchasesTransactionDetail]()
     val purchasesTransactionId = UUID.fromString(purchasesTransactionInput.purchasesTransactionId)
     val staffId = UUID.fromString(purchasesTransactionInput.staffId)
@@ -86,7 +87,7 @@ class PurchasesTransactionService @Inject()(purchasesTransactionRepository: Purc
   }
 
   def completePaymentPurchases(context: Context, id: String, amountOfPayment: BigDecimal): Future[PurchasesTransactionsResult] = {
-    if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
+    if (!JWTUtility.isAdmin(context)) throw AuthorizationException("You are not authorized")
     val purchasesTransactionId = UUID.fromString(id)
     val purchasesTransactionStatus = purchasesTransactionRepository.getPurchasesTransactionStatus(purchasesTransactionId)
 

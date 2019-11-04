@@ -33,12 +33,12 @@ class CustomerService @Inject()(customerRepository: CustomerRepository, userRepo
     customerRepository.findAll()
   }
 
-  def findCustomerById(context: Context, customerId: UUID) = {
+  def findCustomerById(context: Context, customerId: UUID): Future[Option[Customer]] = {
     if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
     customerRepository.findById(customerId)
   }
 
-  def findCustomerByUserId(context: Context, userId: UUID) = {
+  def findCustomerByUserId(context: Context, userId: UUID): Future[Option[Customer]] = {
     if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
     customerRepository.findByUserId(userId)
   }
@@ -49,9 +49,8 @@ class CustomerService @Inject()(customerRepository: CustomerRepository, userRepo
   }
 
   def updateCustomer(context: Context, customerId: UUID, fullName: String, phoneNumber: String
-                     , address: String, noNik: String, dateOfBirth: Long) = {
+                     , address: String, noNik: String, dateOfBirth: Long) : Future[Option[Customer]] = {
     if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
-    val updateUserProfile = UserProfile(address = address, userId = customerId, fullName = fullName, noNik =noNik, phoneNumber= phoneNumber,dateOfBirth = dateOfBirth)
     val update = for {
       customer <- customerRepository.findById(customerId)
       userProfile <- userProfileRepository.findByUserId(customer.get.userId)

@@ -2,6 +2,7 @@ package repositories.repositoryInterfaces
 
 import java.util.UUID
 
+import graphql.input.CheckTransactionDetailInput
 import models.TransactionDetail
 
 import scala.concurrent.Future
@@ -13,5 +14,7 @@ trait TransactionDetailRepository {
   def updateTransactionDetailStatus(transactionId: UUID): Future[Unit]
 
   def findTransactionDetailByTransactionId(transactionId: UUID): Future[Seq[TransactionDetail]]
+
+  def updateTransactionDetailStatusBulk(transactionDetail: Seq[CheckTransactionDetailInput]): Future[Unit]
 
 }

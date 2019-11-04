@@ -17,7 +17,7 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
                                  , productResolver: ProductResolver, productStockResolver: ProductStockResolver
                                  , productDetailResolver: ProductDetailResolver, transactionResolver: TransactionResolver
                                  , customerResolver: CustomerResolver, purchasesTransactionResolver: PurchasesTransactionResolver
-                                 , graphQLType: GraphQLType) {
+                                 , supplierResolver: SupplierResolver, graphQLType: GraphQLType) {
 
   val Queries: List[Field[Context, Unit]] = List(
     Field(
@@ -110,6 +110,20 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
         Argument("customerId", schema.StringType)
       ),
       resolve = sangriaContext => customerResolver.customer(sangriaContext.ctx, sangriaContext.arg[String]("customerId"))
+    ),
+    //supplier
+    Field(
+      name = "suppliers",
+      fieldType = ListType(graphQLType.SupplierType),
+      resolve = sangriaContext => supplierResolver.suppliers(sangriaContext.ctx)
+    ),
+    Field(
+      name = "supplier",
+      fieldType = OptionType(graphQLType.SupplierType),
+      arguments = List(
+        Argument("supplierId", schema.StringType)
+      ),
+      resolve = sangriaContext => supplierResolver.supplier(sangriaContext.ctx, sangriaContext.arg[String]("supplierId"))
     )
   )
 
@@ -272,6 +286,36 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       ),
       resolve = sangriaContext => transactionResolver.updateCustomer(sangriaContext.ctx, UUID.fromString(sangriaContext.arg[String]("transactionId")), UUID.fromString(sangriaContext.arg[String]("customerId")))
     ),
+    //supplier
+    Field(
+      name = "createSupplier",
+      fieldType = OptionType(graphQLType.SupplierType),
+      arguments = List(
+        Argument("name", schema.StringType),
+        Argument("phoneNumber", schema.StringType),
+        Argument("address", schema.StringType),
+      ),
+      resolve = sangriaContext => supplierResolver.createSupplier(sangriaContext.ctx, sangriaContext.arg[String]("name"), sangriaContext.arg[String]("phoneNumber"), sangriaContext.arg[String]("address"))
+    ),
+    Field(
+      name = "updateSupplier",
+      fieldType = OptionType(graphQLType.SupplierType),
+      arguments = List(
+        Argument("id", schema.StringType),
+        Argument("name", schema.StringType),
+        Argument("phoneNumber", schema.StringType),
+        Argument("address", schema.StringType),
+      ),
+      resolve = sangriaContext => supplierResolver.updateSupplier(sangriaContext.ctx, sangriaContext.arg[String]("id"), sangriaContext.arg[String]("name"), sangriaContext.arg[String]("phoneNumber"), sangriaContext.arg[String]("address"))
+    ),
+    Field(
+      name = "deleteSupplier",
+      fieldType = schema.IntType,
+      arguments = List(
+        Argument("id", schema.StringType)
+      ),
+      resolve = sangriaContext => supplierResolver.deleteSupplier(sangriaContext.ctx, sangriaContext.arg[String]("id"))
+    ),
     //customer
     Field(
       name = "createCustomer",
@@ -323,6 +367,13 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
         Argument("amountOfPayment", schema.BigDecimalType)
       ),
       resolve = sangriaContext => purchasesTransactionResolver.completePayment(sangriaContext.ctx, sangriaContext.arg[String]("purchasesTransactionId"), sangriaContext.arg[BigDecimal]("amountOfPayment"))
+    ),
+    //checker
+    Field(
+      name = "checkTransaction",
+      fieldType = OptionType(schema.IntType),
+      arguments = graphQLType.CheckTransactionInputArg :: Nil,
+      resolve = sangriaContext => transactionResolver.checkTransaction(sangriaContext.ctx, sangriaContext.arg(graphQLType.CheckTransactionInputArg))
     )
   )
 
