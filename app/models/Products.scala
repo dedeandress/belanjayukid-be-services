@@ -7,16 +7,16 @@ import slick.jdbc.PostgresProfile.api.{Table => SlickTable, _}
 import slick.lifted.{Tag => SlickTag}
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
 
-case class Products(id: UUID = UUID.randomUUID(), SKU: String, name: String, stock: Int = 0, categoryId: UUID, status: Boolean = true)
+case class Products(id: UUID = UUID.randomUUID(), SKU: String, name: String, stock: Int = 0, categoryId: UUID, imageUrl: String = "", status: Boolean = true)
 
-object Products extends ((UUID, String, String, Int, UUID, Boolean) => Products) {
+object Products extends ((UUID, String, String, Int, UUID, String, Boolean) => Products) {
 
   val categories = TableQuery[CategoryTable]
 
   class ProductsTable(slickTag: SlickTag) extends SlickTable[Products](slickTag, "products") {
     def categoryIdFK = foreignKey("category_id", categoryId, categories)(_.id)
 
-    def * = (id, SKU, name, stock, categoryId, status).mapTo[Products]
+    def * = (id, SKU, name, stock, categoryId, imageUrl, status).mapTo[Products]
 
     def id = column[UUID]("id", O.PrimaryKey)
 
@@ -25,6 +25,8 @@ object Products extends ((UUID, String, String, Int, UUID, Boolean) => Products)
     def name = column[String]("name")
 
     def stock = column[Int]("stock")
+
+    def imageUrl = column[String]("image_url")
 
     def status = column[Boolean]("status")
 
@@ -44,5 +46,5 @@ object ProductJsonProtocol extends DefaultJsonProtocol {
     }
   }
 
-  implicit val productJsonProtocolFormat: JsonFormat[Product] = jsonFormat6(Products)
+  implicit val productJsonProtocolFormat: JsonFormat[Product] = jsonFormat7(Products)
 }

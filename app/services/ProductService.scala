@@ -23,7 +23,7 @@ class ProductService @Inject()(productsRepository: ProductsRepository, categoryR
   def addProduct(context: Context, productInput: ProductInput): Future[Products] = {
     if (!JWTUtility.isAdmin(context)) throw AuthorizationException("You are not authorized")
     for {
-      product <- productsRepository.addProduct(new Products(SKU = productInput.SKU, name = productInput.name, categoryId = UUID.fromString(productInput.categoryId)))
+      product <- productsRepository.addProduct(new Products(SKU = productInput.SKU, name = productInput.name, imageUrl = productInput.imageUrl, categoryId = UUID.fromString(productInput.categoryId)))
       _ <- productDetailRepository.addProductDetail(product.id, productInput)
     } yield product
   }

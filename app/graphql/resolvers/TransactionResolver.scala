@@ -4,7 +4,7 @@ import java.util.UUID
 
 import graphql.Context
 import graphql.`type`.TransactionsResult
-import graphql.input.TransactionInput
+import graphql.input.{CheckTransactionInput, TransactionInput}
 import javax.inject.Inject
 import models.{CreateTransactionResult, Transaction, TransactionResult}
 import services.TransactionService
@@ -29,5 +29,7 @@ class TransactionResolver @Inject()(transactionService: TransactionService, impl
   def updateCustomer(context: Context, transactionId: UUID, customerId: UUID): Future[Option[UUID]] = transactionService.updateCustomer(context, transactionId, customerId)
 
   def getTransactionsWithLimit(context: Context, limit: Int): Future[TransactionsResult] = transactionService.getTransactionsWithLimit(context, limit)
+
+  def checkTransaction(context: Context, checkTransaction: CheckTransactionInput): Future[Option[Int]] = transactionService.checkTransaction(context, checkTransaction)
 
 }

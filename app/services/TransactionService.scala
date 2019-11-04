@@ -7,14 +7,13 @@ import com.google.inject.Inject
 import errors.AuthorizationException
 import graphql.Context
 import graphql.`type`.TransactionsResult
-import graphql.input.TransactionInput
+import graphql.input.{CheckTransactionInput, TransactionInput}
 import models.{CreateTransactionResult, Payment, Transaction, TransactionDetail, TransactionResult}
 import repositories.repositoryInterfaces.{PaymentRepository, ProductDetailRepository, ProductsRepository, TransactionDetailRepository, TransactionRepository}
 import utilities.{JWTUtility, PaymentStatus, TransactionDetailStatus, TransactionStatus}
 
 import scala.collection.mutable
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 
 class TransactionService @Inject()(transactionRepository: TransactionRepository, transactionDetailRepository: TransactionDetailRepository
                                    , productRepository: ProductsRepository, productDetailRepository: ProductDetailRepository
@@ -164,6 +163,17 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
   def getTransactionsWithLimit(context: Context, limit: Int): Future[TransactionsResult] = {
     if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
     transactionRepository.getAllTransactionWithLimit(limit)
+  }
+
+  def checkTransaction(context: Context, checkTransaction: CheckTransactionInput): Future[Option[Int]] ={
+    if (!JWTUtility.isAdminOrChecker(context)) throw AuthorizationException("You are not authorized")
+    val transactionId = UUID.fromString(checkTransaction.transactionId)
+    var transactionStatus = TransactionStatus.ON_PROCESS
+    val searchRefundTransaction = checkTransaction.transactionDetail.find(_.status == TransactionDetailStatus.REFUNDED)
+    if(searchRefundTransaction.nonEmpty) transactionStatus = TransactionStatus.ON_REFUND else transactionStatus = TransactionStatus.COMPLETED
+    transactionDetailRepository.updateTransactionDetailStatusBulk(checkTransaction.transactionDetail).flatMap{
+      _ => transactionRepository.updateTransactionStatus(transactionId, transactionStatus)
+    }
   }
 
 }
