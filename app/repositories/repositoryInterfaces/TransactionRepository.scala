@@ -27,7 +27,7 @@ trait TransactionRepository {
 
   def getAllTransactionWithLimit(limit: Int): Future[TransactionsResult]
 
-  def updateTotalPrice(transactionId: UUID): Future[BigDecimal]
+  def updateTotalPrice(transactionId: UUID, transactionDetailStatus: Int): Future[BigDecimal]
 
   def updateStock(transactionId: UUID): Future[Unit]
 

@@ -4,9 +4,9 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 import com.google.inject.Inject
-import errors.AuthorizationException
+import errors.{AuthorizationException, NotFound}
 import graphql.Context
-import graphql.`type`.TransactionsResult
+import graphql.`type`.{RefundTransactionResult, TransactionsResult}
 import graphql.input.{CheckTransactionInput, TransactionInput}
 import models.{CreateTransactionResult, Payment, Transaction, TransactionDetail, TransactionResult}
 import repositories.repositoryInterfaces.{PaymentRepository, ProductDetailRepository, ProductsRepository, TransactionDetailRepository, TransactionRepository}
@@ -54,7 +54,7 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
                 status =>
                   transactionDetailRepository.findTransactionDetailByTransactionId(transactionId).flatMap {
                     transactionDetailList =>
-                      transactionRepository.updateTotalPrice(transactionId).flatMap{
+                      transactionRepository.updateTotalPrice(transactionId, TransactionDetailStatus.NOT_EMPTY).flatMap{
                         totalPrice =>
                           var paymentStatus = 0
                           var debt = totalPrice - amountOfPayment
@@ -120,7 +120,7 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
         if (status.get == TransactionStatus.INITIAL) {
           transactionDetailRepository.addTransactionDetails(list.toList, transactionId).flatMap {
             transactionDetails =>
-              transactionRepository.updateTotalPrice(transactionId).flatMap{
+              transactionRepository.updateTotalPrice(transactionId, TransactionDetailStatus.NOT_EMPTY).flatMap{
                 totalPrice =>
                   transactionRepository.updateTransaction(transactionId, TransactionStatus.ON_PROCESS, staffId, customerId).flatMap{
                     updateStatus =>
@@ -131,7 +131,7 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
         } else {
           transactionDetailRepository.findTransactionDetailByTransactionId(transactionId).flatMap {
             details =>
-              transactionRepository.updateTotalPrice(transactionId).flatMap{
+              transactionRepository.updateTotalPrice(transactionId, TransactionDetailStatus.NOT_EMPTY).flatMap{
                 totalPrice=>
                   Future.successful(TransactionResult(status.get, details, totalPrice))
               }
@@ -174,6 +174,38 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
     transactionDetailRepository.updateTransactionDetailStatusBulk(checkTransaction.transactionDetail).flatMap{
       _ => transactionRepository.updateTransactionStatus(transactionId, transactionStatus)
     }
+  }
+
+  def refundTransaction(context: Context, id: String): Future[RefundTransactionResult] = {
+    if (!JWTUtility.isAdminOrChecker(context)) throw AuthorizationException("You are not authorized")
+    val transactionId = UUID.fromString(id)
+    transactionDetailRepository.findTransactionDetailByTransactionIdByStatus(transactionId, TransactionDetailStatus.REFUNDED).flatMap{
+      result =>
+        transactionRepository.updateTotalPrice(transactionId, TransactionDetailStatus.COMPLETED).flatMap{
+          totalPrice=>
+            Future.successful(RefundTransactionResult(result._1, result._2, totalPrice))
+        }
+    }
+  }
+
+  def completeRefund(context: Context, id: String): Future[Option[Transaction]] = {
+    if (!JWTUtility.isAdminOrChecker(context)) throw AuthorizationException("You are not authorized")
+    val transactionId = UUID.fromString(id)
+    transactionRepository.getTransactionStatus(transactionId).flatMap{
+      status =>
+        if(status.isEmpty) throw NotFound(s"transactionId Not Found")
+        else if (status.get == TransactionStatus.ON_REFUND){
+          transactionRepository.updateTransactionStatus(transactionId, TransactionStatus.COMPLETED).flatMap{
+            _ =>
+              transactionRepository.getTransaction(transactionId)
+          }
+        }
+        else{
+          transactionRepository.getTransaction(transactionId)
+        }
+    }
+  }.recover{
+    case x: NotFound => throw NotFound(s"$x")
   }
 
 }

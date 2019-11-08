@@ -3,7 +3,7 @@ package graphql.resolvers
 import java.util.UUID
 
 import graphql.Context
-import graphql.`type`.TransactionsResult
+import graphql.`type`.{RefundTransactionResult, TransactionsResult}
 import graphql.input.{CheckTransactionInput, TransactionInput}
 import javax.inject.Inject
 import models.{CreateTransactionResult, Transaction, TransactionResult}
@@ -31,5 +31,9 @@ class TransactionResolver @Inject()(transactionService: TransactionService, impl
   def getTransactionsWithLimit(context: Context, limit: Int): Future[TransactionsResult] = transactionService.getTransactionsWithLimit(context, limit)
 
   def checkTransaction(context: Context, checkTransaction: CheckTransactionInput): Future[Option[Int]] = transactionService.checkTransaction(context, checkTransaction)
+
+  def refundTransaction(context: Context, transactionId: String): Future[RefundTransactionResult] = transactionService.refundTransaction(context, transactionId)
+
+  def completeRefund(context: Context, transactionId: String): Future[Option[Transaction]] = transactionService.completeRefund(context, transactionId)
 
 }

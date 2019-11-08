@@ -64,8 +64,8 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
     db.run(Action.getAllTransactionWithLimit(limit))
   }
 
-  override def updateTotalPrice(transactionId: UUID): Future[BigDecimal] = {
-    db.run(sql"select purchase_price, selling_price, number_of_purchases from transaction_detail td join product_detail pd on td.product_detail_id = pd.id where td.transaction_id::varchar = ${transactionId.toString()} and td.status = ${TransactionDetailStatus.NOT_EMPTY}".as[(BigDecimal, BigDecimal, Int)]).flatMap {
+  override def updateTotalPrice(transactionId: UUID, transactionDetailStatus: Int): Future[BigDecimal] = {
+    db.run(sql"select purchase_price, selling_price, number_of_purchases from transaction_detail td join product_detail pd on td.product_detail_id = pd.id where td.transaction_id::varchar = ${transactionId.toString()} and td.status = ${transactionDetailStatus}".as[(BigDecimal, BigDecimal, Int)]).flatMap {
       list =>
         play.Logger.warn(list.toString())
         var profit: BigDecimal = 0
