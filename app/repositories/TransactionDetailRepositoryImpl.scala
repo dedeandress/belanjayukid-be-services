@@ -72,6 +72,16 @@ class TransactionDetailRepositoryImpl @Inject()(database: AppDatabase, implicit 
     db.run(DBIO.seq(updateStatus: _*))
   }
 
+  override def findTransactionDetailByTransactionIdByStatus(transactionId: UUID, transactionDetailStatus: Int): Future[(Seq[TransactionDetail], BigDecimal)] = {
+    db.run(Action.findTransactionDetailByTransactionIdByStatus(transactionId, transactionDetailStatus)).flatMap{
+      transactionDetails =>
+        Action.calculateRefund(transactionId, transactionDetailStatus).flatMap{
+          refund =>
+            Future.successful(transactionDetails, refund)
+        }
+    }
+  }
+
   object Action {
 
     private def transactionDetailTableWithObject =
@@ -95,6 +105,23 @@ class TransactionDetailRepositoryImpl @Inject()(database: AppDatabase, implicit 
     def getTransactionDetailStatus(transactionId: UUID): DBIO[Option[Int]] = for {
       details <- QueryUtility.transactionDetailQuery.filter(_.id === transactionId).map(_.status).result.headOption
     } yield details
+
+    def findTransactionDetailByTransactionIdByStatus(transactionId: UUID, transactionDetailStatus: Int): DBIO[Seq[TransactionDetail]] = for {
+      details <- QueryUtility.transactionDetailQuery.filter(detail => detail.transactionId === transactionId && detail.status === transactionDetailStatus).result
+    }yield details
+
+    def calculateRefund(transactionId: UUID, transactionDetailStatus: Int): Future[BigDecimal] = {
+      db.run(sql"select selling_price, number_of_purchases from transaction_detail td join product_detail pd on td.product_detail_id = pd.id where td.transaction_id::varchar = ${transactionId.toString()} and td.status = ${transactionDetailStatus}".as[(BigDecimal, Int)]).flatMap {
+        list =>
+          play.Logger.warn(list.toString())
+          var totalRefund: BigDecimal = 0
+          for (item <- list) {
+            totalRefund += item._1 * item._2
+          }
+          play.Logger.warn(s"totalRefund: $totalRefund")
+          Future.successful(totalRefund)
+      }
+    }
   }
 
 }

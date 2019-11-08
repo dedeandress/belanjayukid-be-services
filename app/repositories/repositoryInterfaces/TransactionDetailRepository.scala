@@ -17,4 +17,6 @@ trait TransactionDetailRepository {
 
   def updateTransactionDetailStatusBulk(transactionDetail: Seq[CheckTransactionDetailInput]): Future[Unit]
 
+  def findTransactionDetailByTransactionIdByStatus(transactionId: UUID, transactionDetailStatus: Int) : Future[(Seq[TransactionDetail], BigDecimal)]
+
 }

@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.http.scaladsl.model.DateTime
 import com.google.inject.Inject
-import graphql.`type`.{ProductsResult, PurchasesTransactionsResult, TransactionsResult}
+import graphql.`type`.{ProductsResult, PurchasesTransactionsResult, RefundTransactionResult, TransactionsResult}
 import graphql.input._
 import models._
 import repositories.repositoryInterfaces._
@@ -121,6 +121,12 @@ class GraphQLType @Inject()(userRepository: UserRepository
   implicit val TransactionResultType: ObjectType[Unit, TransactionResult] = deriveObjectType[Unit, TransactionResult](
     ReplaceField("details",
       Field("details", ListType(TransactionDetailType), resolve = c => c.value.details)
+    )
+  )
+
+  implicit val RefundTransactionResult: ObjectType[Unit, RefundTransactionResult] = deriveObjectType[Unit, RefundTransactionResult](
+    ReplaceField("transactionDetails",
+      Field("transactionDetails", ListType(TransactionDetailType), resolve = c => c.value.transactionDetails)
     )
   )
 

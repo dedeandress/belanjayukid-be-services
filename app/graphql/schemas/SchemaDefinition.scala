@@ -374,6 +374,23 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       fieldType = OptionType(schema.IntType),
       arguments = graphQLType.CheckTransactionInputArg :: Nil,
       resolve = sangriaContext => transactionResolver.checkTransaction(sangriaContext.ctx, sangriaContext.arg(graphQLType.CheckTransactionInputArg))
+    ),
+    //refund transaction
+    Field(
+      name = "refundTransaction",
+      fieldType = graphQLType.RefundTransactionResult,
+      arguments = List(
+        Argument("transactionId", schema.StringType)
+      ),
+      resolve = sangriaContext => transactionResolver.refundTransaction(sangriaContext.ctx, sangriaContext.arg[String]("transactionId"))
+    ),
+    Field(
+      name = "completeRefund",
+      fieldType = OptionType(graphQLType.TransactionType),
+      arguments = List(
+        Argument("transactionId", schema.StringType)
+      ),
+      resolve = sangriaContext => transactionResolver.completeRefund(sangriaContext.ctx, sangriaContext.arg[String]("transactionId"))
     )
   )
 
