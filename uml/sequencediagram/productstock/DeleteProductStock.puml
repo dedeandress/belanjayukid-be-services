@@ -1,0 +1,51 @@
+@startuml
+title: Delete ProductStock Sequence Diagram
+actor user
+participant BelanjaYukFE
+database BelanjaYukDB
+box "BelanjaYuk.id" #LightBlue
+participant BelanjaYukBE
+participant ProductStockResolver
+participant ProductStockService
+participant ProductStockRepository
+participant JWTUtility
+participant BelanjaYukDB
+end box
+
+user -> BelanjaYukFE ++ : delete product stock menu
+BelanjaYukFE -> BelanjaYukBE ++ : /graphql delete product stock
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation{
+          deleteProductStock(productStockId)
+        }
+    end note
+BelanjaYukBE -> ProductStockResolver ++ : call ProductStockResolver
+ProductStockResolver -> ProductStockService ++ : call ProductStockService
+    note left
+    passing:
+    - context
+    - productStockId
+    end note
+ProductStockService -> JWTUtility: validate token and claim role
+alt #LightGreen token is not expired
+    ProductStockService -> ProductStockRepository ++ : update status product stock to false
+    ProductStockRepository -> BelanjaYukDB ++ : update category set status is passed from request
+    BelanjaYukDB --> ProductStockRepository -- : affected row no error
+    ProductStockRepository --> ProductStockService -- : affected row no error
+    ProductStockService --> ProductStockResolver : product stock deleted
+    ProductStockResolver --> BelanjaYukBE : product stock deleted
+    BelanjaYukBE --> BelanjaYukFE : product stock deleted
+    alt #LightYellow role is admin or cashier
+        else error: role is not admin or cashier
+        ProductStockService --> ProductStockResolver : Error: Not Authorized
+        ProductStockResolver --> BelanjaYukBE : Error: Not Authorized
+        BelanjaYukBE --> BelanjaYukFE: Message: You're not authorize
+    end alt
+    else token is expired
+    ProductStockService --> ProductStockResolver -- : Error: token expired
+    ProductStockResolver --> BelanjaYukBE -- : Error: token expired
+    BelanjaYukBE --> BelanjaYukFE -- : Message: token was expired
+end alt
+@enduml

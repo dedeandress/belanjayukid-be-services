@@ -1,0 +1,73 @@
+@startuml
+title: Create Product Sequence Diagram
+actor user
+participant BelanjaYukFE
+database BelanjaYukDB
+box "BelanjaYuk.id" #LightBlue
+participant BelanjaYukBE
+participant ProductResolver
+participant ProductService
+participant ProductRepository
+participant JWTUtility
+participant BelanjaYukDB
+end box
+
+user -> BelanjaYukFE ++ : Product menu
+BelanjaYukFE -> BelanjaYukBE ++ : /graphql add product
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation {
+          createProduct(
+            product: $productInput
+          ) : Product
+        }
+
+        ProductInput(
+            name,
+            SKU,
+            stock,
+            categoryId,
+            productDetailInput(
+                productStockId,
+                sellingPrice,
+                purchasePrice,
+                value,
+                productId
+            )
+        )
+    end note
+BelanjaYukBE -> ProductResolver ++ : call ProductResolver
+ProductResolver -> ProductService ++ : call ProductService
+    note left
+    passing:
+    - context
+    - productInput
+    end note
+ProductService -> JWTUtility: validate token and claim role
+alt #LightGreen token is not expired
+    alt #LightYellow role is admin or cashier
+        ProductService -> ProductRepository ++ : call add product with passing Product model
+        ProductRepository -> BelanjaYukDB ++ : insert into Product table
+        BelanjaYukDB --> ProductRepository -- : affected rows no error and return product model
+        ProductRepository --> ProductService -- : affected rows no error and return product model
+        ProductService -> ProductRepository ++ : call add product detail with passing list of ProductDetail
+        ProductRepository -> BelanjaYukDB ++ : bulk insert product detail
+        BelanjaYukDB --> ProductRepository -- : affected rows no error
+        ProductRepository --> BelanjaYukDB -- : affected rows no error
+        ProductService --> ProductResolver: product model
+        ProductResolver --> BelanjaYukBE: product model
+        BelanjaYukBE --> BelanjaYukFE: product model
+        else error: role is not admin or cashier
+        ProductService --> ProductResolver : Error: Not Authorized
+        ProductResolver --> BelanjaYukBE : Error: Not Authorized
+        BelanjaYukBE --> BelanjaYukFE: Message: You're not authorize
+    end alt
+    else token is expired
+    ProductService --> ProductResolver -- : Error: token expired
+    ProductResolver --> BelanjaYukBE -- : Error: token expired
+    BelanjaYukBE --> BelanjaYukFE -- : Message: token was expired
+end alt
+
+
+@enduml

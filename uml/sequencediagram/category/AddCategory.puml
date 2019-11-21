@@ -1,0 +1,55 @@
+@startuml
+title: Add Category Sequence Diagram
+actor user
+participant BelanjaYukFE
+database BelanjaYukDB
+box "BelanjaYuk.id" #LightBlue
+participant BelanjaYukBE
+participant CategoryResolver
+participant CategoryService
+participant CategoryRepository
+participant JWTUtility
+participant BelanjaYukDB
+end box
+
+user -> BelanjaYukFE ++ : add category menu
+BelanjaYukFE -> BelanjaYukBE ++ : /graphql create category
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation{
+          createCategory(name){
+            name
+            status
+            id
+          }
+        }
+    end note
+BelanjaYukBE -> CategoryResolver ++ : call CategoryResolver
+CategoryResolver -> CategoryService ++ : call CategoryService
+    note left
+    passing:
+    - context
+    - Category(id: UUID, name: String, status: Boolean)
+    end note
+CategoryService -> JWTUtility: validate token and claim role
+alt #LightGreen token is not expired
+    CategoryService -> CategoryRepository ++ : add category passing category model
+    CategoryRepository -> BelanjaYukDB ++ : insert into model value is passed from request
+    BelanjaYukDB --> CategoryRepository -- : affected row no error and return category
+    CategoryRepository --> CategoryService -- : affected row no error and return category
+    CategoryService --> CategoryResolver : category
+    CategoryResolver --> BelanjaYukBE : category
+    BelanjaYukBE --> BelanjaYukFE : category
+    alt #LightYellow role is admin or cashier
+        else error: role is not admin or cashier
+        CategoryService --> CategoryResolver : Error: Not Authorized
+        CategoryResolver --> BelanjaYukBE : Error: Not Authorized
+        BelanjaYukBE --> BelanjaYukFE: Message: You're not authorize
+    end alt
+    else token is expired
+    CategoryService --> CategoryResolver -- : Error: token expired
+    CategoryResolver --> BelanjaYukBE -- : Error: token expired
+    BelanjaYukBE --> BelanjaYukFE -- : Message: token was expired
+end alt
+@enduml

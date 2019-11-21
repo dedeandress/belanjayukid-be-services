@@ -1,0 +1,81 @@
+@startuml
+actor user
+database BelanjaYukDB
+
+box "BelanjaYuk.id" #LightBlue
+participant BelanjaYukFE
+participant BelanjaYukBE
+participant StaffResolver
+participant StaffService
+participant UserRepository
+participant BCryptUtility
+participant StaffRepository
+participant JWTUtility
+participant BelanjaYukDB
+end box
+
+user -> BelanjaYukFE ++ : login
+BelanjaYukFE -> BelanjaYukBE: POST: /graphql
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation{
+         login(username, password){
+           bearerToken
+           id
+         }
+       }
+    end note
+BelanjaYukBE -> StaffResolver ++: Call StaffResolver
+    note left
+    passing:
+    - username
+    - password
+    end note
+StaffResolver -> StaffService: Call StaffService
+    note left
+    passing:
+    - context
+    - username
+    - password
+    end note
+StaffService -> UserRepository: Get user with given username
+UserRepository --> StaffService: User model or null
+UserRepository -> BelanjaYukDB: Select user by username
+BelanjaYukDB --> UserRepository: User model or null
+alt #LightYellow user is not null
+    StaffService -> BCryptUtility: Compare user model with credential given in request
+    alt No Error
+        StaffService -> StaffRepository: Get staff by userId
+        StaffRepository -> BelanjaYukDB: select staff by userId
+        BelanjaYukDB --> StaffRepository: Staff model and role or null
+        StaffRepository --> StaffService: Staff model and role or null
+        StaffService -> JWTUtility: generate JWT
+        note left
+        passing:
+        - userId
+        - roleName
+        end note
+        StaffService --> StaffResolver: LoginUser model
+        note right
+        LoginUser body:
+        - Bearer Token
+        - username
+        - role name
+        - staff id
+        end note
+        StaffResolver --> BelanjaYukBE: LoginUser model
+        BelanjaYukBE --> BelanjaYukFE: BearerToken, staffId
+        else error
+        StaffService --> StaffResolver: Error: username and password doesn't exist
+        StaffResolver --> BelanjaYukBE: message: username and password doesn't exist
+        BelanjaYukBE --> BelanjaYukFE: message: username and password doesn't exist
+    end
+    else error
+    StaffService --> StaffResolver: Error: Cannot find user with given username
+    StaffResolver --> BelanjaYukBE: message: username and password doesn't exist
+    BelanjaYukBE --> BelanjaYukFE: message: username and password doesn't exist
+end
+
+
+@enduml
