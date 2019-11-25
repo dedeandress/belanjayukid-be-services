@@ -42,7 +42,7 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       arguments = List(
         Argument("productId", schema.StringType)
       ),
-      resolve = sangriaContext => productResolver.product(sangriaContext.ctx, UUID.fromString(sangriaContext.arg[String]("productId")))
+      resolve = sangriaContext => productResolver.product(sangriaContext.ctx, sangriaContext.arg[String]("productId"))
     ),
     Field(
       name = "products",
@@ -214,7 +214,7 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
         Argument("categoryId", schema.StringType),
         Argument("name", schema.StringType)
       ),
-      resolve = sangriaContext => productResolver.updateProduct(sangriaContext.ctx, UUID.fromString(sangriaContext.arg[String]("productId")), UUID.fromString(sangriaContext.arg[String]("categoryId")), sangriaContext.arg[String]("name"))
+      resolve = sangriaContext => productResolver.updateProduct(sangriaContext.ctx, sangriaContext.arg[String]("productId"), sangriaContext.arg[String]("categoryId"), sangriaContext.arg[String]("name"))
     ),
     Field(
       name = "deleteProduct",
@@ -222,7 +222,7 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       arguments = List(
         Argument("id", schema.StringType)
       ),
-      resolve = sangriaContext => productResolver.deleteProduct(sangriaContext.ctx, UUID.fromString(sangriaContext.arg[String]("id")))
+      resolve = sangriaContext => productResolver.deleteProduct(sangriaContext.ctx, sangriaContext.arg[String]("id"))
     ),
     //productDetail
     Field(

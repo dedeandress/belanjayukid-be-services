@@ -3,7 +3,7 @@ package services
 import java.util.UUID
 
 import com.google.inject.Inject
-import errors.AuthorizationException
+import errors.{AuthorizationException, BadRequest, NotFound}
 import graphql.Context
 import graphql.`type`.ProductsResult
 import graphql.input.ProductInput
@@ -12,35 +12,58 @@ import repositories.repositoryInterfaces.{CategoryRepository, ProductDetailRepos
 import utilities.JWTUtility
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 class ProductService @Inject()(productsRepository: ProductsRepository, categoryRepository: CategoryRepository, productDetailRepository: ProductDetailRepository, productStockRepository: ProductStockRepository, implicit val executionContext: ExecutionContext) {
 
-  def findProduct(context: Context, id: UUID): Future[Option[Products]] = {
+  def findProductByID(context: Context, id: String): Future[Option[Products]] = {
     if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
-    productsRepository.findProduct(id)
+    try {
+      val productId = UUID.fromString(id)
+      productsRepository.findProduct(productId)
+    }catch {
+      case _ : IllegalArgumentException => throw BadRequest("Product ID is not valid")
+    }
   }
 
   def addProduct(context: Context, productInput: ProductInput): Future[Products] = {
     if (!JWTUtility.isAdmin(context)) throw AuthorizationException("You are not authorized")
-    for {
-      product <- productsRepository.addProduct(new Products(SKU = productInput.SKU, name = productInput.name, imageUrl = productInput.imageUrl, categoryId = UUID.fromString(productInput.categoryId)))
-      _ <- productDetailRepository.addProductDetail(product.id, productInput)
-    } yield product
-  }
-
-  def updateProduct(context: Context, productId: UUID, categoryId: UUID, name: String): Future[Option[Products]] = {
-    if (!JWTUtility.isAdmin(context)) throw AuthorizationException("You are not authorized")
-    productsRepository.findProduct(productId).flatMap {
-      product =>
-        productsRepository.updateProduct(product.get.copy(categoryId = categoryId, name = name))
+    try {
+      val categoryId = UUID.fromString(productInput.categoryId)
+      for {
+        product <- productsRepository.addProduct(new Products(SKU = productInput.SKU, name = productInput.name, imageUrl = productInput.imageUrl, categoryId = categoryId))
+        _ <- productDetailRepository.addProductDetail(product.id, productInput)
+      } yield product
+    }catch {
+        case _ : IllegalArgumentException => throw BadRequest("Category ID is not valid")
     }
   }
 
-  def deleteProduct(context: Context, id: UUID): Future[Boolean] = {
+  def updateProduct(context: Context, productId: String, categoryId: String, name: String): Future[Option[Products]] = {
     if (!JWTUtility.isAdmin(context)) throw AuthorizationException("You are not authorized")
-    productsRepository.deleteProduct(id).map {
-      case 0 => false
-      case _ => true
+    try {
+      productsRepository.findProduct(UUID.fromString(productId)).flatMap {
+        case Some(product) =>
+          Try(productsRepository.updateProduct(product.copy(categoryId = UUID.fromString(categoryId), name = name))) match {
+            case Success(productResult) => productResult
+            case Failure(_: IllegalArgumentException) => throw BadRequest("Category ID is not valid")
+          }
+        case None => throw NotFound("Product Not Found")
+      }
+    } catch {
+      case _ : IllegalArgumentException => throw BadRequest("Product ID is not valid")
+    }
+  }
+
+  def deleteProduct(context: Context, id: String): Future[Boolean] = {
+    if (!JWTUtility.isAdmin(context)) throw AuthorizationException("You are not authorized")
+    try {
+      productsRepository.deleteProduct(UUID.fromString(id)).map {
+        case 0 => false
+        case _ => true
+      }
+    }catch {
+      case _ : IllegalArgumentException => throw BadRequest("Product ID is not valid")
     }
   }
 
