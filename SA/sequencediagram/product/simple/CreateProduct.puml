@@ -1,0 +1,47 @@
+@startuml
+title: Create Product Sequence Diagram
+actor user
+participant BelanjaYukFE
+box "BelanjaYuk.id" #LightBlue
+participant AppController
+participant ProductService
+end box
+
+user -> BelanjaYukFE ++ : create Product menu
+BelanjaYukFE -> AppController ++ : /graphql create product
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation {
+          createProduct(
+            product: $productInput
+          ) : Product
+        }
+
+        ProductInput(
+            name,
+            SKU,
+            stock,
+            categoryId,
+            productDetailInput(
+                productStockId,
+                sellingPrice,
+                purchasePrice,
+                value,
+                productId
+            )
+        )
+    end note
+AppController -> AppController : parseGraphql()
+AppController -> ProductService ++ : call createProduct()
+    note left
+    passing:
+    - context
+    - productInput
+    end note
+ProductService --> AppController -- : Product
+AppController --> BelanjaYukFE -- : Product
+BelanjaYukFE --> user -- : create product successful and view product
+
+
+@enduml

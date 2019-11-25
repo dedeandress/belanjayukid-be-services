@@ -1,0 +1,45 @@
+@startuml
+title: Update Staff Sequence Diagram
+actor user
+participant BelanjaYukFE
+box "BelanjaYuk.id" #LightBlue
+participant BelanjaYukBE
+participant StaffService
+end box
+
+user -> BelanjaYukFE ++ : Update staff menu
+BelanjaYukFE -> BelanjaYukBE ++ : /graphql Update staff
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation {
+          updateStaff(
+            staffId,
+            fullName,
+            phoneNumber,
+            address,
+            noNik,
+            dateOfBirth,
+            email,
+            roleId
+          ) : Staff
+        }
+    end note
+BelanjaYukBE -> BelanjaYukBE : call parseGraphql()
+StaffResolver -> StaffService ++ : call updateStaff()
+    note left
+    passing:
+    - context
+    - staffId,
+    - fullName,
+    - phoneNumber,
+    - address,
+    - noNik,
+    - dateOfBirth,
+    - email,
+    - roleId
+    end note
+StaffService --> BelanjaYukBE -- : Staff
+BelanjaYukBE --> BelanjaYukFE -- : Staff
+BelanjaYukFE --> user --: update staff successful and view staff
+@enduml

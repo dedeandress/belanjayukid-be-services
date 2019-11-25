@@ -1,0 +1,35 @@
+@startuml
+title: Refund Transaction Sequence Diagram
+actor user
+participant BelanjaYukFE
+box "BelanjaYuk.id" #LightBlue
+participant AppController
+participant TransactionService
+end box
+
+user -> BelanjaYukFE ++ : click refund transaction menu
+BelanjaYukFE -> AppController ++ : /graphql refund transaction
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+          mutation{
+            refundTransaction(
+                transactionId
+            ){
+                totalRefund
+                totalPrice
+                [TransactionDetail]
+            }
+          }
+    end note
+AppController -> AppController : call parseGraphql()
+AppController -> TransactionService ++ : call TransactionService
+    note left
+    passing:
+    - context
+    - transactionId
+    end note
+TransactionService --> AppController -- : totalRefund, totalPrice, list of TransactionDetail
+AppController --> BelanjaYukFE -- : totalRefund, totalPrice, list of TransactionDetail
+BelanjaYukFE --> user -- : refund transaction
+@enduml

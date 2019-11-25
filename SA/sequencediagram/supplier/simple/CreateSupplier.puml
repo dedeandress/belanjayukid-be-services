@@ -1,0 +1,37 @@
+@startuml
+title: Create Supplier Sequence Diagram
+actor user
+participant BelanjaYukFE
+box "BelanjaYuk.id" #LightBlue
+participant AppController
+participant SupplierService
+end box
+
+user -> BelanjaYukFE ++ : Create Supplier menu
+BelanjaYukFE -> AppController ++ : /graphql create supplier
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+          mutation{
+            createSupplier(name, phoneNumber, address){
+              name
+              phoneNumber
+              address
+              status
+              id
+            }
+          }
+    end note
+AppController -> AppController : parseGraphql()
+AppController -> SupplierService ++ : call createSupplier()
+    note left
+    passing:
+    - context
+    - name
+    - phoneNumber
+    - address
+    end note
+SupplierService --> AppController --: Supplier
+AppController --> BelanjaYukFE -- : Supplier
+BelanjaYukFE --> user -- : create successful and view Supplier
+@enduml

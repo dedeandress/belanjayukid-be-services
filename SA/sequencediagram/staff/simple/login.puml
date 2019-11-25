@@ -1,0 +1,35 @@
+@startuml
+title: login Sequence Diagram
+actor user
+box "BelanjaYuk.id" #LightBlue
+participant BelanjaYukFE
+participant AppController
+participant StaffService
+end box
+
+user -> BelanjaYukFE ++ : login
+BelanjaYukFE -> AppController: POST: /graphql
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation{
+         login(username, password){
+           bearerToken
+           id
+         }
+       }
+    end note
+AppController -> AppController : Call parseGraphql()
+AppController -> StaffService: Call login()
+    note left
+    passing:
+    - context
+    - username
+    - password
+    end note
+StaffService --> AppController -- : LoginUser model
+AppController --> BelanjaYukFE -- : BearerToken, staffId
+BelanjaYukFE --> user -- : view dashboard
+
+
+@enduml

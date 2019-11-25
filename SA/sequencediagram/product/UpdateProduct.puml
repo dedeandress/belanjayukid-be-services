@@ -1,0 +1,63 @@
+@startuml
+title: Update Product Sequence Diagram
+actor user
+participant BelanjaYukFE
+database BelanjaYukDB
+box "BelanjaYuk.id" #LightBlue
+participant BelanjaYukBE
+participant ProductResolver
+participant ProductService
+participant ProductRepository
+participant JWTUtility
+participant BelanjaYukDB
+end box
+
+user -> BelanjaYukFE ++ : Product menu
+BelanjaYukFE -> BelanjaYukBE ++ : /graphql add product
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation {
+          updateProduct(productId, categoryId, name) : Product
+        }
+    end note
+BelanjaYukBE -> ProductResolver ++ : call ProductResolver
+ProductResolver -> ProductService ++ : call ProductService
+    note left
+    passing:
+    - context
+    - productId
+    - categoryId
+    - name
+    end note
+ProductService -> JWTUtility: validate token and claim role
+alt #LightGreen token is not expired
+    alt #LightYellow role is admin
+        ProductService -> ProductRepository ++ : get product passing productId
+        ProductRepository -> BelanjaYukDB ++ : select product where id is passed from request
+        BelanjaYukDB --> ProductRepository -- : product or null
+        ProductRepository --> ProductService -- : product or null
+        alt product is not null
+            ProductService -> ProductRepository ++ : update product passing product
+            ProductRepository -> BelanjaYukDB ++ : update product set values passed from request
+            BelanjaYukDB --> ProductRepository -- : affected row no error and return product
+            ProductRepository --> ProductService -- : affected row no error and return product
+            ProductService --> ProductResolver : product
+            ProductResolver --> BelanjaYukBE : product
+            BelanjaYukBE --> BelanjaYukFE: product
+            else product is null
+            ProductService --> ProductResolver : Error: Product Not Found
+            ProductResolver --> BelanjaYukBE : Error: Product Not Found
+            BelanjaYukBE --> BelanjaYukFE: Message: Product Not Found
+        end alt
+        else error: role is not admin
+        ProductService --> ProductResolver : Error: Not Authorized
+        ProductResolver --> BelanjaYukBE : Error: Not Authorized
+        BelanjaYukBE --> BelanjaYukFE: Message: You're not authorize
+    end alt
+    else token is expired
+    ProductService --> ProductResolver -- : Error: token expired
+    ProductResolver --> BelanjaYukBE -- : Error: token expired
+    BelanjaYukBE --> BelanjaYukFE -- : Message: token was expired
+end alt
+@enduml

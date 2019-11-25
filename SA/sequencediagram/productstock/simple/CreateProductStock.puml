@@ -1,0 +1,29 @@
+@startuml
+title: Create ProductStock Sequence Diagram
+actor user
+participant BelanjaYukFE
+box "BelanjaYuk.id" #LightBlue
+participant BelanjaYukBE
+participant ProductStockService
+end box
+
+user -> BelanjaYukFE ++ : Create product stock menu
+BelanjaYukFE -> BelanjaYukBE ++ : /graphql create product stock
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation{
+          createProductStock(name): ProductStock
+        }
+    end note
+BelanjaYukBE -> BelanjaYukBE : parseGraphql()
+BelanjaYukBE -> ProductStockService ++ : call ProductStockResolver
+    note left
+    passing:
+    - context
+    - ProductStock(id: UUID, name: String, status: Boolean)
+    end note
+ProductStockService --> BelanjaYukBE -- : ProductStock
+BelanjaYukBE --> BelanjaYukFE -- : ProductStock
+BelanjaYukFE --> user -- : create product stock successful and view product stock
+@enduml

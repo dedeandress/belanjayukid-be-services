@@ -1,0 +1,50 @@
+@startuml
+title: Transaction History Sequence Diagram
+actor user
+participant BelanjaYukFE
+box "BelanjaYuk.id" #LightBlue
+participant AppController
+participant TransactionService
+end box
+
+user -> BelanjaYukFE ++ : click Transaction history menu
+BelanjaYukFE -> AppController ++ : /graphql transaction history
+    note left of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation{
+          transactions: List<Transaction>
+        }
+    }
+    end note
+AppController -> AppController : call parseGraphql()
+AppController -> TransactionService ++ : call transactions()
+    note left
+    passing:
+    - context
+    end note
+TransactionService --> AppController -- : List<Transaction>
+AppController --> BelanjaYukFE -- : List<Transaction>
+BelanjaYukFE --> user -- : view transaction list
+
+user -> BelanjaYukFE ++ : Transaction history with status filter
+BelanjaYukFE -> AppController ++ : /graphql transaction history with status filter
+    note left of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation{
+          transactions(status): List<Transaction>
+        }
+    }
+    end note
+AppController -> AppController : call parseGraphql()
+AppController -> TransactionService ++ : call transactions()
+    note left
+    passing:
+    - context
+    - status: Int
+    end note
+TransactionService --> AppController -- : List<Transaction>
+AppController --> BelanjaYukFE -- : List<Transaction>
+BelanjaYukFE --> user -- : view transaction list
+@enduml

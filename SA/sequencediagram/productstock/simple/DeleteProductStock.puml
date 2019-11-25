@@ -1,0 +1,29 @@
+@startuml
+title: Delete ProductStock Sequence Diagram
+actor user
+participant BelanjaYukFE
+box "BelanjaYuk.id" #LightBlue
+participant BelanjaYukBE
+participant ProductStockService
+end box
+
+user -> BelanjaYukFE ++ : Delete product stock menu
+BelanjaYukFE -> BelanjaYukBE ++ : /graphql delete product stock
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation{
+          deleteProductStock(id)
+        }
+    end note
+BelanjaYukBE -> BelanjaYukBE : parseGraphql()
+BelanjaYukBE -> ProductStockService ++ : call deleteProductStock()
+    note left
+    passing:
+    - context
+    - id
+    end note
+ProductStockService --> BelanjaYukBE -- : delete successful
+BelanjaYukBE --> BelanjaYukFE -- : delete successful
+BelanjaYukFE --> user -- : delete successful
+@enduml
