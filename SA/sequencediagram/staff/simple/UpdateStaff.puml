@@ -2,20 +2,13 @@
 title: Update Staff Sequence Diagram
 actor user
 participant BelanjaYukFE
-database BelanjaYukDB
 box "BelanjaYuk.id" #LightBlue
 participant BelanjaYukBE
-participant StaffResolver
 participant StaffService
-participant UserRepository
-participant StaffRepository
-participant UserProfileRepository
-participant JWTUtility
-participant BelanjaYukDB
 end box
 
-user -> BelanjaYukFE ++ : update staff menu
-BelanjaYukFE -> BelanjaYukBE ++ : /graphql update staff
+user -> BelanjaYukFE ++ : Update staff menu
+BelanjaYukFE -> BelanjaYukBE ++ : /graphql Update staff
     note right of BelanjaYukFE
     content type: application/json
     request body:
@@ -32,8 +25,8 @@ BelanjaYukFE -> BelanjaYukBE ++ : /graphql update staff
           ) : Staff
         }
     end note
-BelanjaYukBE -> StaffResolver ++ : call StaffResolver
-StaffResolver -> StaffService ++ : call StaffService
+BelanjaYukBE -> BelanjaYukBE : call parseGraphql()
+StaffResolver -> StaffService ++ : call updateStaff()
     note left
     passing:
     - context
@@ -46,53 +39,7 @@ StaffResolver -> StaffService ++ : call StaffService
     - email,
     - roleId
     end note
-StaffService -> JWTUtility: validate token and claim role
-alt #LightGreen token is not expired
-    alt #LightYellow role is admin or cashier
-        StaffService -> StaffRepository ++ : get staff passing staff id
-        StaffRepository -> BelanjaYukDB ++ : select staff where staffId is passed from request
-        BelanjaYukDB -> StaffRepository -- : staff or null
-        StaffRepository -> StaffService -- : staff or null
-        alt staff is not null
-            StaffService -> UserProfileRepository ++ : get user profile passing user id
-            UserProfileRepository -> BelanjaYukDB ++ : select user profile where user id is passed from request
-            BelanjaYukDB --> UserProfileRepository -- : user profile or null
-            UserProfileRepository --> StaffService -- : user profile or null
-            alt #LightYellow user profile is not null
-                StaffService -> StaffService : create new user profile model
-                StaffService -> StaffRepository ++ : update role and email staff passing staff id
-                StaffRepository -> BelanjaYukDB ++ : update staff set value passed from \n request where staff id is given
-                BelanjaYukDB --> StaffRepository -- : affected row no error
-                StaffRepository --> StaffService -- : affected row no error
-                StaffService -> UserProfileRepository ++ : update user profile passing user id and user profile model
-                UserProfileRepository -> BelanjaYukDB ++ : update user profile set value passed from request where user id is given
-                BelanjaYukDB --> UserProfileRepository -- : affected row no error
-                UserProfileRepository --> StaffService -- : affected row no error
-                StaffService -> StaffRepository ++ : get staff passing staff id
-                StaffRepository -> BelanjaYukDB ++ : select staff where staff id is passed from request
-                BelanjaYukDB --> StaffRepository -- : staff model
-                StaffRepository --> StaffService -- : staff model
-                else user profile is null
-                staffService --> StaffResolver : Error: Not Found
-                StaffResolver --> BelanjaYukBE : Error: Not Found
-                BelanjaYukBE --> BelanjaYukFE: Message: Staff not found
-            end alt
-            StaffService --> StaffResolver : staff model
-            StaffResolver --> BelanjaYukBE : staff model
-            BelanjaYukBE --> BelanjaYukFE : staff model
-            else staff is null
-            StaffService --> StaffResolver : Error: Not Found
-            StaffResolver --> BelanjaYukBE : Error: Not Found
-            BelanjaYukBE --> BelanjaYukFE: Message: Staff not found
-        end alt
-        else error: role is not admin or cashier
-        StaffService --> StaffResolver : Error: Not Authorized
-        StaffResolver --> BelanjaYukBE : Error: Not Authorized
-        BelanjaYukBE --> BelanjaYukFE: Message: You're not authorize
-    end alt
-    else token is expired
-    StaffService --> StaffResolver -- : Error: token expired
-    StaffResolver --> BelanjaYukBE -- : Error: token expired
-    BelanjaYukBE --> BelanjaYukFE -- : Message: token was expired
-end alt
+StaffService --> BelanjaYukBE -- : Staff
+BelanjaYukBE --> BelanjaYukFE -- : Staff
+BelanjaYukFE --> user --: update staff successful and view staff
 @enduml

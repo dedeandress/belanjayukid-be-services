@@ -1,45 +1,37 @@
 @startuml
-title: Create Product Detail Sequence Diagram
+title: Create Supplier Sequence Diagram
 actor user
 participant BelanjaYukFE
 box "BelanjaYuk.id" #LightBlue
 participant AppController
-participant ProductDetailService
+participant SupplierService
 end box
 
-user -> BelanjaYukFE ++ : Create Product Detail menu
-BelanjaYukFE -> AppController ++ : /graphql create product detail
+user -> BelanjaYukFE ++ : Create Supplier menu
+BelanjaYukFE -> AppController ++ : /graphql create supplier
     note right of BelanjaYukFE
     content type: application/json
     request body:
-        mutation{
-          createProductDetail(productDetailInput){
-            value
-            status
-            id
-            productStock
-            sellingPrice
-            purchasePrice
-            product
+          mutation{
+            createSupplier(name, phoneNumber, address){
+              name
+              phoneNumber
+              address
+              status
+              id
+            }
           }
-        }
-
-        ProductDetailInput(
-            productStockId,
-            sellingPrice,
-            purchasePrice,
-            value,
-            productId
-        )
     end note
 AppController -> AppController : parseGraphql()
-AppController -> ProductDetailService ++ : call createProductDetail
+AppController -> SupplierService ++ : call createSupplier()
     note left
     passing:
     - context
-    - productDetailInput
+    - name
+    - phoneNumber
+    - address
     end note
-ProductDetailService --> AppController --: ProductDetail
-AppController --> BelanjaYukFE -- : ProductDetail
-BelanjaYukFE --> user -- : create successfull and view productDetail
+SupplierService --> AppController --: Supplier
+AppController --> BelanjaYukFE -- : Supplier
+BelanjaYukFE --> user -- : create successful and view Supplier
 @enduml

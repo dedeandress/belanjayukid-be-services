@@ -1,7 +1,31 @@
 @startuml
-Alice -> Bob: Authentication Request
-Bob --> Alice: Authentication Response
+title: Delete Customer Sequence Diagram
+actor user
+participant BelanjaYukFE
+box "BelanjaYuk.id" #LightBlue
+participant AppController
+participant CustomerService
+end box
 
-Alice -> Bob: Another authentication Request
-Alice <-- Bob: another authentication Response
+user -> BelanjaYukFE ++ : delete customer menu
+BelanjaYukFE -> AppController ++ : /graphql delete customer
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+      mutation{
+          deleteCustomer(
+              customerId
+          )
+      }
+    end note
+AppController -> AppController : parseGraphql()
+AppController -> CustomerService ++ : call deleteCustomer()
+    note left
+    passing:
+    - context
+    - id
+    end note
+CustomerService --> AppController -- : delete successful
+AppController --> BelanjaYukFE -- : delete successful
+BelanjaYukFE --> user -- : delete successful
 @enduml

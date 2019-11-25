@@ -1,7 +1,40 @@
 @startuml
-Alice -> Bob: Authentication Request
-Bob --> Alice: Authentication Response
+title: Create Customer Sequence Diagram
+actor user
+participant BelanjaYukFE
+box "BelanjaYuk.id" #LightBlue
+participant AppController
+participant CustomerService
+end box
 
-Alice -> Bob: Another authentication Request
-Alice <-- Bob: another authentication Response
+user -> BelanjaYukFE ++ : create customer menu
+BelanjaYukFE -> AppController ++ : /graphql create customer
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+          mutation{
+            createCustomer(
+                customerInput
+            ): customer
+          }
+          CustomerInput(
+              UserProfileInput(
+                  fullName,
+                  phoneNumber,
+                  address,
+                  noNik,
+                  dateOfBirth,
+              )
+          )
+    end note
+AppController -> AppController : parseGraphql()
+AppController -> CustomerService ++ : call createCustomer()
+    note left
+    passing:
+    - context
+    - customerInput
+    end note
+CustomerService --> AppController -- : customer
+AppController --> BelanjaYukFE -- : customer
+BelanjaYukFE --> user -- : add successful and view customer
 @enduml

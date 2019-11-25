@@ -2,20 +2,13 @@
 title: Create Staff Sequence Diagram
 actor user
 participant BelanjaYukFE
-database BelanjaYukDB
 box "BelanjaYuk.id" #LightBlue
-participant BelanjaYukBE
-participant StaffResolver
+participant AppController
 participant StaffService
-participant UserRepository
-participant StaffRepository
-participant UserProfileRepository
-participant JWTUtility
-participant BelanjaYukDB
 end box
 
-user -> BelanjaYukFE ++ : add staff menu
-BelanjaYukFE -> BelanjaYukBE ++ : /graphql add staff
+user -> BelanjaYukFE ++ : Create staff menu
+BelanjaYukFE -> AppController ++ : /graphql Create staff
     note right of BelanjaYukFE
     content type: application/json
     request body:
@@ -41,50 +34,14 @@ BelanjaYukFE -> BelanjaYukBE ++ : /graphql add staff
             roleId
         )
     end note
-BelanjaYukBE -> StaffResolver ++ : call StaffResolver
-StaffResolver -> StaffService ++ : call StaffService
+AppController -> AppController : call parseGraphql()
+AppController -> StaffService ++ : call createStaff()
     note left
     passing:
     - context
     - staffInput
     end note
-StaffService -> JWTUtility: validate token and claim role
-alt #LightGreen token is not expired
-    alt #LightYellow role is admin or cashier
-        StaffService -> UserRepository ++ : get user passed username in StaffInput
-        UserRepository -> BelanjaYukDB ++ : select user where username is given
-        BelanjaYukDB -->  UserRepository -- : user or null
-        UserRepository --> StaffService -- : user or null
-        alt user is null
-            StaffService -> UserRepository ++ : add user
-            UserRepository -> BelanjaYukDB ++ : insert into user table
-            BelanjaYukDB --> UserRepository -- : affected rows no error and return user id
-            UserRepository --> StaffService -- : affected rows no error and return user id
-            StaffService -> StaffService : create UserProfile model
-            StaffService -> UserProfileRepository ++ : add UserProfile
-            UserProfileRepository -> BelanjaYukDB ++ : insert into user profile table
-            BelanjaYukDB --> UserProfileRepository -- : affected rows no error
-            UserProfileRepository --> StaffService -- : affected rows no error
-            StaffService -> StaffRepository ++ : add staff
-            StaffRepository -> BelanjaYukDB ++ : insert into staff table
-            BelanjaYukDB --> StaffRepository -- : affected rows no error and return staff
-            StaffRepository --> StaffService -- : affected rows no error and return staff
-            StaffService --> StaffResolver : staff model
-            StaffResolver --> BelanjaYukBE : staff model
-            BelanjaYukBE --> BelanjaYukFE : staff model
-            else user is not null
-            StaffService --> StaffResolver: throw exception already exist
-            StaffResolver --> BelanjaYukBE: message user already exist
-            BelanjaYukBE --> BelanjaYukFE: message user already exist
-        end alt
-        else error: role is not admin or cashier
-        StaffService --> StaffResolver : Error: Not Authorized
-        StaffResolver --> BelanjaYukBE : Error: Not Authorized
-        BelanjaYukBE --> BelanjaYukFE: Message: You're not authorize
-    end alt
-    else token is expired
-    StaffService --> StaffResolver -- : Error: token expired
-    StaffResolver --> BelanjaYukBE -- : Error: token expired
-    BelanjaYukBE --> BelanjaYukFE -- : Message: token was expired
-end alt
+StaffService --> AppController : Staff
+AppController --> BelanjaYukFE : Staff
+BelanjaYukFE --> user -- : create staff successful and view staff
 @enduml

@@ -1,29 +1,29 @@
 @startuml
-title: Delete Product Detail Sequence Diagram
+title: Delete Supplier Sequence Diagram
 actor user
 participant BelanjaYukFE
 box "BelanjaYuk.id" #LightBlue
 participant AppController
-participant ProductDetailService
+participant SupplierService
 end box
 
-user -> BelanjaYukFE ++ : Delete Product Detail menu
-BelanjaYukFE -> AppController ++ : /graphql delete product detail
+user -> BelanjaYukFE ++ : Delete Supplier menu
+BelanjaYukFE -> AppController ++ : /graphql delete supplier
     note right of BelanjaYukFE
     content type: application/json
     request body:
-        mutation {
-          deleteProductDetail(productDetailId)
+        mutation{
+            deleteSupplier(supplierId)
         }
     end note
 AppController -> AppController : parseGraphql()
-AppController -> ProductDetailService ++ : call deleteProductDetail()
+AppController -> SupplierService ++ : call deleteSupplier()
     note left
     passing:
     - context
     - id
     end note
-ProductDetailService --> AppController --: ProductDetail
-AppController --> BelanjaYukFE -- : ProductDetail
-BelanjaYukFE --> user -- : delete successfull and view productDetail
+SupplierService --> AppController --: Supplier
+AppController --> BelanjaYukFE -- : Supplier
+BelanjaYukFE --> user -- : delete successfull and view Supplier
 @enduml

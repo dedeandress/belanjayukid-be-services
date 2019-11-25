@@ -2,19 +2,13 @@
 title: Refund Transaction Sequence Diagram
 actor user
 participant BelanjaYukFE
-database BelanjaYukDB
 box "BelanjaYuk.id" #LightBlue
-participant BelanjaYukBE
-participant TransactionResolver
+participant AppController
 participant TransactionService
-participant TransactionRepository
-participant TransactionDetailRepository
-participant JWTUtility
-participant BelanjaYukDB
 end box
 
-user -> BelanjaYukFE ++ : refund transaction menu
-BelanjaYukFE -> BelanjaYukBE ++ : /graphql refund transaction
+user -> BelanjaYukFE ++ : click refund transaction menu
+BelanjaYukFE -> AppController ++ : /graphql refund transaction
     note right of BelanjaYukFE
     content type: application/json
     request body:
@@ -28,35 +22,14 @@ BelanjaYukFE -> BelanjaYukBE ++ : /graphql refund transaction
             }
           }
     end note
-BelanjaYukBE -> TransactionResolver ++ : call TransactionResolver
-TransactionResolver -> TransactionService ++ : call TransactionService
+AppController -> AppController : call parseGraphql()
+AppController -> TransactionService ++ : call TransactionService
     note left
     passing:
     - context
     - transactionId
     end note
-TransactionService -> JWTUtility: validate token and claim role
-alt #LightGreen token is not expired
-    alt #LightYellow role is admin or cashier
-        TransactionService -> TransactionDetailRepository ++ : get Transaction detail passing transactionId where status is REFUNDED
-        TransactionDetailRepository -> BelanjaYukDB ++ : select Transaction detail where transactionId is passed from request and status is REFUNDED
-        BelanjaYukDB --> TransactionDetailRepository -- : list of TransactionDetail
-        TransactionDetailRepository --> TransactionService -- : list of TransactionDetail and totalRefund
-        TransactionService -> TransactionRepository ++ : update totalPrice and transaction status passing transactionId
-        TransactionRepository -> BelanjaYukDB ++ : update transaction set status is passed from request and totalPrice where transaction id is given
-        BelanjaYukDB --> TransactionRepository -- : affected rows no error and return totalPrice
-        TransactionRepository --> TransactionService -- : affected rows no error and return totalPrice
-        TransactionService --> TransactionResolver : totalRefund, totalPrice, list of TransactionDetail
-        TransactionResolver --> BelanjaYukBE : totalRefund, totalPrice, list of TransactionDetail
-        BelanjaYukBE --> BelanjaYukFE : totalRefund, totalPrice, list of TransactionDetail
-        else error: role is not admin or checker
-        TransactionService --> TransactionResolver : Error: Not Authorized
-        TransactionResolver --> BelanjaYukBE : Error: Not Authorized
-        BelanjaYukBE --> BelanjaYukFE: Message: You're not authorize
-    end alt
-    else token is expired
-    TransactionService --> TransactionResolver -- : Error: token expired
-    TransactionResolver --> BelanjaYukBE -- : Error: token expired
-    BelanjaYukBE --> BelanjaYukFE -- : Message: token was expired
-end alt
+TransactionService --> AppController -- : totalRefund, totalPrice, list of TransactionDetail
+AppController --> BelanjaYukFE -- : totalRefund, totalPrice, list of TransactionDetail
+BelanjaYukFE --> user -- : refund transaction
 @enduml
