@@ -1,0 +1,60 @@
+@startuml
+title: Update Supplier Sequence Diagram
+actor user
+participant BelanjaYukFE
+database BelanjaYukDB
+box "BelanjaYuk.id" #LightBlue
+participant BelanjaYukBE
+participant SupplierResolver
+participant SupplierService
+participant SupplierRepository
+participant JWTUtility
+participant BelanjaYukDB
+end box
+
+user -> BelanjaYukFE ++ : update supplier menu
+BelanjaYukFE -> BelanjaYukBE ++ : /graphql update supplier
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+          mutation{
+            updateSupplier(id, name, phoneNumber, address){
+              name
+              phoneNumber
+              address
+              status
+              id
+            }
+          }
+    end note
+BelanjaYukBE -> SupplierResolver ++ : call SupplierResolver
+SupplierResolver -> SupplierService ++ : call SupplierService
+    note left
+    passing:
+    - context
+    - id
+    - name
+    - phoneNumber
+    - address
+    end note
+SupplierService -> JWTUtility: validate token and claim role
+alt #LightGreen token is not expired
+    alt #LightYellow role is admin
+        SupplierService -> SupplierRepository ++ : update supplier passing supplier
+        SupplierRepository -> BelanjaYukDB ++ : update supplier values passed from request
+        BelanjaYukDB --> SupplierRepository -- : affected row no error and return supplier
+        SupplierRepository --> SupplierService -- : affected row no error and return supplier
+        SupplierService --> SupplierResolver : supplier
+        SupplierResolver --> BelanjaYukBE : supplier
+        BelanjaYukBE --> BelanjaYukFE: supplier
+        else error: role is not admin
+        SupplierService --> SupplierResolver : Error: Not Authorized
+        SupplierResolver --> BelanjaYukBE : Error: Not Authorized
+        BelanjaYukBE --> BelanjaYukFE: Message: You're not authorize
+    end alt
+    else token is expired
+    SupplierService --> SupplierResolver -- : Error: token expired
+    SupplierResolver --> BelanjaYukBE -- : Error: token expired
+    BelanjaYukBE --> BelanjaYukFE -- : Message: token was expired
+end alt
+@enduml

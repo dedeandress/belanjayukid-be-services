@@ -1,0 +1,57 @@
+@startuml
+title: Delete Product Detail Sequence Diagram
+actor user
+participant BelanjaYukFE
+database BelanjaYukDB
+box "BelanjaYuk.id" #LightBlue
+participant BelanjaYukBE
+participant ProductDetailResolver
+participant ProductDetailService
+participant ProductDetailRepository
+participant JWTUtility
+participant BelanjaYukDB
+end box
+
+user -> BelanjaYukFE ++ : Delete Product Detail menu
+BelanjaYukFE -> BelanjaYukBE ++ : /graphql delete product detail
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation {
+          deleteProductDetail(productDetailId)
+        }
+    end note
+BelanjaYukBE -> ProductDetailResolver ++ : call ProductDetailResolver
+ProductDetailResolver -> ProductDetailService ++ : call ProductDetailService
+    note left
+    passing:
+    - context
+    - productDetailId
+    end note
+ProductDetailService -> JWTUtility: validate token and claim role
+alt #LightGreen token is not expired
+    alt #LightYellow role is admin
+        ProductDetailService -> ProductDetailRepository ++ : update product detail status to false passing productDetailId
+        ProductDetailRepository -> BelanjaYukDB ++ : update product detail status to false where id is passed from request
+        BelanjaYukDB --> ProductDetailRepository -- : affected row no error and return int
+        ProductDetailRepository --> ProductDetailService -- : affected row no error and return int
+        alt int is not 0
+            ProductDetailService --> ProductDetailResolver : delete successful and return true
+            ProductDetailResolver --> BelanjaYukBE : delete successful and return true
+            BelanjaYukBE --> BelanjaYukFE: delete successful and return true
+            else int is 0
+            ProductDetailService --> ProductDetailResolver : Error: Product Detail Not Found
+            ProductDetailResolver --> BelanjaYukBE : Error: Product Detail Not Found
+            BelanjaYukBE --> BelanjaYukFE: Message: Product Detail Not Found
+        end alt
+        else error: role is not admin
+        ProductDetailService --> ProductDetailResolver : Error: Not Authorized
+        ProductDetailResolver --> BelanjaYukBE : Error: Not Authorized
+        BelanjaYukBE --> BelanjaYukFE: Message: You're not authorize
+    end alt
+    else token is expired
+    ProductDetailService --> ProductDetailResolver -- : Error: token expired
+    ProductDetailResolver --> BelanjaYukBE -- : Error: token expired
+    BelanjaYukBE --> BelanjaYukFE -- : Message: token was expired
+end alt
+@enduml

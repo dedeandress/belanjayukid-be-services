@@ -1,0 +1,57 @@
+@startuml
+title: Delete Product Sequence Diagram
+actor user
+participant BelanjaYukFE
+database BelanjaYukDB
+box "BelanjaYuk.id" #LightBlue
+participant BelanjaYukBE
+participant ProductResolver
+participant ProductService
+participant ProductRepository
+participant JWTUtility
+participant BelanjaYukDB
+end box
+
+user -> BelanjaYukFE ++ : Product menu
+BelanjaYukFE -> BelanjaYukBE ++ : /graphql delete product
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation {
+          deleteProduct(productId)
+        }
+    end note
+BelanjaYukBE -> ProductResolver ++ : call ProductResolver
+ProductResolver -> ProductService ++ : call ProductService
+    note left
+    passing:
+    - context
+    - productId
+    end note
+ProductService -> JWTUtility: validate token and claim role
+alt #LightGreen token is not expired
+    alt #LightYellow role is admin
+        ProductService -> ProductRepository ++ : update product status to false passing productId
+        ProductRepository -> BelanjaYukDB ++ : update product status to false where id is passed from request
+        BelanjaYukDB --> ProductRepository -- : affected row no error and return int
+        ProductRepository --> ProductService -- : affected row no error and return int
+        alt int is not 0
+            ProductService --> ProductResolver : delete successful and return true
+            ProductResolver --> BelanjaYukBE : delete successful and return true
+            BelanjaYukBE --> BelanjaYukFE: delete successful and return true
+            else int is 0
+            ProductService --> ProductResolver : Error: Product Not Found
+            ProductResolver --> BelanjaYukBE : Error: Product Not Found
+            BelanjaYukBE --> BelanjaYukFE: Message: Product Not Found
+        end alt
+        else error: role is not admin
+        ProductService --> ProductResolver : Error: Not Authorized
+        ProductResolver --> BelanjaYukBE : Error: Not Authorized
+        BelanjaYukBE --> BelanjaYukFE: Message: You're not authorize
+    end alt
+    else token is expired
+    ProductService --> ProductResolver -- : Error: token expired
+    ProductResolver --> BelanjaYukBE -- : Error: token expired
+    BelanjaYukBE --> BelanjaYukFE -- : Message: token was expired
+end alt
+@enduml

@@ -1,0 +1,79 @@
+@startuml
+
+actor Admin
+actor Cashier
+actor Checker
+
+rectangle "BelanjaYuk"{
+    left to right direction
+    (Dashboard) as Dashboard
+    (Checkout) as (Checkout)
+    (Cari Produk Pembelian) as (CariProdukPembelian)
+    (Pembayaran) as (PenjualanPembayaran)
+    (Pembayaran) as (PembelianPembayaran)
+    (Cari Produk Penjualan) as (CariProdukPenjualan)
+    (Checkout) as (Checkout2)
+    (Tambah Produk) as (TambahProduk)
+    (Ubah Produk) as (UbahProduk)
+    (Delete Produk) as (HapusProduk)
+    (Tambah Kategori) as (TambahKategori)
+    (Hapus Kategori) as (HapusKategori)
+    (Tambah Pelanggan) as (TambahPelanggan)
+    (Ubah Pelanggan) as (UbahPelanggan)
+    (Hapus Pelanggan) as (HapusPelanggan)
+    (Tambah Produk Stok) as (TambahPStok)
+    (Hapus Produk Stok) as (HapusPStok)
+    (Tambah Karyawan) as (TambahKaryawan)
+    (Ubah Karyawan) as (UbahKaryawan)
+    (Hapus Karyawan) as (HapusKaryawan)
+    (Pembayaran Hutang) as (PembayaranHutang)
+    (Pengantaran Barang) as (PengantaranBarang)
+    (Pengecekan Barang) as (PengecekanBarang)
+    (Masuk) as (Masuk)
+    (Keluar) as (Keluar)
+
+
+
+
+
+    Admin -- (Masuk)
+    Admin -- CariProdukPembelian
+    CariProdukPembelian .> Checkout : include
+    Checkout .> PembelianPembayaran : include
+
+    Admin -- CariProdukPenjualan
+    CariProdukPenjualan .>Checkout2 : include
+    Checkout2 .> PengantaranBarang : << extend >>
+    PengantaranBarang .> PenjualanPembayaran : include
+    Admin -- TambahPelanggan
+    Admin -- UbahPelanggan
+    Admin -- HapusPelanggan
+    Admin -- TambahKaryawan
+    Admin -- UbahKaryawan
+    Admin -- HapusKaryawan
+    Admin -- TambahKategori
+    Admin -- HapusKategori
+    Admin -- TambahProduk
+    Admin -- HapusProduk
+    Admin -- UbahProduk
+    Admin -- TambahPStok
+    Admin -- HapusPStok
+    Admin -- PembayaranHutang
+    Admin -- Keluar
+
+'    cashier
+    (Masuk) -- Cashier
+    CariProdukPenjualan -- Cashier
+    Dashboard -- Cashier
+    TambahPelanggan -- Cashier
+    UbahPelanggan -- Cashier
+    PembayaranHutang -- Cashier
+    (Keluar) -- Cashier
+
+    (Masuk) -- Checker
+    (PengecekanBarang) -- Checker
+    (Keluar) -- Checker
+
+
+}
+@enduml

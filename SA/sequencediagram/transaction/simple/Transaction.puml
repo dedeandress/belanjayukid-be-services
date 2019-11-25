@@ -1,0 +1,269 @@
+@startuml
+title: Transaction Sequence Diagram
+actor user
+participant BelanjaYukFE
+database BelanjaYukDB
+box "BelanjaYuk.id" #LightBlue
+participant BelanjaYukBE
+participant TransactionResolver
+participant TransactionService
+participant TransactionRepository
+participant TransactionDetailRepository
+participant JWTUtility
+participant PaymentRepository
+participant BelanjaYukDB
+end box
+
+user -> BelanjaYukFE ++ : Transaction menu
+BelanjaYukFE -> BelanjaYukBE ++ : /graphql create transaction init
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation{
+          createTransaction{
+            transactionId
+          }
+        }
+    }
+    end note
+BelanjaYukBE -> TransactionResolver ++ : call TransactionResolver
+TransactionResolver -> TransactionService ++ : call TransactionService
+    note left
+    passing:
+    - context
+    end note
+TransactionService -> JWTUtility: validate token and claim role
+alt #LightGreen token is not expired
+    alt #LightYellow role is admin or cashier
+            TransactionService -> PaymentRepository ++ : add payment init
+            PaymentRepository -> BelanjaYukDB ++ : insert new payment
+            BelanjaYukDB --> PaymentRepository -- : affected row no error and return payment id
+            PaymentRepository --> TransactionService -- : affected row no error and return payment id
+            TransactionService -> TransactionRepository ++ : call addTransaction init
+                note left of TransactionService
+                    passing Transaction(paymentId) model
+                end note
+            TransactionRepository -> BelanjaYukDB ++ : insert new transaction
+            BelanjaYukDB --> TransactionRepository -- : affected row no error and return \ntransaction id and status
+            TransactionRepository --> TransactionService -- : affected row no error and return transaction id and status = 0
+            TransactionService --> TransactionResolver : return response Transaction id
+            TransactionResolver --> BelanjaYukBE : response CreateTransactionResult
+            BelanjaYukBE --> BelanjaYukFE : transactionId and status = 0
+        else error: role is not admin or cashier
+        TransactionService --> TransactionResolver : Error: Not Authorized
+        TransactionResolver --> BelanjaYukBE : Error: Not Authorized
+        BelanjaYukBE --> BelanjaYukFE: Message: You're not authorize
+    end alt
+    else token is expired
+    TransactionService --> TransactionResolver -- : Error: token expired
+    TransactionResolver --> BelanjaYukBE -- : Error: token expired
+    BelanjaYukBE --> BelanjaYukFE -- : Message: token was expired
+end alt
+BelanjaYukFE -> BelanjaYukFE: add all transaction detail to cart
+BelanjaYukFE -> BelanjaYukBE ++ : /graphql checkout transaction
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation {
+          checkout(
+            transaction: {
+              transactionId: $transactionId
+              customerId: $customerId
+              staffId: $staffId
+              detail: [
+                {
+                  productDetailId: $productDetailId
+                  numberOfPurchase: $numberOfPurchase
+                }
+              ]
+            }
+          ) {
+            status
+            details {
+              id
+              numberOfPurchases
+              status
+              transactionID
+            }
+            totalPrice
+          }
+        }
+    }
+    end note
+BelanjaYukBE -> TransactionResolver ++ : call TransactionResolver
+TransactionResolver -> TransactionService ++ : call TransactionService
+    note left
+    passing:
+    - context
+    - transactionInput
+    end note
+TransactionService -> JWTUtility: validate token and claim role
+alt #LightGreen token is not expired
+    alt #LightYellow role is admin or cashier
+        TransactionService -> TransactionService : add TransactionDetail from \nTransactionInput to list
+        TransactionService -> TransactionRepository ++ : get Transaction status
+        TransactionRepository -> BelanjaYukDB ++ : select Transaction by id
+        BelanjaYukDB --> TransactionRepository -- : status or null
+        TransactionRepository --> TransactionService -- : status or null
+        alt status is not null
+            alt #LightYellow status is 0
+                TransactionService -> TransactionDetailRepository ++ : add list of transaction detail
+                TransactionDetailRepository -> BelanjaYukDB ++ : insert list\n transaction detail
+                BelanjaYukDB --> TransactionDetailRepository -- : affected row no error and\n return list of\n transaction detail
+                TransactionDetailRepository --> TransactionService -- : affected row no error and \n return list of transaction detail
+                TransactionService -> TransactionRepository ++ : update total totalPrice
+                TransactionRepository -> BelanjaYukDB ++ : update totalPrice
+                BelanjaYukDB --> TransactionRepository -- : affected row no error\n and return totalPrice
+                TransactionRepository --> TransactionService -- : affected column no error and return totalPrice
+                TransactionService -> TransactionRepository ++ : update Transaction passing status = 1, transactionId, customerId, and staffId
+                TransactionRepository -> BelanjaYukDB ++ : update PTransaction set values as passed\n from request where transactionId is given
+                BelanjaYukDB --> TransactionRepository -- : affected column no error\n and return status
+                TransactionRepository --> TransactionService -- : affected column no error\n and return status
+                else status is not 0
+                TransactionService -> TransactionDetailRepository ++ : get transaction detail by transactionId
+                TransactionDetailRepository -> BelanjaYukDB ++ : select transaction\n detail by\n transactionId
+                BelanjaYukDB --> TransactionDetailRepository -- : list of\nTransactionDetail
+                TransactionDetailRepository --> TransactionService -- : list of TransactionDetail
+                TransactionService -> TransactionRepository ++ : update total totalPrice
+                TransactionRepository -> BelanjaYukDB ++ : update totalPrice
+                BelanjaYukDB --> TransactionRepository -- : affected row no error\n and return totalPrice
+                TransactionRepository --> TransactionService -- : affected column no error\n and return totalPrice
+            end alt
+            TransactionService --> TransactionResolver : return TransactionsResult
+            TransactionResolver --> BelanjaYukBE: response TransactionsResult
+            BelanjaYukBE --> BelanjaYukFE: status, totalPrice and list of transaction details
+        end alt
+        else error: role is not admin or cashier
+        TransactionService --> TransactionResolver : Error: Not Authorized
+        TransactionResolver --> BelanjaYukBE : Error: Not Authorized
+        BelanjaYukBE --> BelanjaYukFE: Message: You're not authorize
+    end alt
+    else token is expired
+    TransactionService --> TransactionResolver -- : Error: token expired
+    TransactionResolver --> BelanjaYukBE -- : Error: token expired
+    BelanjaYukBE --> BelanjaYukFE -- : Message: token was expired
+end alt
+
+BelanjaYukFE -> BelanjaYukBE ++ : /graphql completed transaction
+    note left of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation {
+          completePayment(
+            transactionId: $transactionId
+            amountOfPayment: $totalPay
+          ) {
+            status
+            debt
+          }
+        }
+    end note
+BelanjaYukBE -> TransactionResolver ++ : call TransactionResolver
+TransactionResolver -> TransactionService ++ : call TransactionService
+    note left of TransactionResolver
+    passing:
+    - context
+    - transactionId
+    - totalPay
+    end note
+TransactionService -> JWTUtility: validate token and claim role
+alt #LightGreen token is not expired
+    alt #LightYellow role is admin or cashier
+        TransactionService -> TransactionRepository ++ : get transaction status
+        TransactionRepository -> BelanjaYukDB ++ : select status by transactionId
+        BelanjaYukDB --> TransactionRepository -- : status or null
+        TransactionRepository --> TransactionService -- : status or null
+        alt status not null
+            alt status is 1
+                TransactionService -> TransactionRepository ++ : bulk update stock with List of\nTransactionDetail (decrement)
+                TransactionRepository -> BelanjaYukDB ++ : bulk update stock set values as passed\nfrom request with list of\ntransactionDetail
+                BelanjaYukDB --> TransactionRepository -- : affected row no error
+                TransactionRepository --> TransactionService -- : affected row no error
+                TransactionService -> TransactionRepository ++ : update status passing Transaction id and status = 2
+                TransactionRepository -> BelanjaYukDB ++ : update status set values as passed from\n request where transaction id\nis given
+                BelanjaYukDB --> TransactionRepository -- : affected row no error and return\n new status
+                TransactionRepository --> TransactionService -- : affected row no error and return new status
+                TransactionService -> TransactionDetailRepository ++ : get list of TransactionDetail passing\nTransaction id
+                TransactionDetailRepository -> BelanjaYukDB ++ : select\nTransactionDetail\nwhere\nTransaction id is given
+                BelanjaYukDB --> TransactionDetailRepository -- : list of TransactionDetail\nmodel
+                TransactionDetailRepository --> TransactionService -- : list of\nTransactionDetail model
+                TransactionService -> TransactionRepository ++ : get totalPrice passing Transaction id
+                TransactionRepository -> BelanjaYukDB ++ : select totalPrice where\nTransaction id is given
+                BelanjaYukDB --> TransactionRepository -- : totalPrice
+                TransactionRepository --> TransactionService -- : totalPrice
+                TransactionService -> TransactionService: calculate debt
+                note right of TransactionService
+                    debt = totalPrice - totalPay
+                    if debt <= 0 PaymentStatus = 1
+                    else PaymentStatus = 2
+                end note
+                TransactionService -> PaymentRepository ++ : update payment status passing transaction id, debt, amountOfPayment, and payment status
+                PaymentRepository -> BelanjaYukDB ++ : update payment set values as passed\n from request where transaction id is given
+                BelanjaYukDB --> PaymentRepository -- : affected row no error and return debt
+                PaymentRepository --> TransactionService -- : affected row no error and return debt
+                else status is not 1
+                    TransactionService -> TransactionDetailRepository ++ : get list of TransactionDetail passing\nTransaction id
+                    TransactionDetailRepository -> BelanjaYukDB ++ : select\nTransactionDetail\nwhere\nTransaction\nid is given
+                    BelanjaYukDB --> TransactionDetailRepository -- : list of\nTransactionDetail\nmodel
+                    TransactionDetailRepository --> TransactionService -- : list of TransactionDetail model
+                    TransactionService -> TransactionRepository ++ : get totalPrice and debt passing transaction id
+                    TransactionRepository -> BelanjaYukDB ++ : select totalPrice and debt where\ntransaction id is given
+                    BelanjaYukDB --> TransactionRepository -- : totalPrice and debt
+                    TransactionRepository --> TransactionService -- : totalPrice and debt
+            end alt
+        end alt
+        TransactionService --> TransactionResolver: TransactionResult
+        note right of TransactionService
+        TransactionResult(
+            transactionId,
+            debt,
+            amountOfPayment,
+            paymentStatus
+        )
+        end note
+        TransactionResolver --> BelanjaYukBE: TransactionResult
+        BelanjaYukBE --> BelanjaYukFE: status, debt
+        else error: role is not admin or cashier
+        TransactionService --> TransactionResolver : Error: Not Authorized
+        TransactionResolver --> BelanjaYukBE : Error: Not Authorized
+        BelanjaYukBE --> BelanjaYukFE: Message: You're not authorize
+    end alt
+    else token is expired
+    TransactionService --> TransactionResolver -- : Error: token expired
+    TransactionResolver --> BelanjaYukBE -- : Error: token expired
+    BelanjaYukBE --> BelanjaYukFE -- : Message: token was expired
+end alt
+
+@enduml
+
+'BelanjaYukFE -> BelanjaYukBE ++ : /graphql create transaction init
+'    note right of BelanjaYukFE
+'    content type: application/json
+'    request body:
+'        mutation{
+'          createTransaction{
+'            transactionId
+'          }
+'        }
+'    }
+'    end note
+'BelanjaYukBE -> TransactionResolver ++ : call TransactionResolver
+'TransactionResolver -> TransactionService ++ : call TransactionService
+'    note left
+'    passing:
+'    - context
+'    end note
+'TransactionService -> JWTUtility: validate token and claim role
+'alt #LightGreen token is not expired
+'    alt #LightYellow role is admin or cashier
+'
+'        else error: role is not admin or cashier
+'        TransactionService --> TransactionResolver : Error: Not Authorized
+'        TransactionResolver --> BelanjaYukBE : Error: Not Authorized
+'        BelanjaYukBE --> BelanjaYukFE: Message: You're not authorize
+'    end alt
+'    else token is expired
+'    TransactionService --> TransactionResolver -- : Error: token expired
+'    TransactionResolver --> BelanjaYukBE -- : Error: token expired
+'    BelanjaYukBE --> BelanjaYukFE -- : Message: token was expired
+'end alt
