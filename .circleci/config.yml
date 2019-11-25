@@ -4,7 +4,13 @@ orbs:
 workflows:
   heroku_deploy:
     jobs:
-      - deploy
+      - deploy:
+          filters:
+            tags:
+              only: /^[0-9].[0-9].[0-9]$/
+              branches:
+                only:
+                  - develop
 jobs:
   deploy:
     executor: heroku/default # Uses the basic buildpack-deps image, which has the prerequisites for installing heroku's CLI.
