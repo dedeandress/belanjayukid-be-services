@@ -1,5 +1,5 @@
 # Belanjayuk.id Backend api services
-[![CircleCI](https://circleci.com/gh/dedeandress/belanjayukid-be-services/tree/develop.svg?style=svg)](https://circleci.com/gh/dedeandress/belanjayukid-be-services/tree/develop)
+[![CircleCI](https://circleci.com/gh/dedeandress/belanjayukid-be-services/tree/develop.svg?style=svg&circle-token=7df00539d9432f282fb40c4dcbf85c127b5d50f6)](https://circleci.com/gh/dedeandress/belanjayukid-be-services/tree/develop)
 
 System Requirements:
 * Scala 2.12.8
