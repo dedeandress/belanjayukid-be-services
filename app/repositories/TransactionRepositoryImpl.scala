@@ -59,9 +59,9 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
     db.run(Action.updateTransaction(transactionId, status, staffId, customerId))
   }
 
-  override def getAllTransactionWithLimit(limit: Int): Future[TransactionsResult] = {
-    play.Logger.warn(s"getAllTransactionWith Limit: $limit")
-    db.run(Action.getAllTransactionWithLimit(limit))
+  override def getAllTransactionWithLimit(limit: Int, status: Int): Future[TransactionsResult] = {
+    play.Logger.warn(s"getAllTransactionWith Limit: $limit and status: $status")
+    db.run(Action.getAllTransactionWithLimit(limit, status))
   }
 
   override def updateTotalPrice(transactionId: UUID, transactionDetailStatus: Int): Future[BigDecimal] = {
@@ -132,9 +132,9 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
       transactions <- QueryUtility.transactionsQuery.filter(_.status === status).result
     } yield transactions
 
-    def getAllTransactionWithLimit(limit: Int): DBIO[TransactionsResult] = for {
-      transactions <- QueryUtility.transactionsQuery.filter(_.status =!= TransactionStatus.INITIAL).sortBy(_.date.desc).take(limit).result
-      numberOfProduct <- QueryUtility.transactionsQuery.filter(_.status =!= TransactionStatus.INITIAL).length.result
+    def getAllTransactionWithLimit(limit: Int, status: Int): DBIO[TransactionsResult] = for {
+      transactions <- QueryUtility.transactionsQuery.filter(_.status === status).sortBy(_.date.desc).take(limit).result
+      numberOfProduct <- QueryUtility.transactionsQuery.filter(_.status === status).length.result
     } yield TransactionsResult(
       transactions = transactions,
       totalCount = numberOfProduct,

@@ -64,15 +64,16 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       arguments = List(
         Argument("transactionId", schema.StringType)
       ),
-      resolve = sangriaContext => transactionResolver.getTransaction(sangriaContext.ctx, UUID.fromString(sangriaContext.arg[String]("transactionId")))
+      resolve = sangriaContext => transactionResolver.getTransaction(sangriaContext.ctx, sangriaContext.arg[String]("transactionId"))
     ),
     Field(
       name = "transactionsWithLimit",
       fieldType = graphQLType.TransactionsResultType,
       arguments = List(
-        Argument("limit", schema.IntType)
+        Argument("limit", schema.IntType),
+        Argument("status", schema.IntType)
       ),
-      resolve = sangriaContext => transactionResolver.getTransactionsWithLimit(sangriaContext.ctx, sangriaContext.arg[Int]("limit"))
+      resolve = sangriaContext => transactionResolver.getTransactionsWithLimit(sangriaContext.ctx, sangriaContext.arg[Int]("limit"), sangriaContext.arg[Int]("status"))
     ),
     //staff
     Field(
