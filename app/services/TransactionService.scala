@@ -1,16 +1,15 @@
 package services
 
 import java.util.UUID
-import java.util.concurrent.TimeUnit
 
 import com.google.inject.Inject
-import errors.{AuthorizationException, NotFound}
+import errors.{AuthorizationException, BadRequest, NotFound}
 import graphql.Context
 import graphql.`type`.{RefundTransactionResult, TransactionsResult}
 import graphql.input.{CheckTransactionInput, TransactionInput}
 import models.{CreateTransactionResult, Payment, Transaction, TransactionDetail, TransactionResult}
 import repositories.repositoryInterfaces.{PaymentRepository, ProductDetailRepository, ProductsRepository, TransactionDetailRepository, TransactionRepository}
-import utilities.{JWTUtility, PaymentStatus, TransactionDetailStatus, TransactionStatus}
+import utilities.{JWTUtility, PaymentStatus, TransactionDetailStatus, TransactionStatus, Utility}
 
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
@@ -34,67 +33,67 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
 
   }
 
-  def updateTransaction(context: Context, transactionId: UUID, status: Int): Future[Option[Int]] = {
+  def updateTransaction(context: Context, transactionId: String, status: Int): Future[Option[Int]] = {
     if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
-    transactionRepository.updateTransactionStatus(transactionId, status)
+    transactionRepository.updateTransactionStatus(Utility.checkUUID(transactionId, "Transaction"), status)
   }
 
   def completePayment(context: Context, id: String, amountOfPayment: BigDecimal): Future[TransactionResult] = {
     if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
-    val transactionId = UUID.fromString(id)
-    val transactionStatus = transactionRepository.getTransactionStatus(transactionId)
+      val transactionId = Utility.checkUUID(id, "Transaction")
+      val transactionStatus = transactionRepository.getTransactionStatus(transactionId)
 
-    transactionStatus.flatMap {
-      trStatus =>
-        play.Logger.warn(s"completePayment: Status = $trStatus")
-        if (trStatus.get == TransactionStatus.ON_PROCESS) {
-          transactionRepository.updateStock(transactionId).flatMap {
-            _ =>
-              transactionRepository.updateTransactionStatus(transactionId, TransactionStatus.ON_CHECKER).flatMap {
-                status =>
-                  transactionDetailRepository.findTransactionDetailByTransactionId(transactionId).flatMap {
-                    transactionDetailList =>
-                      transactionRepository.updateTotalPrice(transactionId, TransactionDetailStatus.NOT_EMPTY).flatMap{
-                        totalPrice =>
-                          var paymentStatus = 0
-                          var debt = totalPrice - amountOfPayment
-                          if(debt<=0) {
-                            debt = 0
-                            paymentStatus = PaymentStatus.PAID
-                          }
-                          else paymentStatus = PaymentStatus.DEBT
-                          paymentRepository.updatePayment(transactionId = transactionId, debt =  debt, amountOfPayment = amountOfPayment, paymentStatus).flatMap{
-                            debt =>
-                              Future.successful(TransactionResult(status.get, transactionDetailList, totalPrice, debt))
-                          }
-                      }
-                  }
-              }
+      transactionStatus.flatMap {
+        trStatus =>
+          play.Logger.warn(s"completePayment: Status = $trStatus")
+          if (trStatus.get == TransactionStatus.ON_PROCESS) {
+            transactionRepository.updateStock(transactionId).flatMap {
+              _ =>
+                transactionRepository.updateTransactionStatus(transactionId, TransactionStatus.ON_CHECKER).flatMap {
+                  status =>
+                    transactionDetailRepository.findTransactionDetailByTransactionId(transactionId).flatMap {
+                      transactionDetailList =>
+                        transactionRepository.updateTotalPrice(transactionId, TransactionDetailStatus.NOT_EMPTY).flatMap{
+                          totalPrice =>
+                            var paymentStatus = 0
+                            var debt = totalPrice - amountOfPayment
+                            if(debt<=0) {
+                              debt = 0
+                              paymentStatus = PaymentStatus.PAID
+                            }
+                            else paymentStatus = PaymentStatus.DEBT
+                            paymentRepository.updatePayment(transactionId = transactionId, debt =  debt, amountOfPayment = amountOfPayment, paymentStatus).flatMap{
+                              debt =>
+                                Future.successful(TransactionResult(status.get, transactionDetailList, totalPrice, debt))
+                            }
+                        }
+                    }
+                }
+            }
+          } else {
+            transactionDetailRepository.findTransactionDetailByTransactionId(transactionId).flatMap {
+              transactionDetails =>
+                transactionRepository.getTotalPriceAndDebt(transactionId).flatMap{
+                  result => Future.successful(TransactionResult(trStatus.get, transactionDetails, result._1, result._2))
+                }
+            }
           }
-        } else {
-          transactionDetailRepository.findTransactionDetailByTransactionId(transactionId).flatMap {
-            transactionDetails =>
-              transactionRepository.getTotalPriceAndDebt(transactionId).flatMap{
-                result => Future.successful(TransactionResult(trStatus.get, transactionDetails, result._1, result._2))
-              }
-          }
-        }
-    }
+      }
   }
 
   def addTransactionDetails(context: Context, transactionInput: TransactionInput): Future[TransactionResult] = {
     if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
     var list = new mutable.MutableList[TransactionDetail]()
-    val transactionId = UUID.fromString(transactionInput.transactionId)
-    val staffId = UUID.fromString(transactionInput.staffId)
-    val customerId = UUID.fromString(transactionInput.customerId)
+    val transactionId = Utility.checkUUID(transactionInput.transactionId, "Transaction")
+    val staffId = Utility.checkUUID(transactionInput.staffId, "Staff")
+    val customerId = Utility.checkUUID(transactionInput.customerId, "Customer")
     for (detail <- transactionInput.detail) {
-      val productDetailId = UUID.fromString(detail.productDetailId)
+      val productDetailId = Utility.checkUUID(detail.productDetailId, "Product Detail")
       if (list.exists(item => item.productDetailId == productDetailId)){
         val numberOfPurchases = list.find(item => item.productDetailId == productDetailId).get.numberOfPurchases + detail.numberOfPurchase
         val index = list.indexWhere(item => item.productDetailId == productDetailId)
         val transactionDetail = new TransactionDetail(
-          transactionId = UUID.fromString(transactionInput.transactionId),
+          transactionId = Utility.checkUUID(transactionInput.transactionId, "Transaction"),
           numberOfPurchases = numberOfPurchases,
           productDetailId = productDetailId,
           status = TransactionDetailStatus.NOT_EMPTY
@@ -106,9 +105,9 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
       else {
         play.Logger.warn(s"add transactionDetail to list")
         list.+=(new TransactionDetail(
-          transactionId = UUID.fromString(transactionInput.transactionId),
+          transactionId = Utility.checkUUID(transactionInput.transactionId, "Transaction"),
           numberOfPurchases = detail.numberOfPurchase,
-          productDetailId = UUID.fromString(detail.productDetailId),
+          productDetailId = Utility.checkUUID(detail.productDetailId, "Product Detail"),
           status = TransactionDetailStatus.NOT_EMPTY
         ))
       }
@@ -155,19 +154,19 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
     transactionRepository.getTransactions(status)
   }
 
-  def getTransaction(context: Context, transactionId: UUID): Future[Option[Transaction]] = {
+  def getTransaction(context: Context, transactionId: String): Future[Option[Transaction]] = {
     if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
-    transactionRepository.getTransaction(transactionId)
+    transactionRepository.getTransaction(Utility.checkUUID(transactionId, "Transaction"))
   }
 
-  def getTransactionsWithLimit(context: Context, limit: Int): Future[TransactionsResult] = {
+  def getTransactionsWithLimit(context: Context, limit: Int, status: Int): Future[TransactionsResult] = {
     if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
-    transactionRepository.getAllTransactionWithLimit(limit)
+    transactionRepository.getAllTransactionWithLimit(limit, status)
   }
 
   def checkTransaction(context: Context, checkTransaction: CheckTransactionInput): Future[Option[Int]] ={
     if (!JWTUtility.isAdminOrChecker(context)) throw AuthorizationException("You are not authorized")
-    val transactionId = UUID.fromString(checkTransaction.transactionId)
+    val transactionId = Utility.checkUUID(checkTransaction.transactionId, "Transaction")
     var transactionStatus = TransactionStatus.ON_PROCESS
     val searchRefundTransaction = checkTransaction.transactionDetail.find(_.status == TransactionDetailStatus.REFUNDED)
     if(searchRefundTransaction.nonEmpty) transactionStatus = TransactionStatus.ON_REFUND else transactionStatus = TransactionStatus.COMPLETED
@@ -178,7 +177,7 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
 
   def refundTransaction(context: Context, id: String): Future[RefundTransactionResult] = {
     if (!JWTUtility.isAdminOrChecker(context)) throw AuthorizationException("You are not authorized")
-    val transactionId = UUID.fromString(id)
+    val transactionId = Utility.checkUUID(id, "Transaction")
     transactionDetailRepository.findTransactionDetailByTransactionIdByStatus(transactionId, TransactionDetailStatus.REFUNDED).flatMap{
       result =>
         transactionRepository.updateTotalPrice(transactionId, TransactionDetailStatus.COMPLETED).flatMap{
@@ -190,22 +189,21 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
 
   def completeRefund(context: Context, id: String): Future[Option[Transaction]] = {
     if (!JWTUtility.isAdminOrChecker(context)) throw AuthorizationException("You are not authorized")
-    val transactionId = UUID.fromString(id)
-    transactionRepository.getTransactionStatus(transactionId).flatMap{
-      status =>
-        if(status.isEmpty) throw NotFound(s"transactionId Not Found")
-        else if (status.get == TransactionStatus.ON_REFUND){
-          transactionRepository.updateTransactionStatus(transactionId, TransactionStatus.COMPLETED).flatMap{
+    val transactionId = Utility.checkUUID(id, "Transaction")
+    transactionRepository.getTransactionStatus(transactionId).flatMap {
+      case Some(status) =>
+        if (status == TransactionStatus.ON_REFUND) {
+          transactionRepository.updateTransactionStatus(transactionId, TransactionStatus.COMPLETED).flatMap {
             _ =>
               transactionRepository.getTransaction(transactionId)
           }
         }
-        else{
-          transactionRepository.getTransaction(transactionId)
+        else {
+          play.Logger.error(s"Bad Request Transaction ID: $transactionId status is $status")
+          throw BadRequest(s"Transaction ID: $transactionId status is $status")
         }
+      case None => throw NotFound("Transaction Not Found")
     }
-  }.recover{
-    case x: NotFound => throw NotFound(s"$x")
   }
 
 }
