@@ -44,6 +44,8 @@ class StaffRepositoryImpl @Inject()(database: AppDatabase, implicit val executio
     db.run(Action.updateEmail(userId, email))
   }
 
+  override def deleteStaff(staffId: UUID): Future[Option[Staff]] = db.run(Action.delete(staffId))
+
   object Action {
 
     def addStaff(staff: Staff): DBIO[Option[Staff]] = for {
@@ -60,7 +62,7 @@ class StaffRepositoryImpl @Inject()(database: AppDatabase, implicit val executio
     } yield staff
 
     def findAll(): DBIO[Seq[Staff]] = for {
-      staff <- QueryUtility.staffQuery.result
+      staff <- QueryUtility.staffQuery.filter(_.status === true).result
     }yield staff
 
     def updateRole(userId: UUID, roleId: UUID): DBIO[Int] = for {
@@ -78,6 +80,14 @@ class StaffRepositoryImpl @Inject()(database: AppDatabase, implicit val executio
         case _ => DBIO.successful(())
       }
     } yield update
+
+    def delete(id: UUID) : DBIO[Option[Staff]] = for {
+      update <- QueryUtility.staffQuery.filter(_.id === id).map(_.status).update(false)
+      staff <- update match {
+        case 0 => DBIO.failed(NotFound("not found staff id"))
+        case _ => findById(id)
+      }
+    }yield staff
 
   }
 

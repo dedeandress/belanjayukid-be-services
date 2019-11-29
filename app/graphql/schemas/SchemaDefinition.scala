@@ -167,6 +167,14 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       )
     ),
     Field(
+      name = "deleteStaff",
+      fieldType = OptionType(graphQLType.StaffType),
+      arguments = List(
+        Argument("staffId", schema.StringType)
+      ),
+      resolve = sangriaContext => staffResolver.deleteStaff(sangriaContext.ctx, sangriaContext.arg[String]("staffId"))
+    ),
+    Field(
       name = "createProduct",
       fieldType = graphQLType.ProductType,
       arguments = graphQLType.ProductInputArg :: Nil,

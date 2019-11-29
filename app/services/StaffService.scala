@@ -3,7 +3,7 @@ package services
 import java.util.UUID
 
 import com.google.inject.Inject
-import errors.{AlreadyExists, AuthorizationException, NotFound}
+import errors.{AlreadyExists, AuthorizationException, BadRequest, NotFound}
 import graphql.Context
 import graphql.input.StaffInput
 import models._
@@ -100,6 +100,18 @@ class StaffService @Inject()(staffRepository: StaffRepository, userRepository: U
         }
         else Future.failed(NotFound("Not Found"))
     }
+  }
 
+  def deleteStaff(context: Context, staffId: String): Future[Option[Staff]] = {
+    if (!JWTUtility.isAdmin(context)) throw AuthorizationException("You are not authorized")
+    try {
+      staffRepository.findById(UUID.fromString(staffId)).flatMap{
+        case Some(staff) =>
+          staffRepository.deleteStaff(staff.id)
+        case None => throw NotFound("Staff ID not found")
+      }
+    }catch {
+      case _ : IllegalArgumentException => throw BadRequest("Staff ID is not valid")
+    }
   }
 }
