@@ -63,7 +63,7 @@ class CustomerService @Inject()(customerRepository: CustomerRepository, userRepo
       dateOfBirth = dateOfBirth,
       id = userProfile.get.id
       ))
-      updateUserProfile <- userProfileRepository.updateUserProfile(newUserProfile)
+      updateUserProfile <- userProfileRepository.updateUserProfile(newUserProfile, "123")
     } yield updateUserProfile
 
     update.flatMap{
