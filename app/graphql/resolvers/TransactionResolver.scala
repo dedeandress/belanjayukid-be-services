@@ -36,4 +36,6 @@ class TransactionResolver @Inject()(transactionService: TransactionService, impl
 
   def completeRefund(context: Context, transactionId: String): Future[Option[Transaction]] = transactionService.completeRefund(context, transactionId)
 
+  def getTransactionWithRange(context: Context, fromDate: Long, toDate: Long): Future[Seq[Transaction]] = transactionService.getTransactionWithRange(context, fromDate, toDate)
+
 }

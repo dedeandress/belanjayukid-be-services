@@ -75,6 +75,15 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       ),
       resolve = sangriaContext => transactionResolver.getTransactionsWithLimit(sangriaContext.ctx, sangriaContext.arg[Int]("limit"), sangriaContext.arg[Int]("status"))
     ),
+    Field(
+      name = "transactionsWithRange",
+      fieldType = ListType(graphQLType.TransactionType),
+      arguments = List(
+        Argument("fromDate", schema.LongType),
+        Argument("toDate", schema.LongType)
+      ),
+      resolve = sangriaContext => transactionResolver.getTransactionWithRange(sangriaContext.ctx, sangriaContext.arg[Long]("fromDate"), sangriaContext.arg[Long]("toDate"))
+    ),
     //staff
     Field(
       name = "staffs",
@@ -173,6 +182,16 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
         Argument("staffId", schema.StringType)
       ),
       resolve = sangriaContext => staffResolver.deleteStaff(sangriaContext.ctx, sangriaContext.arg[String]("staffId"))
+    ),
+    Field(
+      name = "changePassword",
+      fieldType = schema.BooleanType,
+      arguments = List(
+        Argument("oldPassword", schema.StringType),
+        Argument("newPassword", schema.StringType),
+        Argument("confirmPassword", schema.StringType)
+      ),
+      resolve = sangriaContext => staffResolver.changePassword(sangriaContext.ctx, sangriaContext.arg[String]("oldPassword"), sangriaContext.arg[String]("newPassword"), sangriaContext.arg[String]("confirmPassword"))
     ),
     Field(
       name = "createProduct",

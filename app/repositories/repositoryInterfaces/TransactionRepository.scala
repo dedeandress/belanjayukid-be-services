@@ -35,4 +35,6 @@ trait TransactionRepository {
 
   def updatePaymentStatus(transactionId: UUID): Future[Int]
 
+  def getTransactions(fromDate: Long, toDate: Long): Future[Seq[Transaction]]
+
 }

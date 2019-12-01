@@ -3,7 +3,7 @@ package services
 import java.util.UUID
 
 import com.google.inject.Inject
-import errors.{AlreadyExists, AuthorizationException, BadRequest, NotFound}
+import errors.{AlreadyExists, AuthenticationException, AuthorizationException, BadRequest, NotFound}
 import graphql.Context
 import graphql.input.StaffInput
 import models._
@@ -112,6 +112,22 @@ class StaffService @Inject()(staffRepository: StaffRepository, userRepository: U
       }
     }catch {
       case _ : IllegalArgumentException => throw BadRequest("Staff ID is not valid")
+    }
+  }
+
+  def changePassword(context: Context, oldPassword: String, newPassword: String, confirmPassword: String): Future[Boolean] = {
+    if (!JWTUtility.isAuthorize(context)) throw AuthorizationException("You are not authorized")
+    play.Logger.warn("Change Password")
+    val userId = JWTUtility.getUserId(context)
+    userRepository.find(userId).flatMap{
+      case Some(user) =>
+        val checkPassword = BCryptUtility.check(oldPassword, user.password)
+        if (checkPassword) {
+          if (newPassword.equals(confirmPassword)) {
+            userRepository.changePassword(userId, BCryptUtility.hashPassword(newPassword))
+          }else throw AuthenticationException("New Password and Confirm Password doesn't exist")
+        }else throw AuthenticationException("Wrong Password")
+      case None => throw NotFound("User ID not found")
     }
   }
 }

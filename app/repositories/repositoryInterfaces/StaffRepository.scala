@@ -18,4 +18,6 @@ trait StaffRepository {
   def updateRoleAndEmail(userId: UUID, roleId: UUID, email: String): Future[Int]
 
   def deleteStaff(staffId: UUID): Future[Option[Staff]]
+
+
 }

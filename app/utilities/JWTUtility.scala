@@ -1,7 +1,7 @@
 package utilities
 
 import java.time.{ZoneId, ZonedDateTime}
-import java.util.Date
+import java.util.{Date, UUID}
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
@@ -32,7 +32,7 @@ object JWTUtility {
     }
   }
 
-  def getId(jwt: String): String = {
+  private def getId(jwt: String): String = {
     val json = Jwt.decodeRaw(jwt, BelanjaYukConstant.secretKey, Seq(JwtAlgorithm.HS256))
     Json.parse(json.get).get("id").asText()
   }
@@ -72,9 +72,20 @@ object JWTUtility {
     false
   }
 
+  def isAuthorize(context: Context): Boolean = {
+    if(JWTUtility.getRole(JWTUtility.getToken(context)).equals("Admin") ||
+      JWTUtility.getRole(JWTUtility.getToken(context)).equals("Checker") ||
+      JWTUtility.getRole(JWTUtility.getToken(context)).equals("Checker")) return true
+    false
+  }
+
   def isAdmin(context: Context): Boolean = {
     if(JWTUtility.getRole(JWTUtility.getToken(context)).equals("Admin")) return true
     false
+  }
+
+  def getUserId(context: Context): UUID = {
+    Utility.checkUUID(JWTUtility.getId(JWTUtility.getToken(context)), "UserId")
   }
 
 }

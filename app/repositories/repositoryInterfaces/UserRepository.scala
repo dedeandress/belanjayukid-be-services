@@ -21,4 +21,6 @@ trait UserRepository {
 
   def findUser(username: String): Future[Option[User]]
 
+  def changePassword(userId: UUID, newPassword: String): Future[Boolean]
+
 }
