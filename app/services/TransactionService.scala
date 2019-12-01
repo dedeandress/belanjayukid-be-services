@@ -164,6 +164,11 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
     transactionRepository.getAllTransactionWithLimit(limit, status)
   }
 
+  def getTransactionWithRange(context: Context, fromDate: Long, toDate: Long): Future[Seq[Transaction]] = {
+    if (!JWTUtility.isAdmin(context)) throw AuthorizationException("You are not authorized")
+    transactionRepository.getTransactions(fromDate, toDate)
+  }
+
   def checkTransaction(context: Context, checkTransaction: CheckTransactionInput): Future[Option[Int]] ={
     if (!JWTUtility.isAdminOrChecker(context)) throw AuthorizationException("You are not authorized")
     val transactionId = Utility.checkUUID(checkTransaction.transactionId, "Transaction")

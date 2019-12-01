@@ -25,4 +25,6 @@ class StaffResolver @Inject()(staffService: StaffService, userService: UserServi
                   , address: String, noNik: String, dateOfBirth: Long, roleId: String, staffEmail: String): Future[Option[Staff]] = staffService.updateStaff(context, staffId, fullName, phoneNumber, address, noNik, dateOfBirth, roleId, staffEmail)
 
   def deleteStaff(context: Context, staffId: String): Future[Option[Staff]] = staffService.deleteStaff(context, staffId)
+
+  def changePassword(context: Context, oldPassword: String, newPassword: String, confirmPassword: String): Future[Boolean] = staffService.changePassword(context, oldPassword, newPassword, confirmPassword)
 }

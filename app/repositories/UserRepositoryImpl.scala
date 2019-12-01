@@ -35,6 +35,8 @@ class UserRepositoryImpl @Inject()(val database: AppDatabase, implicit val execu
 
   override def findUser(username: String): Future[Option[User]] = db.run(Actions.findUser(username))
 
+  override def changePassword(userId: UUID, newPassword: String): Future[Boolean] = db.run(Actions.changePassword(userId, newPassword))
+
   object Actions {
     def findAll(): DBIO[List[User]] = for {
       users <- userQuery.result
@@ -65,6 +67,14 @@ class UserRepositoryImpl @Inject()(val database: AppDatabase, implicit val execu
     def findUser(username: String): DBIO[Option[User]] = for {
       user <- userQuery.filter(_.username === username).result.headOption
     } yield user
+
+    def changePassword(userId: UUID, newPassword: String): DBIO[Boolean] = for {
+      update <- userQuery.filter(_.id === userId).map(_.password).update(newPassword)
+      updateStatus <- update match {
+        case 0 => DBIO.failed(NotFound("User ID not found"))
+        case _ => DBIO.successful(true)
+      }
+    } yield updateStatus
   }
 
 }
