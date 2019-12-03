@@ -38,4 +38,8 @@ class TransactionResolver @Inject()(transactionService: TransactionService, impl
 
   def getTransactionWithRange(context: Context, fromDate: Long, toDate: Long): Future[Seq[Transaction]] = transactionService.getTransactionWithRange(context, fromDate, toDate)
 
+  def getTransactionByPaymentStatus(context: Context, paymentStatus: Int): Future[Seq[Transaction]] = transactionService.getTransactionByPaymentStatus(context, paymentStatus)
+
+  def payOffDebt(context: Context, transactionId: String, amountPaid: BigDecimal): Future[Option[Transaction]] = transactionService.payOffDebt(context, transactionId, amountPaid)
+
 }

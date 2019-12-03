@@ -211,4 +211,28 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
     }
   }
 
+  def getTransactionByPaymentStatus(context: Context, paymentStatus: Int): Future[Seq[Transaction]] = {
+    if (!JWTUtility.isAdminOrChecker(context)) throw AuthorizationException("You are not authorized")
+    transactionRepository.getTransactionsByPaymentStatus(paymentStatus)
+  }
+
+  def payOffDebt(context: Context, id: String, amountOfPayment: BigDecimal): Future[Option[Transaction]] = {
+    if (!JWTUtility.isAdminOrChecker(context)) throw AuthorizationException("You are not authorized")
+    val transactionId = Utility.checkUUID(id, "Transaction")
+    transactionRepository.getTransaction(transactionId).flatMap{
+      case Some(transaction) =>
+        paymentRepository.findById(transaction.paymentId).flatMap{
+          case Some(payment) =>
+            if (amountOfPayment >= payment.debt) {
+              transactionRepository.updatePaymentStatus(transaction.id, PaymentStatus.PAID).flatMap{
+                case _ => transactionRepository.getTransaction(transaction.id)
+                case 0 => throw NotFound("Payment Failed")
+              }
+            }else throw NotFound("Payment Failed : insufficient fund")
+          case None => throw NotFound("Payment Not Found")
+        }
+      case None => throw NotFound("Transaction Not Found")
+    }
+  }
+
 }
