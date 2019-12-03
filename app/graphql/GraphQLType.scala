@@ -20,7 +20,8 @@ class GraphQLType @Inject()(userRepository: UserRepository
                             , categoryRepository: CategoryRepository, productStockRepository: ProductStockRepository
                             , productRepository: ProductsRepository, productDetailRepository: ProductDetailRepository
                             , transactionDetailRepository: TransactionDetailRepository, staffRepository: StaffRepository
-                            , paymentRepository: PaymentRepository, customerRepository: CustomerRepository) {
+                            , paymentRepository: PaymentRepository, customerRepository: CustomerRepository
+                            , transactionRepository: TransactionRepository) {
 
   implicit val RoleType: ObjectType[Unit, Role] = deriveObjectType[Unit, Role](ObjectTypeName("Role"), ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id)))
 

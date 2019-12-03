@@ -84,6 +84,14 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       ),
       resolve = sangriaContext => transactionResolver.getTransactionWithRange(sangriaContext.ctx, sangriaContext.arg[Long]("fromDate"), sangriaContext.arg[Long]("toDate"))
     ),
+    Field(
+      name = "transactionsByPaymentStatus",
+      fieldType = ListType(graphQLType.TransactionType),
+      arguments = List(
+        Argument("paymentStatus", schema.IntType)
+      ),
+      resolve = sangriaContext => transactionResolver.getTransactionByPaymentStatus(sangriaContext.ctx, sangriaContext.arg[Int]("paymentStatus"))
+    ),
     //staff
     Field(
       name = "staffs",
@@ -314,6 +322,15 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
         Argument("customerId", schema.StringType)
       ),
       resolve = sangriaContext => transactionResolver.updateCustomer(sangriaContext.ctx, UUID.fromString(sangriaContext.arg[String]("transactionId")), UUID.fromString(sangriaContext.arg[String]("customerId")))
+    ),
+    Field(
+      name = "payOffDebt",
+      fieldType = OptionType(graphQLType.TransactionType),
+      arguments = List(
+        Argument("transactionId", schema.StringType),
+        Argument("amountPaid", schema.BigDecimalType)
+      ),
+      resolve = sangriaContext => transactionResolver.payOffDebt(sangriaContext.ctx, sangriaContext.arg[String]("transactionId"), sangriaContext.arg[BigDecimal]("amountPaid"))
     ),
     //supplier
     Field(

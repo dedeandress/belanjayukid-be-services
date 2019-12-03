@@ -103,7 +103,9 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
 
   override def getTransactions(fromDate: Long, toDate: Long): Future[Seq[Transaction]] = db.run(Action.getTransaction(fromDate, toDate))
 
-  override def updatePaymentStatus(transactionId: UUID): Future[Int] = ???
+  override def updatePaymentStatus(transactionId: UUID, paymentStatus: Int): Future[Int] = db.run(Action.updatePaymentStatus(transactionId, paymentStatus))
+
+  override def getTransactionsByPaymentStatus(paymentStatus: Int): Future[Seq[Transaction]] = db.run(Action.getTransactionByPaymentStatus(paymentStatus))
 
   object Action {
 
@@ -168,6 +170,14 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
     def getTransaction(fromDate: Long, toDate: Long): DBIO[Seq[Transaction]] = for {
       transaction <- QueryUtility.transactionsQuery.filter(transaction => transaction.date >= fromDate && transaction.date <= toDate).result
     }yield transaction
+
+    def getTransactionByPaymentStatus(paymentStatus: Int): DBIO[Seq[Transaction]] = for {
+      transaction <- QueryUtility.transactionsQuery.filter(_.paymentStatus === paymentStatus).result
+    }yield transaction
+
+    def updatePaymentStatus(transactionId: UUID, paymentStatus: Int): DBIO[Int] = for {
+      updatePaymentStatus <- QueryUtility.transactionsQuery.filter(_.id === transactionId).map(_.paymentStatus).update(paymentStatus)
+    } yield updatePaymentStatus
   }
 
 }
