@@ -17,9 +17,15 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
                                  , productResolver: ProductResolver, productStockResolver: ProductStockResolver
                                  , productDetailResolver: ProductDetailResolver, transactionResolver: TransactionResolver
                                  , customerResolver: CustomerResolver, purchasesTransactionResolver: PurchasesTransactionResolver
-                                 , supplierResolver: SupplierResolver, graphQLType: GraphQLType) {
+                                 , supplierResolver: SupplierResolver
+                                 , storeResolver: StoreResolver, graphQLType: GraphQLType) {
 
   val Queries: List[Field[Context, Unit]] = List(
+    Field(
+      name = "store",
+      fieldType = OptionType(graphQLType.StoreType),
+      resolve = sangriaContext => storeResolver.store(sangriaContext.ctx)
+    ),
     Field(
       name = "categories",
       fieldType = ListType(graphQLType.CategoryType),
@@ -157,6 +163,16 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
       resolve = sangriaContext => staffResolver.login(sangriaContext.arg[String]("username"), sangriaContext.arg[String]("password"))
     ),
     Field(
+      name = "updateStore",
+      fieldType = OptionType(graphQLType.StoreType),
+      arguments = List(
+        Argument("name", schema.StringType),
+        Argument("phoneNumber", schema.StringType),
+        Argument("address", schema.StringType)
+      ),
+      resolve = sangriaContext => storeResolver.updateStore(sangriaContext.ctx, sangriaContext.arg[String]("name"), sangriaContext.arg[String]("phoneNumber"), sangriaContext.arg[String]("address"))
+    ),
+    Field(
       name = "createStaff",
       fieldType = OptionType(graphQLType.StaffType),
       arguments = graphQLType.StaffInputArg :: Nil,
@@ -173,15 +189,14 @@ class SchemaDefinition @Inject()(staffResolver: StaffResolver
         Argument("noNik", schema.StringType),
         Argument("dateOfBirth", schema.LongType),
         Argument("roleId", schema.StringType),
-        Argument("staffEmail", schema.StringType),
-        Argument("staffPassword", schema.StringType)
+        Argument("staffEmail", schema.StringType)
       ),
       resolve = sangriaContext => staffResolver.updateStaff(
         sangriaContext.ctx, sangriaContext.arg[String]("staffId"),
         sangriaContext.arg[String]("fullName"), sangriaContext.arg[String]("phoneNumber"),
         sangriaContext.arg[String]("address"), sangriaContext.arg[String]("noNik"),
         sangriaContext.arg[Long]("dateOfBirth"), sangriaContext.arg[String]("roleId"),
-        sangriaContext.arg[String]("staffEmail"), sangriaContext.arg[String]("staffPassword")
+        sangriaContext.arg[String]("staffEmail")
       )
     ),
     Field(

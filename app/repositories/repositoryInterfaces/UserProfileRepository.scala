@@ -14,5 +14,5 @@ trait UserProfileRepository {
 
   def findById(id: UUID): Future[Option[UserProfile]]
 
-  def updateUserProfile(userProfile: UserProfile, password: String): Future[Int]
+  def updateUserProfile(userProfile: UserProfile): Future[Int]
 }

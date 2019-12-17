@@ -4,7 +4,6 @@ import com.google.inject.{Inject, Singleton}
 import errors.NotFound
 import modules.AppDatabase
 import repositories.repositoryInterfaces.UserProfileRepository
-import utilities.QueryUtility
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -32,7 +31,7 @@ class UserProfileRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
 
   override def findById(id: UUID): Future[Option[UserProfile]] = db.run(Actions.findById(id))
 
-  override def updateUserProfile(userProfile: UserProfile, password: String): Future[Int] = db.run(Actions.update(userProfile, password))
+  override def updateUserProfile(userProfile: UserProfile): Future[Int] = db.run(Actions.update(userProfile))
 
   object Actions {
 
@@ -54,12 +53,11 @@ class UserProfileRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
       userProfile <- userProfileQuery.filter(_.id === id).result.headOption
     } yield userProfile
 
-    def update(userProfile: UserProfile, password: String): DBIO[Int] = for {
+    def update(userProfile: UserProfile): DBIO[Int] = for {
       update <- userProfileQuery.filter(_.id === userProfile.id).update(userProfile)
-      updatePassword <- QueryUtility.userQuery.filter(_.id === userProfile.userId).map(_.password).update(password)
       status <- update match {
         case 0 => DBIO.failed(NotFound("not found user id"))
-        case _ => DBIO.successful(updatePassword)
+        case _ => DBIO.successful(1)
       }
     }yield status
   }
