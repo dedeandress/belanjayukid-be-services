@@ -150,22 +150,22 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
   }
 
   def getAllTransaction(context: Context, status: Int): Future[Seq[Transaction]] = {
-    if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
+    if (!JWTUtility.isAuthorize(context)) throw AuthorizationException("You are not authorized")
     transactionRepository.getTransactions(status)
   }
 
   def getTransaction(context: Context, transactionId: String): Future[Option[Transaction]] = {
-    if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
+    if (!JWTUtility.isAuthorize(context)) throw AuthorizationException("You are not authorized")
     transactionRepository.getTransaction(Utility.checkUUID(transactionId, "Transaction"))
   }
 
   def getTransactionsWithLimit(context: Context, limit: Int, status: Int): Future[TransactionsResult] = {
-    if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
+    if (!JWTUtility.isAuthorize(context)) throw AuthorizationException("You are not authorized")
     transactionRepository.getAllTransactionWithLimit(limit, status)
   }
 
   def getTransactionWithRange(context: Context, fromDate: Long, toDate: Long): Future[Seq[Transaction]] = {
-    if (!JWTUtility.isAdmin(context)) throw AuthorizationException("You are not authorized")
+    if (!JWTUtility.isAuthorize(context)) throw AuthorizationException("You are not authorized")
     transactionRepository.getTransactions(fromDate, toDate)
   }
 
@@ -181,7 +181,7 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
   }
 
   def refundTransaction(context: Context, id: String): Future[RefundTransactionResult] = {
-    if (!JWTUtility.isAdminOrChecker(context)) throw AuthorizationException("You are not authorized")
+    if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
     val transactionId = Utility.checkUUID(id, "Transaction")
     transactionDetailRepository.findTransactionDetailByTransactionIdByStatus(transactionId, TransactionDetailStatus.REFUNDED).flatMap{
       result =>
@@ -193,7 +193,7 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
   }
 
   def completeRefund(context: Context, id: String): Future[Option[Transaction]] = {
-    if (!JWTUtility.isAdminOrChecker(context)) throw AuthorizationException("You are not authorized")
+    if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
     val transactionId = Utility.checkUUID(id, "Transaction")
     transactionRepository.getTransactionStatus(transactionId).flatMap {
       case Some(status) =>
@@ -212,12 +212,12 @@ class TransactionService @Inject()(transactionRepository: TransactionRepository,
   }
 
   def getTransactionByPaymentStatus(context: Context, paymentStatus: Int): Future[Seq[Transaction]] = {
-    if (!JWTUtility.isAdminOrChecker(context)) throw AuthorizationException("You are not authorized")
+    if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
     transactionRepository.getTransactionsByPaymentStatus(paymentStatus)
   }
 
   def payOffDebt(context: Context, id: String, amountOfPayment: BigDecimal): Future[Option[Transaction]] = {
-    if (!JWTUtility.isAdminOrChecker(context)) throw AuthorizationException("You are not authorized")
+    if (!JWTUtility.isAdminOrCashier(context)) throw AuthorizationException("You are not authorized")
     val transactionId = Utility.checkUUID(id, "Transaction")
     transactionRepository.getTransaction(transactionId).flatMap{
       case Some(transaction) =>
