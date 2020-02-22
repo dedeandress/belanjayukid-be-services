@@ -7,6 +7,7 @@ participant AppController
 participant PurchasesTransactionService
 end box
 user -> BelanjaYukFE ++ : Purchases Transaction menu
+activate user
 BelanjaYukFE -> AppController ++ : /graphql create purchases transaction init
     note right of BelanjaYukFE
     content type: application/json
@@ -99,4 +100,5 @@ PurchasesTransactionResult(
 end note
 AppController --> BelanjaYukFE: PurchasesTransactionResult
 BelanjaYukFE --> user: payment complete successful view
+deactivate user
 @enduml

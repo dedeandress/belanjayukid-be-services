@@ -8,6 +8,7 @@ participant StaffService
 end box
 
 user -> BelanjaYukFE ++ : Update staff menu
+activate user
 BelanjaYukFE -> BelanjaYukBE ++ : /graphql Update staff
     note right of BelanjaYukFE
     content type: application/json
@@ -42,4 +43,5 @@ StaffResolver -> StaffService ++ : call updateStaff()
 StaffService --> BelanjaYukBE -- : Staff
 BelanjaYukBE --> BelanjaYukFE -- : Staff
 BelanjaYukFE --> user --: update staff successful and view staff
+deactivate user
 @enduml

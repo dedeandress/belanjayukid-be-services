@@ -8,6 +8,7 @@ participant SupplierService
 end box
 
 user -> BelanjaYukFE ++ : Delete Supplier menu
+activate user
 BelanjaYukFE -> AppController ++ : /graphql delete supplier
     note right of BelanjaYukFE
     content type: application/json
@@ -26,4 +27,5 @@ AppController -> SupplierService ++ : call deleteSupplier()
 SupplierService --> AppController --: Supplier
 AppController --> BelanjaYukFE -- : Supplier
 BelanjaYukFE --> user -- : delete successfull and view Supplier
+deactivate user
 @enduml

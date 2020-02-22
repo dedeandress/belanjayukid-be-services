@@ -8,6 +8,7 @@ participant CustomerService
 end box
 
 user -> BelanjaYukFE ++ : create customer menu
+activate user
 BelanjaYukFE -> AppController ++ : /graphql create customer
     note right of BelanjaYukFE
     content type: application/json
@@ -37,4 +38,5 @@ AppController -> CustomerService ++ : call createCustomer()
 CustomerService --> AppController -- : customer
 AppController --> BelanjaYukFE -- : customer
 BelanjaYukFE --> user -- : add successful and view customer
+deactivate user
 @enduml

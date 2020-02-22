@@ -8,6 +8,7 @@ participant CategoryService
 end box
 
 user -> BelanjaYukFE ++ : delete category menu
+activate user
 BelanjaYukFE -> AppController ++ : /graphql delete category
     note left of BelanjaYukFE
     content type: application/json
@@ -26,4 +27,5 @@ AppController -> CategoryService ++ : deleteCategory()
 CategoryService --> AppController : delete successful
 AppController --> BelanjaYukFE : delete successful
 BelanjaYukFE --> user : delete successful
+deactivate user
 @enduml

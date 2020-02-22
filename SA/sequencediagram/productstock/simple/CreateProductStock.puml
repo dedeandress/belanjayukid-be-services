@@ -8,6 +8,7 @@ participant ProductStockService
 end box
 
 user -> BelanjaYukFE ++ : Create product stock menu
+activate user
 BelanjaYukFE -> BelanjaYukBE ++ : /graphql create product stock
     note right of BelanjaYukFE
     content type: application/json
@@ -17,7 +18,7 @@ BelanjaYukFE -> BelanjaYukBE ++ : /graphql create product stock
         }
     end note
 BelanjaYukBE -> BelanjaYukBE : parseGraphql()
-BelanjaYukBE -> ProductStockService ++ : call ProductStockResolver
+BelanjaYukBE -> ProductStockService ++ : call createProductStock()
     note left
     passing:
     - context
@@ -26,4 +27,5 @@ BelanjaYukBE -> ProductStockService ++ : call ProductStockResolver
 ProductStockService --> BelanjaYukBE -- : ProductStock
 BelanjaYukBE --> BelanjaYukFE -- : ProductStock
 BelanjaYukFE --> user -- : create product stock successful and view product stock
+deactivate user
 @enduml

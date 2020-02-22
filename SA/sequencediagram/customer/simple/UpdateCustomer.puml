@@ -8,6 +8,7 @@ participant CustomerService
 end box
 
 user -> BelanjaYukFE ++ : update customer menu
+activate user
 BelanjaYukFE -> AppController ++ : /graphql update customer
     note right of BelanjaYukFE
     content type: application/json
@@ -38,4 +39,5 @@ AppController -> CustomerService ++ : call updateCustomer()
 CustomerService --> AppController -- : update successful
 AppController --> BelanjaYukFE -- : update successful
 BelanjaYukFE --> user -- : update successful
+deactivate user
 @enduml

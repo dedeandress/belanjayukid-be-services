@@ -8,6 +8,7 @@ participant StaffService
 end box
 
 user -> BelanjaYukFE ++ : Create staff menu
+activate user
 BelanjaYukFE -> AppController ++ : /graphql Create staff
     note right of BelanjaYukFE
     content type: application/json
@@ -44,4 +45,5 @@ AppController -> StaffService ++ : call createStaff()
 StaffService --> AppController : Staff
 AppController --> BelanjaYukFE : Staff
 BelanjaYukFE --> user -- : create staff successful and view staff
+deactivate user
 @enduml

@@ -8,6 +8,7 @@ participant ProductDetailService
 end box
 
 user -> BelanjaYukFE ++ : Delete Product Detail menu
+activate user
 BelanjaYukFE -> AppController ++ : /graphql delete product detail
     note right of BelanjaYukFE
     content type: application/json
@@ -26,4 +27,5 @@ AppController -> ProductDetailService ++ : call deleteProductDetail()
 ProductDetailService --> AppController --: ProductDetail
 AppController --> BelanjaYukFE -- : ProductDetail
 BelanjaYukFE --> user -- : delete successfull and view productDetail
+deactivate user
 @enduml

@@ -1,5 +1,5 @@
 @startuml
-title: Create Product Sequence Diagram
+title: Update Product Sequence Diagram
 actor user
 participant BelanjaYukFE
 box "BelanjaYuk.id" #LightBlue
@@ -7,8 +7,9 @@ participant AppController
 participant ProductService
 end box
 
-user -> BelanjaYukFE ++ : create Product menu
-BelanjaYukFE -> AppController ++ : /graphql create product
+user -> BelanjaYukFE ++ : update Product menu
+activate user
+BelanjaYukFE -> AppController ++ : /graphql update product
     note right of BelanjaYukFE
     content type: application/json
     request body:
@@ -17,7 +18,7 @@ BelanjaYukFE -> AppController ++ : /graphql create product
         }
     end note
 AppController -> AppController : parseGraphql()
-AppController -> ProductService ++ : call createProduct()
+AppController -> ProductService ++ : call updateProduct()
     note left
     passing:
     - context
@@ -28,6 +29,6 @@ AppController -> ProductService ++ : call createProduct()
 ProductService --> AppController -- : Product
 AppController --> BelanjaYukFE -- : Product
 BelanjaYukFE --> user -- : update product successful and view product
-
+deactivate user
 
 @enduml

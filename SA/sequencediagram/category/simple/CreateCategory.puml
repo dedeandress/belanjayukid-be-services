@@ -8,6 +8,7 @@ participant CategoryService
 end box
 
 user -> BelanjaYukFE ++ : create category menu
+activate user
 BelanjaYukFE -> AppController ++ : /graphql create category
     note left of BelanjaYukFE
     content type: application/json
@@ -30,4 +31,5 @@ AppController -> CategoryService ++ : createCategory()
 CategoryService --> AppController : Category
 AppController --> BelanjaYukFE : Category
 BelanjaYukFE --> user : add successful and view Category
+deactivate user
 @enduml

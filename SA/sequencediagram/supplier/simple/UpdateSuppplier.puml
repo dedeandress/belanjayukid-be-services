@@ -1,5 +1,5 @@
 @startuml
-title: Create Supplier Sequence Diagram
+title: Update Supplier Sequence Diagram
 actor user
 participant BelanjaYukFE
 box "BelanjaYuk.id" #LightBlue
@@ -7,33 +7,34 @@ participant AppController
 participant SupplierService
 end box
 
-user -> BelanjaYukFE ++ : Create Supplier menu
+user -> BelanjaYukFE ++ : Update Supplier menu
 activate user
-BelanjaYukFE -> AppController ++ : /graphql create supplier
+BelanjaYukFE -> AppController ++ : /graphql update supplier
     note right of BelanjaYukFE
     content type: application/json
     request body:
           mutation{
-            createSupplier(name, phoneNumber, address){
-              name
-              phoneNumber
-              address
-              status
-              id
-            }
+              updateSupplier(id, name, phoneNumber, address){
+                name
+                phoneNumber
+                address
+                status
+                id
+              }
           }
     end note
 AppController -> AppController : parseGraphql()
-AppController -> SupplierService ++ : call createSupplier()
+AppController -> SupplierService ++ : call updateSupplier()
     note left
     passing:
     - context
+    - id
     - name
     - phoneNumber
     - address
     end note
 SupplierService --> AppController --: Supplier
 AppController --> BelanjaYukFE -- : Supplier
-BelanjaYukFE --> user -- : create successful and view Supplier
+BelanjaYukFE --> user -- : update successful and view Supplier
 deactivate user
 @enduml

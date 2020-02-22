@@ -8,6 +8,7 @@ participant TransactionService
 end box
 
 user -> BelanjaYukFE ++ : complete refund transaction menu
+activate user
 BelanjaYukFE -> AppController ++ : /graphql complete refund transaction
     note right of BelanjaYukFE
     content type: application/json
@@ -28,4 +29,5 @@ AppController -> TransactionService ++ : call completeRefund()
 TransactionService --> AppController : transaction
 AppController --> BelanjaYukFE : transaction
 BelanjaYukFE --> user : refund transaction successful
+deactivate user
 @enduml
