@@ -133,7 +133,7 @@ class TransactionRepositoryImpl @Inject()(database: AppDatabase, implicit val ex
     } yield status
 
     def getAllTransaction(status: Int): DBIO[Seq[Transaction]] = for {
-      transactions <- QueryUtility.transactionsQuery.filter(_.status === status).result
+      transactions <- QueryUtility.transactionsQuery.filter(_.status === status).sortBy(_.date.desc).result
     } yield transactions
 
     def getAllTransactionWithLimit(limit: Int, status: Int): DBIO[TransactionsResult] = for {
