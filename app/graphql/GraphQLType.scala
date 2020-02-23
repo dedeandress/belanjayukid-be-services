@@ -59,6 +59,10 @@ class GraphQLType @Inject()(userRepository: UserRepository
     ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id))
   )
 
+  implicit val StoreType: ObjectType[Unit, Store] = deriveObjectType[Unit, Store](
+    ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id))
+  )
+
   implicit val SupplierType: ObjectType[Unit, Supplier] = deriveObjectType[Unit, Supplier](
     ReplaceField("id", Field("id", CustomScalar.UUIDType, resolve = _.value.id))
   )

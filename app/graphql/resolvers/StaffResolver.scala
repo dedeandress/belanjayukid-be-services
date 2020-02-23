@@ -22,7 +22,7 @@ class StaffResolver @Inject()(staffService: StaffService, userService: UserServi
   def findStaffById(context: Context, staffId: String): Future[Option[Staff]] = staffService.findStaffById(context, UUID.fromString(staffId))
 
   def updateStaff(context: Context, staffId: String, fullName: String, phoneNumber: String
-                  , address: String, noNik: String, dateOfBirth: Long, roleId: String, staffEmail: String, staffPassword: String): Future[Option[Staff]] = staffService.updateStaff(context, staffId, fullName, phoneNumber, address, noNik, dateOfBirth, roleId, staffEmail, staffPassword)
+                  , address: String, noNik: String, dateOfBirth: Long, roleId: String, staffEmail: String): Future[Option[Staff]] = staffService.updateStaff(context, staffId, fullName, phoneNumber, address, noNik, dateOfBirth, roleId, staffEmail)
 
   def deleteStaff(context: Context, staffId: String): Future[Option[Staff]] = staffService.deleteStaff(context, staffId)
 
