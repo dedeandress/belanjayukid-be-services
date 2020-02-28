@@ -1,11 +1,11 @@
 package graphql
 
 import com.google.inject.Inject
-import graphql.schemas.{SchemaDefinition, UserSchema}
+import graphql.schemas.SchemaDefinition
+import sangria.schema.{ObjectType, fields}
 
-class GraphQL @Inject()(userSchema: UserSchema, schemaDefinition: SchemaDefinition){
+class GraphQL @Inject()(schemaDefinition: SchemaDefinition){
 
-  import sangria.schema.{ObjectType, fields}
   /**
     * The constant that signifies the maximum allowed depth of query.
     */

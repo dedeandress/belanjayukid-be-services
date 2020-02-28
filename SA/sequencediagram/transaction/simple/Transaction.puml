@@ -1,0 +1,109 @@
+@startuml
+title: Transaction Sequence Diagram
+actor user
+participant BelanjaYukFE
+box "BelanjaYuk.id" #LightBlue
+participant AppController
+participant TransactionService
+end box
+
+user -> BelanjaYukFE ++ : click Transaction menu
+activate user
+BelanjaYukFE -> AppController ++ : /graphql create transaction
+    note left of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation{
+          createTransaction{
+            transactionId
+          }
+        }
+    }
+    end note
+AppController -> AppController : call parseGraphql()
+AppController -> TransactionService ++ : call createTransaction()
+    note left
+    passing:
+    - context
+    end note
+TransactionService --> AppController -- : response CreateTransactionResult
+AppController --> BelanjaYukFE -- : transactionId and status = 0
+BelanjaYukFE --> user -- : transaction menu
+
+user -> BelanjaYukFE: add all transaction detail to cart
+BelanjaYukFE -> AppController ++ : /graphql checkout transaction
+    note left of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation {
+          checkout(
+            transaction: {
+              transactionId: $transactionId
+              customerId: $customerId
+              staffId: $staffId
+              detail: [
+                {
+                  productDetailId: $productDetailId
+                  numberOfPurchase: $numberOfPurchase
+                }
+              ]
+            }
+          ) {
+            status
+            details {
+              id
+              numberOfPurchases
+              status
+              transactionID
+            }
+            totalPrice
+          }
+        }
+    }
+    end note
+AppController -> AppController : call parseGraphql()
+AppController -> TransactionService ++ : call checkout()
+    note left
+    passing:
+    - context
+    - transactionInput
+    end note
+TransactionService --> AppController -- : response TransactionsResult
+AppController --> BelanjaYukFE -- : status, totalPrice and list of transaction details
+BelanjaYukFE --> user -- : payment menu
+
+BelanjaYukFE -> AppController ++ : /graphql completed transaction
+    note left of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation {
+          completePayment(
+            transactionId: $transactionId
+            amountOfPayment: $totalPay
+          ) {
+            status
+            debt
+          }
+        }
+    end note
+AppController -> AppController : call parseGraphql()
+AppController -> TransactionService ++ : call completePayment()
+    note left of AppController
+    passing:
+    - context
+    - transactionId
+    - totalPay
+    end note
+TransactionService --> AppController: TransactionResult
+note right of TransactionService
+TransactionResult(
+    transactionId,
+    debt,
+    amountOfPayment,
+    paymentStatus
+)
+end note
+AppController --> BelanjaYukFE -- : TransactionResult
+BelanjaYukFE --> user -- : payment completed
+deactivate user
+@enduml

@@ -1,0 +1,31 @@
+@startuml
+title: Delete Supplier Sequence Diagram
+actor user
+participant BelanjaYukFE
+box "BelanjaYuk.id" #LightBlue
+participant AppController
+participant SupplierService
+end box
+
+user -> BelanjaYukFE ++ : Delete Supplier menu
+activate user
+BelanjaYukFE -> AppController ++ : /graphql delete supplier
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation{
+            deleteSupplier(supplierId)
+        }
+    end note
+AppController -> AppController : parseGraphql()
+AppController -> SupplierService ++ : call deleteSupplier()
+    note left
+    passing:
+    - context
+    - id
+    end note
+SupplierService --> AppController --: Supplier
+AppController --> BelanjaYukFE -- : Supplier
+BelanjaYukFE --> user -- : delete successfull and view Supplier
+deactivate user
+@enduml

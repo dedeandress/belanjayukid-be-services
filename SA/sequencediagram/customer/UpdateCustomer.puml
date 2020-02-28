@@ -1,0 +1,78 @@
+@startuml
+title: Add Customer Sequence Diagram
+actor user
+participant BelanjaYukFE
+database BelanjaYukDB
+box "BelanjaYuk.id" #LightBlue
+participant BelanjaYukBE
+participant CustomerResolver
+participant CustomerService
+participant JWTUtility
+participant UserRepository
+participant UserProfileRepository
+participant CustomerRepository
+participant BelanjaYukDB
+end box
+
+user -> BelanjaYukFE ++ : add customer menu
+BelanjaYukFE -> BelanjaYukBE ++ : /graphql add customer
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+          mutation{
+            createCustomer(
+                customerId
+                fullName,
+                phoneNumber,
+                address,
+                noNik,
+                dateOfBirth,
+            ): customer
+          }
+    end note
+BelanjaYukBE -> CustomerResolver ++ : call CustomerResolver
+CustomerResolver -> CustomerService ++ : call CustomerService
+    note left
+    passing:
+    - context
+    - customerId
+    - fullName
+    - phoneNumber
+    - address
+    - noNik
+    - dateOfBirth
+    end note
+CustomerService -> JWTUtility: validate token and claim role
+alt #LightGreen token is not expired
+    alt #LightYellow role is admin
+        CustomerService -> CustomerRepository ++ : get customer passing customerId
+        CustomerRepository -> BelanjaYukDB ++ : select customer where id is passed from request
+        BelanjaYukDB --> CustomerRepository -- : affected row no error and return customer
+        CustomerRepository --> CustomerService -- : affected row no error and return customer
+        CustomerService -> UserProfileRepository ++ : get user profile passing userId
+        UserProfileRepository -> BelanjaYukDB ++ : select user profile where userId is passed from request
+        BelanjaYukDB --> UserProfileRepository -- : affected row no error and return userProfile
+        UserProfileRepository --> CustomerService -- : affected row no error and return userProfile
+        CustomerService -> CustomerRepository ++ : get customer passing customerId
+        CustomerService -> UserProfileRepository ++ : update user profile passing userProfile
+        UserProfileRepository -> BelanjaYukDB ++ : update user profile set values passed from request
+        BelanjaYukDB --> UserProfileRepository -- : affected row no error and return userProfile
+        UserProfileRepository --> CustomerService -- : affected row no error and return userProfile
+        CustomerService -> CustomerRepository ++ : get customer passing customerId
+        CustomerRepository -> BelanjaYukDB ++ : select customer where id is passed from request
+        BelanjaYukDB --> CustomerRepository -- : affected row no error and return customer
+        CustomerRepository --> CustomerService -- : affected row no error and return customer
+        CustomerService --> CustomerResolver : customer
+        CustomerResolver --> BelanjaYukBE : customer
+        BelanjaYukBE --> BelanjaYukFE: customer
+        else error: role is not admin
+        CustomerService --> CustomerResolver : Error: Not Authorized
+        CustomerResolver --> BelanjaYukBE : Error: Not Authorized
+        BelanjaYukBE --> BelanjaYukFE: Message: You're not authorize
+    end alt
+    else token is expired
+    CustomerService --> CustomerResolver -- : Error: token expired
+    CustomerResolver --> BelanjaYukBE -- : Error: token expired
+    BelanjaYukBE --> BelanjaYukFE -- : Message: token was expired
+end alt
+@enduml

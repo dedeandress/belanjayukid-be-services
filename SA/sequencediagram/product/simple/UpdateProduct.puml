@@ -1,0 +1,34 @@
+@startuml
+title: Update Product Sequence Diagram
+actor user
+participant BelanjaYukFE
+box "BelanjaYuk.id" #LightBlue
+participant AppController
+participant ProductService
+end box
+
+user -> BelanjaYukFE ++ : update Product menu
+activate user
+BelanjaYukFE -> AppController ++ : /graphql update product
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation {
+          updateProduct(productId, categoryId, name) : Product
+        }
+    end note
+AppController -> AppController : parseGraphql()
+AppController -> ProductService ++ : call updateProduct()
+    note left
+    passing:
+    - context
+    - productId
+    - categoryId
+    - name
+    end note
+ProductService --> AppController -- : Product
+AppController --> BelanjaYukFE -- : Product
+BelanjaYukFE --> user -- : update product successful and view product
+deactivate user
+
+@enduml

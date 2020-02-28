@@ -1,0 +1,43 @@
+@startuml
+title: Check Transaction Sequence Diagram
+actor user
+participant CheckerApps
+box "BelanjaYuk.id" #LightBlue
+participant AppController
+participant TransactionService
+end box
+
+user -> CheckerApps ++ : check transaction menu
+activate user
+CheckerApps -> AppController ++ : /graphql check transaction
+    note right of CheckerApps
+    content type: application/json
+    request body:
+          mutation{
+            checkTransaction(
+                checkTransactionInput
+            )
+          }
+
+          CheckTransactionInput(
+            transactionId,
+            [checkTransactionDetailInput]
+          )
+
+          CheckTransactionDetailInput(
+            transactionDetailId,
+            status
+          )
+    end note
+AppController -> AppController : parseGraphql()
+AppController -> TransactionService ++ : call checkTransaction()
+    note left
+    passing:
+    - context
+    - checkTransactionInput
+    end note
+TransactionService --> AppController : check transaction completed
+AppController --> CheckerApps : check transaction completed
+CheckerApps --> user : transaction completed
+deactivate user
+@enduml

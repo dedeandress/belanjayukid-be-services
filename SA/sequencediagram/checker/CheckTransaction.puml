@@ -1,0 +1,75 @@
+@startuml
+title: Check Transaction Sequence Diagram
+actor user
+participant CheckerApps
+database BelanjaYukDB
+box "BelanjaYuk.id" #LightBlue
+participant BelanjaYukBE
+participant TransactionResolver
+participant TransactionService
+participant TransactionRepository
+participant TransactionDetailRepository
+participant JWTUtility
+participant BelanjaYukDB
+end box
+
+user -> CheckerApps ++ : check transaction menu
+CheckerApps -> BelanjaYukBE ++ : /graphql check transaction
+    note right of CheckerApps
+    content type: application/json
+    request body:
+          mutation{
+            checkTransaction(
+                checkTransactionInput
+            )
+          }
+
+          CheckTransactionInput(
+            transactionId,
+            [checkTransactionDetailInput]
+          )
+
+          CheckTransactionDetailInput(
+            transactionDetailId,
+            status
+          )
+    end note
+BelanjaYukBE -> TransactionResolver ++ : call TransactionResolver
+TransactionResolver -> TransactionService ++ : call TransactionService
+    note left
+    passing:
+    - context
+    - checkTransactionInput
+    end note
+TransactionService -> JWTUtility: validate token and claim role
+alt #LightGreen token is not expired
+    alt #LightYellow role is admin or checker
+        TransactionService -> TransactionService : TransactionStatus = ON_PROCESS
+        TransactionService -> TransactionService : checkTransactionInput have a refunded product
+        alt have refunded product
+            TransactionService -> TransactionService : TransactionStatus = ON_REFUND
+            else haven't refunded product
+            TransactionService -> TransactionService : TransactionStatus = COMPLETED
+        end alt
+        TransactionService -> TransactionDetailRepository ++ : update bulk Transaction detail status passing transactionId
+        TransactionDetailRepository -> BelanjaYukDB ++ : update Transaction detail where transactionId is passed from request
+        BelanjaYukDB --> TransactionDetailRepository -- : affected rows no error
+        TransactionDetailRepository --> TransactionService -- : affected rows no error
+        TransactionService -> TransactionRepository ++ : update transaction status passing transactionId
+        TransactionRepository -> BelanjaYukDB ++ : update transaction set status is passed from request where transaction id is given
+        BelanjaYukDB --> TransactionRepository -- : affected rows no error
+        TransactionRepository --> TransactionService -- : affected rows no error
+        TransactionService --> TransactionResolver : check transaction completed
+        TransactionResolver --> BelanjaYukBE : check transaction completed
+        BelanjaYukBE --> CheckerApps : check transaction completed
+        else error: role is not admin or checker
+        TransactionService --> TransactionResolver : Error: Not Authorized
+        TransactionResolver --> BelanjaYukBE : Error: Not Authorized
+        BelanjaYukBE --> CheckerApps: Message: You're not authorize
+    end alt
+    else token is expired
+    TransactionService --> TransactionResolver -- : Error: token expired
+    TransactionResolver --> BelanjaYukBE -- : Error: token expired
+    BelanjaYukBE --> CheckerApps -- : Message: token was expired
+end alt
+@enduml

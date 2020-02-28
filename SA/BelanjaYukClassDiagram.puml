@@ -1,0 +1,683 @@
+@startuml
+
+Class Customer{
+    id: UUID
+    status: Boolean
+}
+
+Class User{
+    id: UUID
+    username: String
+    password: String
+    email: String
+}
+
+class Staff{
+    id: UUID
+    status: Boolean
+}
+
+Class UserProfile{
+    id: UUID
+    fullName: String
+    phoneNumber: String
+    address: String
+    noNik: String
+    dateOfBirth: Long
+}
+
+Class Category {
+    id: UUID
+    name: String
+    status: Boolean
+}
+
+Class Payment{
+    id: UUID
+    debt: BigDecimal
+    amountOfPayment: BigDecimal
+}
+
+Class ProductDetail{
+    id: UUID
+    sellingPrice: BigDecimal
+    purchasePrice: BigDecimal
+    value: Int, productId: UUID
+    status: Boolean
+}
+
+class Products{
+    id: UUID
+    SKU: String
+    name: String
+    stock: Int
+    imageUrl: String
+    status: Boolean
+}
+
+class ProductStock{
+    id: UUID
+    name: String
+    status: Boolean
+}
+
+class PurchasesTransaction{
+    id: UUID
+    totalPrice: BigDecimal
+    status: Int
+    date: Long
+}
+
+class PurchasesTransactionDetail{
+    id: UUID
+    numberOfPurchases: Int
+}
+
+class Role{
+    id: UUID
+    name: String
+}
+
+class Shipment{
+    id: UUID
+    address: String
+    phone: String
+    price: BigDecimal
+    transactionId: UUID
+}
+
+class Store{
+    id: UUID
+    name: String
+    phoneNumber: String
+    address: String
+}
+
+class Supplier{
+    id: UUID
+    name: String
+    phoneNumber: String
+    address: String
+    status: Boolean
+}
+
+class Transaction{
+    id: UUID
+    paymentStatus: Int
+    totalPrice: BigDecimal
+    profit: BigDecimal
+    status: Int
+    date: Long
+    paymentId: UUID
+}
+
+class TransactionDetail{
+    id: UUID
+    numberOfPurchases: Int
+    status: Int
+}
+
+interface CategoryRepository{
+   {method} + addCategory(category: Category): Category
+   {method} + findCategory(id: UUID): Category
+   {method} + getAllCategory: List<Category>
+   {method} +  {method}+ deleteCategory(id: UUID): Int
+}
+
+interface CustomerRepository {
+  {method} + addCustomer(customer: Customer): Customer
+
+  {method} + findById(id: UUID): Customer
+
+  {method} + findByUserId(userId: UUID): Customer
+
+  {method} + findAll(): List<Customer>
+
+  {method} + deleteCustomer(id: UUID): Int
+}
+
+interface PaymentRepository {
+
+  {method} + addPayment(payment: Payment): UUID
+
+  {method} + updatePayment(transactionId: UUID, debt: BigDecimal,
+  amountOfPayment: BigDecimal, paymentStatus: Int): BigDecimal
+
+  {method} + findById(id: UUID): Payment
+
+  {method} + updatePaymentPurchases(purchasesTransactionId: UUID
+  , debt: BigDecimal, amountOfPayment: BigDecimal, paymentStatus : Int): BigDecimal
+}
+
+interface ProductDetailRepository {
+
+  {method} + findProductDetail(id: UUID): ProductDetail
+
+  {method} + addProductDetail(productId: UUID, productDetail: ProductInput)
+
+  {method} + findProductDetailByProductId(productId: UUID): List<ProductDetail>
+
+  {method} + deleteProductDetail(id: UUID): Int
+
+  {method} + addProductDetail(productDetail: ProductDetail): ProductDetail
+}
+
+interface ProductsRepository {
+
+  {method} + addProduct(product: Products): Products
+
+  {method} + findProduct(id: UUID): Products
+
+  {method} + updateProduct(product: Products): Products
+
+  {method} + deleteProduct(productsId: UUID): Int
+
+  {method} + findProduct(name: String): Products
+
+  {method} + getAllProductsWithPagination(limit: Int): ProductsResult
+
+  {method} + getAllProducts: List<Products>
+
+  {method} + updateStock(productId: UUID, stock: Int): Int
+
+  {method} + decrementStock(details: List<TransactionDetail>)
+
+}
+
+interface ProductStockRepository {
+
+  {method} + findProductStock(id: UUID): ProductStock
+
+  {method} + addProductStock(productStock: ProductStock): ProductStock
+
+  {method} + getAllProductStock: List<ProductStock>
+
+  {method} + deleteProductStock(id: UUID): Int
+
+}
+
+interface PurchasesTransactionDetailRepository {
+
+  {method} + addPurchasesTransactionDetails(purchasesTransactionId: UUID
+  , purchasesTransactionDetails: List<PurchasesTransactionDetail>): List<PurchasesTransactionDetail>
+
+  {method} + findPurchasesTransactionDetailByPurchasesTransactionId(
+  purchasesTransactionId: UUID): List<PurchasesTransactionDetail>
+
+}
+
+interface PurchasesTransactionRepository {
+
+  {method} + addPurchasesTransaction(purchasesTransaction: PurchasesTransaction): (UUID, Int)
+
+  {method} + getPurchasesTransactionStatus(id: UUID): Int
+
+  {method} + updatePurchasesTransaction(purchasesTransactionId: UUID
+  , status: Int, staffId: UUID, supplierId: UUID): Int
+
+  {method} + updateTotalPrice(purchasesTransactionId: UUID): BigDecimal
+
+  {method} + updateStock(purchasesTransactionId: UUID)
+
+  {method} + getTotalPriceAndDebt(purchasesTransactionId: UUID): (BigDecimal, BigDecimal)
+
+  {method} + updatePurchasesTransactionStatus(purchasesTransactionId: UUID
+  , status: Int): Int
+
+  {method} + getTotalPrice(purchasesTransactionId: UUID): BigDecimal
+
+}
+
+interface RoleRepository {
+  {method} + findAll(): List<Role>
+
+  {method} + findById(id: UUID): Role
+
+  {method} + findByName(roleName: String): Role
+}
+
+interface ShipmentRepository {
+
+  {method} + addShipment(shipment: Shipment)
+
+}
+
+interface StaffRepository {
+   {method} + addStaff(staff: Staff): Staff
+
+   {method} + findById(id: UUID): Staff
+
+   {method} + findByUserId(userId: UUID): Staff
+
+   {method} + findAll(): List<Staff>
+
+   {method} + updateRoleAndEmail(userId: UUID, roleId: UUID, email: String): Int
+}
+
+interface SupplierRepository {
+
+  {method} + addSupplier(supplier: Supplier): Supplier
+
+  {method} + deleteSupplier(supplierId: UUID): Int
+
+  {method} + updateSupplier(supplier: Supplier): Supplier
+
+  {method} + findById(id: UUID): Supplier
+
+  {method} + findAll(): List<Supplier>
+
+}
+
+interface TransactionDetailRepository {
+
+  {method} + addTransactionDetails(details: List[TransactionDetail]
+  , transactionId: UUID): List<TransactionDetail>
+
+  {method} + updateTransactionDetailStatus(transactionId: UUID)
+
+  {method} + findTransactionDetailByTransactionId(
+  transactionId: UUID): List<TransactionDetail>
+
+  {method} + updateTransactionDetailStatusBulk(
+  transactionDetail: Seq[CheckTransactionDetailInput])
+
+  {method} + findTransactionDetailByTransactionIdByStatus(transactionId: UUID
+  , transactionDetailStatus: Int) : (List<TransactionDetail>, BigDecimal)]
+
+}
+
+interface TransactionRepository {
+
+  {method} + addTransaction(transaction: Transaction): UUID
+
+  {method} + updateTransactionStatus(transactionId: UUID, status: Int): Int
+
+  {method} + getTransactionStatus(transactionId: UUID): Int
+
+  {method} + getTransactions(status: Int): List<Transaction>
+
+  {method} + getTransaction(transactionId: UUID): Transaction
+
+  {method} + updateStaff(transactionId: UUID, staffId: UUID): UUID
+
+  {method} + updateCustomer(transactionId: UUID, customerId: UUID): UUID
+
+  {method} + updateTransaction(transactionId: UUID, status: Int, staffId: UUID, customerId: UUID): Int
+
+  {method} + getAllTransactionWithLimit(limit: Int): TransactionsResult
+
+  {method} + updateTotalPrice(transactionId: UUID, transactionDetailStatus: Int): BigDecimal
+
+  {method} + updateStock(transactionId: UUID)
+
+  {method} + getTotalPriceAndDebt(transactionId: UUID): (BigDecimal, BigDecimal)
+
+  {method} + updatePaymentStatus(transactionId: UUID): Int
+
+}
+
+interface UserProfileRepository {
+
+  {method} + findByUserId(userId: UUID): UserProfile
+
+  {method} + addUserProfile(userProfile: UserProfile): UserProfile
+
+  {method} + findById(id: UUID): UserProfile
+
+  {method} + updateUserProfile(userProfile: UserProfile): Int
+}
+
+interface UserRepository {
+
+  {method} + findAll(): List<User>
+
+  {method} + find(id: UUID): User
+
+  {method} + create(user: User): UUID
+
+  {method} + delete(id: UUID): Boolean
+
+  {method} + update(user: User): User
+
+  {method} + findUser(username: String): User
+
+}
+
+class AppController{
+    {method} + graphqlBody()
+    {method} - executeQuery()
+    {method} - parseVariable()
+}
+
+class CategoryResolver{
+    {method} + category(context: Context, id: UUID): Category
+    {method} + addCategory(context: Context, category: Category): Category
+    {method} + categories(context: Context): List<Category>
+    {method} + deleteCategory(context: Context, id: UUID): Int
+}
+
+class CustomerResolver{
+    {method} + addCustomer(context: Context, userProfileInput: UserProfileInput): Customer
+    {method} + customer(context: Context): List<Customer>
+    {method} + updateCustomer(context: Context, customerId: String, fullName: String, phoneNumber: String
+    , address: String, noNik: String, dateOfBirth: Long)
+    {method} + deleteCustomer(context: Context, id: UUID): Int
+    {method} + customer(context: Context, id: UUID): Customer
+}
+
+class ProductDetailResolver{
+    {method} + productDetailByProductId(context: Context, productId: UUID): ProductDetail
+    {method} + addProductId(context: Context, productDetailInput: ProductDetailInput): ProductDetail
+    {method} + deleteProductDetail(context: Context, id: UUID): Boolean
+    {method} + productDetail(context: Context, id: UUID): ProductDetail
+}
+
+class ProductResolver {
+
+  {method} + product(context: Context, id: UUID)Products
+
+  {method} + createProduct(context: Context, productInput: ProductInput): Products
+
+  {method} + updateProduct(context: Context, productId: UUID, categoryId: UUID, name: String): Products
+
+  {method} + deleteProduct(context: Context, productId: UUID): Boolean
+
+  {method} + products(context: Context, name: String): List<Products>
+
+  {method} + products(context: Context, limit: Int): ProductsResult
+
+  {method} + products(context: Context): List<Products>
+
+}
+
+class ProductStockResolver{
+
+  {method} +  productStock(context: Context, id: UUID): ProductStock
+
+  {method} +  productStocks(context: Context): List<ProductStock>
+
+  {method} +  createProductStock(context: Context, productStock: ProductStock): ProductStock
+
+  {method} +  deleteProductStock(context: Context, id: UUID): Int
+
+}
+
+class PurchasesTransactionResolver {
+
+  {method} + createPurchasesTransaction(
+  context: Context): CreatePurchasesTransactionResult
+
+  {method} + checkout(context: Context
+  , purchasesTransactionInput: PurchasesTransactionInput): PurchasesTransactionsResult
+
+  {method} + completePayment(context: Context, purchasesTransactionId: String
+  , amountOfPayment: BigDecimal): PurchasesTransactionsResult
+
+}
+
+class RoleResolver{
+
+  {method} + roles: List<Role>
+
+  {method} + role(id: UUID): Role
+
+}
+
+class StaffResolver {
+  {method} + createStaff(context: Context, staffInput: StaffInput): Staff
+
+  {method} + login(username: String, password: String): LoginUser
+
+  {method} + roles(context: Context): List<Role>
+
+  {method} + findAll(context: Context): List<Staff>
+
+  {method} + findStaffById(context: Context, staffId: String): Staff
+
+  {method} + updateStaff(context: Context, staffId: String, fullName: String, phoneNumber: String
+                  , address: String, noNik: String, dateOfBirth: Long, roleId: String, staffEmail: String): Staff
+}
+
+class SupplierResolver {
+
+  {method} + createSupplier(context: Context, name: String
+  , phoneNumber: String, address: String): Supplier
+
+  {method} + updateSupplier(context: Context, id: String
+  , name: String, phoneNumber: String, address: String): Supplier
+
+  {method} + deleteSupplier(context: Context, id: String): Int
+
+  {method} + supplier(context: Context, id: String): Supplier
+
+  {method} + suppliers(context: Context): List<Supplier>
+
+}
+
+class TransactionResolver {
+
+  {method} + createTransaction(context: Context): CreateTransactionResult
+
+  {method} + createTransactionDetail(context: Context
+  , transactionInput: TransactionInput): TransactionResult
+
+  {method} + completePayment(context: Context, transactionId: String
+  , amountOfPayment: BigDecimal): TransactionResult
+
+  {method} + getTransactions(context: Context, status: Int): List<Transaction>
+
+  {method} + getTransaction(context: Context, transactionId: UUID): Transaction
+
+  {method} + updateStaff(context: Context, transactionId: UUID, staffId: UUID): UUID
+
+  {method} + updateCustomer(context: Context, transactionId: UUID, customerId: UUID): UUID
+
+  {method} + getTransactionsWithLimit(context: Context, limit: Int): TransactionsResult
+
+  {method} + checkTransaction(context: Context, checkTransaction: CheckTransactionInput): Int
+
+  {method} + refundTransaction(context: Context, transactionId: String): RefundTransactionResult
+
+  {method} + completeRefund(context: Context, transactionId: String): Transaction
+
+}
+
+class UserProfileResolver{
+
+  {method} + userProfile(userId: UUID): UserProfile
+
+}
+
+class UserResolver {
+
+  {method} + users: List<User>
+
+  {method} + deleteUser(id: UUID): Boolean
+
+  {method} + updateUser(id: UUID, username: String, password: String, email: String): User
+
+  {method} + user(id: UUID): User
+
+}
+
+
+class CategoryService {
+    {method} + category(context: Context, id: UUID): Category
+    {method} + createCategory(context: Context, category: Category): Category
+    {method} + categories(context: Context): List<Category>
+    {method} + deleteCategory(context: Context, id: UUID)
+}
+
+class CustomerService {
+    {method} + customer(context: Context, id: UUID): Customer
+    {method} + createCustomer(context: Context, customer: Customer): Customer
+    {method} + customers(context: Context): List<Customer>
+    {method} + deleteCustomer(context: Context, id: UUID)
+    {method} + updateCustomer(context: Context, customerId: UUID, fullName: String, phoneNumber: String
+               , address: String, noNik: String, dateOfBirth: Long)
+}
+
+class ProductDetailService {
+    {method} + productDetail(context: Context, id: UUID): ProductDetail
+    {method} + createProductDetail(context: Context, productDetail: ProductDetail): ProductDetail
+    {method} + productDetails(context: Context): List<ProductDetail>
+    {method} + deleteProductDetail(context: Context, id: UUID)
+}
+
+class ProductService {
+    {method} + product(context: Context, id: UUID): Products
+    {method} + createProduct(context: Context, product: Products): Products
+    {method} + products(context: Context): List<Products>
+    {method} + deleteProduct(context: Context, id: UUID)
+    {method} + updateProduct(context: Context, productId: UUID, categoryId: UUID, name: String): Products
+}
+
+class ProductStockService {
+    {method} + productStock(context: Context, id: UUID): ProductStock
+    {method} + createProductStock(context: Context, productStock: ProductStock): ProductStock
+    {method} + productDetails(context: Context): List<ProductStock>
+    {method} + deleteProductStock(context: Context, id: UUID)
+}
+
+class PurchasesTransactionService {
+    {method} + createPurchasesTransaction(context: Context): CreatePurchasesTransactionResult
+    {method} + checkout(context: Context, purchasesTransactionInput): PurchasesTransactionsResult
+    {method} + completePayment(context, id: UUID, amountOfPayment: BigDecimal): PurchasesTransactionsResult
+}
+
+class StaffService {
+    {method} + staff(context: Context, id: UUID): Staff
+    {method} + createStaff(context: Context, staff: Staff): Staff
+    {method} + staffs(context: Context): List<Staff>
+    {method} + deleteStaff(context: Context, id: UUID)
+    {method} + login(context: Context, username: String, password: String): LoginUser
+    {method} + roles(context: Context): List<Role>
+    {method} + updateStaff(context: Context, staffId: String, fullName: String, phoneNumber: String
+                           , address: String, noNik: String, dateOfBirth: Long, roleId: String, staffEmail: String): Staff
+}
+
+class SupplierService {
+    {method} + supplier(context: Context, id: UUID): Supplier
+    {method} + createSupplier(context: Context, supplier: Supplier): Supplier
+    {method} + suppliers(context: Context): List<Supplier>
+    {method} + deleteSupplier(context: Context, id: UUID)
+}
+
+class TransactionService {
+    {method} + createTransaction(context: Context): CreateTransactionResult
+    {method} + checkout(context: Context, transactionInput: TransactionInput): TransactionResult
+    {method} + completePayment(context: Context, id: UUID, amountOfPayment: BigDecimal): TransactionResult
+    {method} + checkTransaction(context: Context, checkTransaction: CheckTransactionInput)
+    {method} + refundTransaction(context: Context, id: UUID): RefundTransactionResult
+    {method} + completeRefund(context: Context, id: UUID): Transaction
+    {method} + transaction(context: Context, id: UUID): Transaction
+    {method} + transaction(context: Context, status: Int): List<Transaction>
+    {method} + transactions(context: Context)
+}
+
+class AppController{
+    {method} + graphql()
+    {method} - parseGraphql()
+}
+
+class CreateTransactionResult{
+    + transactionId: UUID
+    + status: Int
+}
+
+class CreatePurchasesTransactionResult{
+    + purchasesTransactionId: UUID
+    + status: Int
+}
+
+class CheckTransactionDetailInput{
+    transactionDetailId: String
+    status: Int
+}
+
+class CheckTransactionInput{
+    transactionId: String
+    transactionDetail: Seq[CheckTransactionDetailInput]
+}
+
+class ProductDetailInput{
+    productStockId: String
+    sellingPrice: BigDecimal
+    purchasePrice: BigDecimal
+    value: Int
+    productId: String
+}
+
+class ProductInput{
+    name: String
+    SKU: String
+    stock: Int
+    categoryId: String
+    imageUrl: String
+    productDetailInput: List[ProductDetailInput]
+ }
+
+class PurchasesTransactionDetailInput{
+    productDetailId: String
+    numberOfPurchase: Int
+}
+
+class PurchasesTransactionInput{
+    purchasesTransactionId: String
+    supplierId: String
+    staffId: String
+    detail: List[PurchasesTransactionDetailInput]
+ }
+
+class StaffInput{
+    userInput: UserInput
+    roleId: String
+    userProfileInput: UserProfileInput
+}
+
+class TransactionDetailInput{
+    productDetailId: String
+    numberOfPurchase: Int
+}
+
+class TransactionInput{
+    transactionId: String
+    customerId: String
+    staffId: String
+    detail: List[TransactionDetailInput]
+ }
+
+class UserInput{
+    username: String
+    password: String
+    email: String
+}
+
+class UserProfileInput{
+    fullName: String
+    phoneNumber: String
+    address: String
+    noNik: String
+    dateOfBirth: Long
+}
+
+skinparam linetype polyline
+'skinparam linetype ortho
+User -down- UserProfile
+Customer "1..1" - "1..1" Staff
+(Customer, Staff) .. User
+Staff -left- Transaction
+Customer -left- Transaction
+Staff *-up- Role
+
+ProductDetail -up- TransactionDetail
+ProductDetail *-left- ProductStock
+ProductDetail *-down- Products
+Products *-right-Category
+
+Payment "1..1" - "1..1" Shipment
+(Payment, Shipment) .. Transaction
+Transaction -down- TransactionDetail
+PurchasesTransaction -up- Supplier
+PurchasesTransaction -down- PurchasesTransactionDetail
+@enduml

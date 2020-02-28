@@ -1,0 +1,69 @@
+@startuml
+title: Refund Transaction Sequence Diagram
+actor user
+participant BelanjaYukFE
+database BelanjaYukDB
+box "BelanjaYuk.id" #LightBlue
+participant BelanjaYukBE
+participant TransactionResolver
+participant TransactionService
+participant TransactionRepository
+participant TransactionDetailRepository
+participant JWTUtility
+participant BelanjaYukDB
+end box
+
+user -> BelanjaYukFE ++ : complete refund transaction menu
+BelanjaYukFE -> BelanjaYukBE ++ : /graphql complete refund transaction
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+          mutation{
+            completeRefund(
+                transactionId
+            ): Transaction
+          }
+    end note
+BelanjaYukBE -> TransactionResolver ++ : call TransactionResolver
+TransactionResolver -> TransactionService ++ : call TransactionService
+    note left
+    passing:
+    - context
+    - transactionId
+    end note
+TransactionService -> JWTUtility: validate token and claim role
+alt #LightGreen token is not expired
+    alt #LightYellow role is admin or cashier
+        TransactionService -> TransactionRepository ++ : get Transaction status passing transactionId
+        TransactionDetailRepository -> BelanjaYukDB ++ : select Transaction status where transactionId is passed from request
+        BelanjaYukDB --> TransactionRepository -- : status
+        TransactionRepository --> TransactionService -- : status
+        alt status is ON_REFUND
+            TransactionService -> TransactionRepository ++ : update transaction status passing transactionId
+            TransactionRepository -> BelanjaYukDB ++ : update transaction set status is passed from request where transaction id is given
+            BelanjaYukDB --> TransactionRepository -- : affected rows no error
+            TransactionRepository --> TransactionService -- : affected rows no error
+            TransactionService -> TransactionRepository ++ : get transaction passing transactionId
+            TransactionRepository -> BelanjaYukDB ++ : select transaction where transaction id is given
+            BelanjaYukDB --> TransactionRepository -- : transaction
+            TransactionRepository --> TransactionService -- : transaction
+            else status is not ON_REFUND
+            TransactionService -> TransactionRepository ++ : get transaction passing transactionId
+            TransactionRepository -> BelanjaYukDB ++ : select transaction where transaction id is given
+            BelanjaYukDB --> TransactionRepository -- : transaction
+            TransactionRepository --> TransactionService -- : transaction
+        end alt
+        TransactionService --> TransactionResolver : transaction
+        TransactionResolver --> BelanjaYukBE : transaction
+        BelanjaYukBE --> BelanjaYukFE : transaction
+        else error: role is not admin or checker
+        TransactionService --> TransactionResolver : Error: Not Authorized
+        TransactionResolver --> BelanjaYukBE : Error: Not Authorized
+        BelanjaYukBE --> BelanjaYukFE: Message: You're not authorize
+    end alt
+    else token is expired
+    TransactionService --> TransactionResolver -- : Error: token expired
+    TransactionResolver --> BelanjaYukBE -- : Error: token expired
+    BelanjaYukBE --> BelanjaYukFE -- : Message: token was expired
+end alt
+@enduml

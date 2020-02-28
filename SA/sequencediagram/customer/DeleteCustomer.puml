@@ -1,0 +1,53 @@
+@startuml
+title: Delete Customer Sequence Diagram
+actor user
+participant BelanjaYukFE
+database BelanjaYukDB
+box "BelanjaYuk.id" #LightBlue
+participant BelanjaYukBE
+participant CustomerResolver
+participant CustomerService
+participant CustomerRepository
+participant JWTUtility
+participant BelanjaYukDB
+end box
+
+user -> BelanjaYukFE ++ : delete customer menu
+BelanjaYukFE -> BelanjaYukBE ++ : /graphql delete customer
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+          mutation{
+            deleteCustomer(
+                customerId
+            )
+          }
+    end note
+BelanjaYukBE -> CustomerResolver ++ : call CustomerResolver
+CustomerResolver -> CustomerService ++ : call CustomerService
+    note left
+    passing:
+    - context
+    - customerId
+    end note
+CustomerService -> JWTUtility: validate token and claim role
+alt #LightGreen token is not expired
+    alt #LightYellow role is admin
+        CustomerService -> CustomerRepository ++ : update customer status to false passing userId
+        CustomerRepository -> BelanjaYukDB ++ : update customer status set status is false where id is passed from request
+        BelanjaYukDB --> CustomerRepository -- : affected row no error and return userId
+        CustomerRepository --> CustomerService -- : affected row no error and return userId
+        CustomerService --> CustomerResolver : delete successfully
+        CustomerResolver --> BelanjaYukBE : delete successfully
+        BelanjaYukBE --> BelanjaYukFE: delete successfully
+        else error: role is not admin
+        CustomerService --> CustomerResolver : Error: Not Authorized
+        CustomerResolver --> BelanjaYukBE : Error: Not Authorized
+        BelanjaYukBE --> BelanjaYukFE: Message: You're not authorize
+    end alt
+    else token is expired
+    CustomerService --> CustomerResolver -- : Error: token expired
+    CustomerResolver --> BelanjaYukBE -- : Error: token expired
+    BelanjaYukBE --> BelanjaYukFE -- : Message: token was expired
+end alt
+@enduml

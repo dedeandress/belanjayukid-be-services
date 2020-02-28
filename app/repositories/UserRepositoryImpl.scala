@@ -1,11 +1,11 @@
 package repositories
 
-import com.google.inject.{Inject, Singleton}
-import models.User
-import modules.AppDatabase
 import java.util.UUID
 
+import com.google.inject.{Inject, Singleton}
 import errors.NotFound
+import models.User
+import modules.AppDatabase
 import repositories.repositoryInterfaces.UserRepository
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -35,36 +35,46 @@ class UserRepositoryImpl @Inject()(val database: AppDatabase, implicit val execu
 
   override def findUser(username: String): Future[Option[User]] = db.run(Actions.findUser(username))
 
-  object Actions {
-    def find(id: UUID): DBIO[Option[User]] = for {
-      user <- userQuery.filter(_.id===id).result.headOption
-    }yield user
+  override def changePassword(userId: UUID, newPassword: String): Future[Boolean] = db.run(Actions.changePassword(userId, newPassword))
 
+  object Actions {
     def findAll(): DBIO[List[User]] = for {
       users <- userQuery.result
     } yield users.toList
 
-    def create(user: User): DBIO[UUID] = for{
-        userId <- userQuery returning userQuery.map(_.id) += user
-    }yield userId
+    def create(user: User): DBIO[UUID] = for {
+      userId <- userQuery returning userQuery.map(_.id) += user
+    } yield userId
 
-    def update(user: User): DBIO[User] = for{
-      update <- userQuery.filter(_.id===user.id).update(user)
+    def update(user: User): DBIO[User] = for {
+      update <- userQuery.filter(_.id === user.id).update(user)
       _ <- update match {
         case 0 => DBIO.failed(NotFound("not found user id"))
         case _ => DBIO.successful(())
       }
       result <- find(user.id)
-    }yield result.get
+    } yield result.get
+
+    def find(id: UUID): DBIO[Option[User]] = for {
+      user <- userQuery.filter(_.id === id).result.headOption
+    } yield user
 
     def delete(id: UUID): DBIO[Boolean] = for {
       maybeDelete <- userQuery.filter(_.id === id).delete
-      isDelete =  if(maybeDelete == 1) true else false
-    }yield isDelete
+      isDelete = if (maybeDelete == 1) true else false
+    } yield isDelete
 
     def findUser(username: String): DBIO[Option[User]] = for {
-      user <- userQuery.filter(_.username===username).result.headOption
-    }yield user
+      user <- userQuery.filter(_.username === username).result.headOption
+    } yield user
+
+    def changePassword(userId: UUID, newPassword: String): DBIO[Boolean] = for {
+      update <- userQuery.filter(_.id === userId).map(_.password).update(newPassword)
+      updateStatus <- update match {
+        case 0 => DBIO.failed(NotFound("User ID not found"))
+        case _ => DBIO.successful(true)
+      }
+    } yield updateStatus
   }
 
 }

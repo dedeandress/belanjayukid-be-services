@@ -6,31 +6,35 @@ import java.util.UUID.randomUUID
 import akka.http.scaladsl.model.DateTime
 import slick.jdbc.PostgresProfile.api.{Table => SlickTable, _}
 import slick.lifted.{Tag => SlickTag}
-import java.sql.Timestamp
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, deserializationError}
 
 case class UserProfile(id: UUID = randomUUID, fullName: String, phoneNumber: String, address: String, noNik: String, dateOfBirth: Long, userId: UUID)
 
 object UserProfile extends ((UUID, String, String, String, String, Long, UUID) => UserProfile) {
 
-  implicit val dateTimeColumnType = MappedColumnType.base[DateTime, Timestamp](
-    dt => new Timestamp(dt.clicks),
-    ts => DateTime(ts.getTime)
-  )
-  class UserProfileTable(slickTag: SlickTag) extends SlickTable[UserProfile](slickTag, "user_profile"){
+  class UserProfileTable(slickTag: SlickTag) extends SlickTable[UserProfile](slickTag, "user_profile") {
 
     import models.User.UserTable
 
     val users = TableQuery[UserTable]
-    def id = column[UUID]("id", O.PrimaryKey)
-    def fullName = column[String]("full_name")
-    def phoneNumber = column[String]("phone_number")
-    def address = column[String]("address")
-    def noNik = column[String]("no_nik")
-    def dateOfBirth = column[Long]("date_of_birth")
-    def userId = column[UUID]("user_id")
+
     def userIdFK = foreignKey("user_id", userId, users)(_.id)
+
     def * = (id, fullName, phoneNumber, address, noNik, dateOfBirth, userId).mapTo[UserProfile]
+
+    def userId = column[UUID]("user_id")
+
+    def id = column[UUID]("id", O.PrimaryKey)
+
+    def fullName = column[String]("full_name")
+
+    def phoneNumber = column[String]("phone_number")
+
+    def address = column[String]("address")
+
+    def noNik = column[String]("no_nik")
+
+    def dateOfBirth = column[Long]("date_of_birth")
   }
 
 }

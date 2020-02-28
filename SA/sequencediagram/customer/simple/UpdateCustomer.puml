@@ -1,0 +1,43 @@
+@startuml
+title: Update Customer Sequence Diagram
+actor user
+participant BelanjaYukFE
+box "BelanjaYuk.id" #LightBlue
+participant AppController
+participant CustomerService
+end box
+
+user -> BelanjaYukFE ++ : update customer menu
+activate user
+BelanjaYukFE -> AppController ++ : /graphql update customer
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+          mutation{
+            createCustomer(
+                customerId
+                fullName,
+                phoneNumber,
+                address,
+                noNik,
+                dateOfBirth,
+            ): customer
+          }
+    end note
+AppController -> AppController : parseGraphql()
+AppController -> CustomerService ++ : call updateCustomer()
+    note left
+    passing:
+    - context
+    - customerId
+    - fullName
+    - phoneNumber
+    - address
+    - noNik
+    - dateOfBirth
+    end note
+CustomerService --> AppController -- : update successful
+AppController --> BelanjaYukFE -- : update successful
+BelanjaYukFE --> user -- : update successful
+deactivate user
+@enduml

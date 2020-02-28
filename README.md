@@ -1,4 +1,5 @@
 # Belanjayuk.id Backend api services
+[![CircleCI](https://circleci.com/gh/dedeandress/belanjayukid-be-services/tree/develop.svg?style=svg&circle-token=7df00539d9432f282fb40c4dcbf85c127b5d50f6)](https://circleci.com/gh/dedeandress/belanjayukid-be-services/tree/develop)
 
 System Requirements:
 * Scala 2.12.8
@@ -122,12 +123,33 @@ while(noSuccess) {
     if(dead) break
 }
 ```
+
+### BelanjaYuk Constant Variable
+
+#### Transaction Status
+  * INITIAL = 0
+  * ON_PROCESS = 1
+  * ON_CHECKER = 2
+  * COMPLETED = 3
+  * ON_REFUND = 4
+
+#### PaymentStatus
+  * UNPAID = 0
+  * PAID = 1
+
+#### TransactionDetailStatus
+  * EMPTY = 0
+  * NOT_EMPTY = 1
+  * COMPLETED = 2
+  * CANCELED = 3
+  * RETURNED = 4
+
 ## GraphQL Schema
 ```graphql
 
 scalar BigDecimal
-scalar Long
 scalar UUID
+scalar Long
 
 type Category {
   name: String!
@@ -149,6 +171,15 @@ type Credential {
 type Mutation {
   login(username: String!, password: String!): Credential!
   createStaff(staff: StaffInput!): Staff
+  updateStaff(
+    staffId: String!
+    fullName: String!
+    phoneNumber: String!
+    address: String!
+    noNik: String!
+    dateOfBirth: Long!
+    roleId: String!
+  ): Staff
   createProduct(product: ProductInput!): Products!
   createCategory(name: String!): Category!
   deleteCategory(id: String!): Int!
@@ -216,12 +247,14 @@ type Query {
   categories: [Category!]!
   productStocks: [ProductStock!]!
   roles: [Role!]!
-  product(name: String!): [Products!]!
+  product(productId: String!): Products
   products: [Products!]!
   transactions(status: Int!): [Transaction!]!
   transaction(transactionId: String!): Transaction
+  transactionsWithLimit(limit: Int!): TransactionsResult!
   staffs: [Staff!]!
   staff(staffId: String!): Staff
+  productDetails(productId: String!): [ProductDetail!]!
 }
 
 type Role {
@@ -280,6 +313,12 @@ type TransactionResult {
   details: [TransactionDetail!]!
 }
 
+type TransactionsResult {
+  totalCount: Int!
+  hasNextData: Boolean!
+  transactions: [Transaction!]!
+}
+
 type User {
   username: String!
   password: String!
@@ -309,7 +348,6 @@ input UserProfileInput {
   noNik: String!
   dateOfBirth: Long!
 }
-
 
 ```
 > pardon my english. - DA99 -

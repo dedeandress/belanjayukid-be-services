@@ -1,0 +1,35 @@
+@startuml
+title: Create Category Sequence Diagram
+actor user
+participant BelanjaYukFE
+box "BelanjaYuk.id" #LightBlue
+participant AppController
+participant CategoryService
+end box
+
+user -> BelanjaYukFE ++ : create category menu
+activate user
+BelanjaYukFE -> AppController ++ : /graphql create category
+    note left of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation{
+          createCategory(name){
+            name
+            status
+            id
+          }
+        }
+    end note
+AppController -> AppController : parseGraphql()
+AppController -> CategoryService ++ : createCategory()
+    note left
+    passing:
+    - context
+    - Category(id: UUID, name: String, status: Boolean)
+    end note
+CategoryService --> AppController : Category
+AppController --> BelanjaYukFE : Category
+BelanjaYukFE --> user : add successful and view Category
+deactivate user
+@enduml

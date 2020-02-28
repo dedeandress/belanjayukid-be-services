@@ -1,0 +1,67 @@
+@startuml
+title: Create Product Detail Sequence Diagram
+actor user
+participant BelanjaYukFE
+database BelanjaYukDB
+box "BelanjaYuk.id" #LightBlue
+participant BelanjaYukBE
+participant ProductDetailResolver
+participant ProductDetailService
+participant ProductDetailRepository
+participant JWTUtility
+participant BelanjaYukDB
+end box
+
+user -> BelanjaYukFE ++ : Create Product Detail menu
+BelanjaYukFE -> BelanjaYukBE ++ : /graphql create product detail
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation{
+          createProductDetail(productDetailInput){
+            value
+            status
+            id
+            productStock
+            sellingPrice
+            purchasePrice
+            product
+          }
+        }
+
+        ProductDetailInput(
+            productStockId,
+            sellingPrice,
+            purchasePrice,
+            value,
+            productId
+        )
+    end note
+BelanjaYukBE -> ProductDetailResolver ++ : call ProductDetailResolver
+ProductDetailResolver -> ProductDetailService ++ : call ProductDetailService
+    note left
+    passing:
+    - context
+    - productDetailInput
+    end note
+ProductDetailService -> JWTUtility: validate token and claim role
+alt #LightGreen token is not expired
+    alt #LightYellow role is admin
+        ProductDetailService -> ProductDetailRepository ++ : add product detail passing productDetail
+        ProductDetailRepository -> BelanjaYukDB ++ : insert product detail values passed from request
+        BelanjaYukDB --> ProductDetailRepository -- : affected row no error and return productDetail
+        ProductDetailRepository --> ProductDetailService -- : affected row no error and return productDetail
+        ProductDetailService --> ProductDetailResolver : productDetail
+        ProductDetailResolver --> BelanjaYukBE : productDetail
+        BelanjaYukBE --> BelanjaYukFE: productDetail
+        else error: role is not admin
+        ProductDetailService --> ProductDetailResolver : Error: Not Authorized
+        ProductDetailResolver --> BelanjaYukBE : Error: Not Authorized
+        BelanjaYukBE --> BelanjaYukFE: Message: You're not authorize
+    end alt
+    else token is expired
+    ProductDetailService --> ProductDetailResolver -- : Error: token expired
+    ProductDetailResolver --> BelanjaYukBE -- : Error: token expired
+    BelanjaYukBE --> BelanjaYukFE -- : Message: token was expired
+end alt
+@enduml

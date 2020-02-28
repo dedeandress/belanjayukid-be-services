@@ -1,0 +1,231 @@
+@startuml
+title: Purchases Transaction Sequence Diagram
+actor user
+participant BelanjaYukFE
+database BelanjaYukDB
+box "BelanjaYuk.id" #LightBlue
+participant BelanjaYukBE
+participant PurchasesTransactionResolver
+participant PurchasesTransactionService
+participant PurchasesTransactionRepository
+participant PurchasesTransactionDetailRepository
+participant JWTUtility
+participant PaymentRepository
+participant BelanjaYukDB
+end box
+user -> BelanjaYukFE ++ : Purchases Transaction menu
+BelanjaYukFE -> BelanjaYukBE ++ : /graphql create purchases transaction init
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation{
+          createPurchasesTransaction{
+            status
+            purchasesTransactionId
+          }
+        }
+    }
+    end note
+BelanjaYukBE -> PurchasesTransactionResolver ++ : call PurchasesTransactionResolver
+PurchasesTransactionResolver -> PurchasesTransactionService ++ : call PurchasesTransactionService
+    note left
+    passing:
+    - context
+    end note
+PurchasesTransactionService -> JWTUtility: validate token and claim role
+alt #LightGreen token is not expired
+    alt #LightYellow role is admin
+    PurchasesTransactionService -> PaymentRepository ++ : add payment init
+    PaymentRepository -> BelanjaYukDB ++ : insert new payment
+    BelanjaYukDB --> PaymentRepository -- : affected row no error and return payment id
+    PaymentRepository --> PurchasesTransactionService -- : affected row no error and return payment id
+    PurchasesTransactionService -> PurchasesTransactionRepository ++ : call addPuchasesTransaction init
+        note left of PurchasesTransactionService
+            passing PurchasesTransaction model
+        end note
+    PurchasesTransactionRepository -> BelanjaYukDB ++ : insert new purchases transaction
+    BelanjaYukDB --> PurchasesTransactionRepository -- : affected row no error and return \ntransaction id and status
+    PurchasesTransactionRepository --> PurchasesTransactionService -- : affected row no error and return transaction id and status = 0
+    PurchasesTransactionService --> PurchasesTransactionResolver : return response PurchasesTransaction id
+    PurchasesTransactionResolver --> BelanjaYukBE : response CreatePurchasesTransactionResult
+    BelanjaYukBE --> BelanjaYukFE : PurchasesTransactionId and status = 0
+    else error: role is not admin
+    PurchasesTransactionService --> PurchasesTransactionResolver : Error: Not Authorized
+    PurchasesTransactionResolver --> BelanjaYukBE : Error: Not Authorized
+    BelanjaYukBE --> BelanjaYukFE: Message: You're not authorize
+    end alt
+    else token is expired
+    PurchasesTransactionService --> PurchasesTransactionResolver -- : Error: token expired
+    PurchasesTransactionResolver --> BelanjaYukBE -- : Error: token expired
+    BelanjaYukBE --> BelanjaYukFE -- : Message: token was expired
+end alt
+
+BelanjaYukFE -> BelanjaYukFE: add all purchases transaction detail to cart
+BelanjaYukFE -> BelanjaYukBE ++ : /graphql checkout purchases transaction from cart
+    note left of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation {
+          checkoutPurchases(
+            purchasesTransaction: {
+              purchasesTransactionId: $purchasesTransactionId
+              supplierId: $supplierId
+              staffId: $staffId
+              detail: [PurchasesTransactionDetailInput]
+            }
+          ) {
+            status
+            totalPrice
+            details {
+              numberOfPurchases
+              productDetail {
+                id
+              }
+            }
+          }
+        }
+    }
+    end note
+BelanjaYukBE -> PurchasesTransactionResolver ++ : call PurchasesTransactionResolver
+PurchasesTransactionResolver -> PurchasesTransactionService ++ : call PurchasesTransactionService
+    note left of PurchasesTransactionResolver
+    passing:
+    - context
+    - PurchasesTransactionInput
+    end note
+PurchasesTransactionService -> JWTUtility: validate token and claim role
+alt #LightGreen token is not expired
+    alt #LightYellow role is admin
+        PurchasesTransactionService -> PurchasesTransactionService : add PurchasesTransactionDetail from \nPurchasesTransactionInput to list
+        PurchasesTransactionService -> PurchasesTransactionRepository ++ : get PurchasesTransaction status
+        PurchasesTransactionRepository -> BelanjaYukDB ++ : select purchasesTransaction by id
+        BelanjaYukDB --> PurchasesTransactionRepository -- : status or null
+        PurchasesTransactionRepository --> PurchasesTransactionService -- : status or null
+        alt status is not null
+            alt status is 0
+            PurchasesTransactionService -> PurchasesTransactionDetailRepository ++ : add list of purchases transaction detail
+            PurchasesTransactionDetailRepository -> BelanjaYukDB ++ : insert list purchases\n transaction detail
+            BelanjaYukDB --> PurchasesTransactionDetailRepository -- : affected row no error and\n return list of purchases\n transaction detail
+            PurchasesTransactionDetailRepository --> PurchasesTransactionService -- : affected row no error and \n return list of purchases transaction detail
+            PurchasesTransactionService -> PurchasesTransactionRepository ++ : update total totalPrice
+            PurchasesTransactionRepository -> BelanjaYukDB ++ : update totalPrice
+            BelanjaYukDB --> PurchasesTransactionRepository -- : affected row no error\n and return totalPrice
+            PurchasesTransactionRepository --> PurchasesTransactionService -- : affected column no error and return totalPrice
+            PurchasesTransactionService -> PurchasesTransactionRepository ++ : update PurchasesTransaction status from 0 to 1
+            PurchasesTransactionRepository -> BelanjaYukDB ++ : update PurchasesTransaction status to 1
+            BelanjaYukDB --> PurchasesTransactionRepository -- : affected column no error\n and return status
+            PurchasesTransactionRepository --> PurchasesTransactionService -- : affected column no error\n and return status
+            else status is not 0
+            PurchasesTransactionService -> PurchasesTransactionDetailRepository ++ : get purchases transaction detail by purchasesTransactionId
+            PurchasesTransactionDetailRepository -> BelanjaYukDB ++ : select purchases transaction\n detail by\n purchasesTransactionId
+            BelanjaYukDB --> PurchasesTransactionDetailRepository -- : list of\nPurchasesTransactionDetail
+            PurchasesTransactionDetailRepository --> PurchasesTransactionService -- : list of PurchasesTransactionDetail
+            PurchasesTransactionService -> PurchasesTransactionRepository ++ : update total totalPrice
+            PurchasesTransactionRepository -> BelanjaYukDB ++ : update totalPrice
+            BelanjaYukDB --> PurchasesTransactionRepository -- : affected row no error\n and return totalPrice
+            PurchasesTransactionRepository --> PurchasesTransactionService -- : affected column no error\n and return totalPrice
+            end alt
+            PurchasesTransactionService --> PurchasesTransactionResolver : return PurchasesTransactionsResult
+            PurchasesTransactionResolver --> BelanjaYukBE: response PurchasesTransactionsResult
+            BelanjaYukBE --> BelanjaYukFE: status, totalPrice and list of purchases transaction details
+        end alt
+        else error: role is not admin
+        PurchasesTransactionService --> PurchasesTransactionResolver: Error: Not Authorized
+        PurchasesTransactionResolver --> BelanjaYukBE: Error: Not Authorized
+        BelanjaYukBE --> BelanjaYukFE: Message: You're not authorize
+    end alt
+    else token is expired
+    PurchasesTransactionService --> PurchasesTransactionResolver -- : Error: token expired
+    PurchasesTransactionResolver --> BelanjaYukBE -- : Error: token expired
+    BelanjaYukBE --> BelanjaYukFE -- : Message: token was expired
+end alt
+BelanjaYukFE -> BelanjaYukBE ++ : /graphql completed purchases transaction
+    note left of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation {
+          completePaymentPurchases(
+            purchasesTransactionId: $purchasesTransactionId
+            amountOfPayment: $totalPay
+          ) {
+            status
+            debt
+          }
+        }
+    end note
+BelanjaYukBE -> PurchasesTransactionResolver ++ : call PurchasesTransactionResolver
+PurchasesTransactionResolver -> PurchasesTransactionService ++ : call PurchasesTransactionService
+    note left of PurchasesTransactionResolver
+    passing:
+    - context
+    - purchasesTransactionId
+    - totalPay
+    end note
+PurchasesTransactionService -> JWTUtility: validate token and claim role
+alt token not expired
+    alt #LightGreen role is admin
+        PurchasesTransactionService -> PurchasesTransactionRepository ++ : get purchasesTransaction status
+        PurchasesTransactionRepository -> BelanjaYukDB ++ : select status by purchasesTransactionId
+        BelanjaYukDB --> PurchasesTransactionRepository -- : status or null
+        PurchasesTransactionRepository --> PurchasesTransactionService -- : status or null
+        alt status not null
+            alt status is 1
+                PurchasesTransactionService -> PurchasesTransactionRepository ++ : bulk update stock with List of\nPurchasesTransactionDetail (increment)
+                PurchasesTransactionRepository -> BelanjaYukDB ++ : bulk update stock set values as passed\nfrom request with list of\nPurchasesTransactionDetail
+                BelanjaYukDB --> PurchasesTransactionRepository -- : affected row no error
+                PurchasesTransactionRepository --> PurchasesTransactionService -- : affected row no error
+                PurchasesTransactionService -> PurchasesTransactionRepository ++ : update status passing PurchasesTransaction id and status = 2
+                PurchasesTransactionRepository -> BelanjaYukDB ++ : update status set values as passed from\n request where purchasesTransaction id\nis given
+                BelanjaYukDB --> PurchasesTransactionRepository -- : affected row no error and return\n new status
+                PurchasesTransactionRepository --> PurchasesTransactionService -- : affected row no error and return new status
+                PurchasesTransactionService -> PurchasesTransactionDetailRepository ++ : get list of PurchasesTransactionDetail passing\nPurchasesTransaction id
+                PurchasesTransactionDetailRepository -> BelanjaYukDB ++ : select\nPurchasesTransactionDetail\nwhere\nPurchasesTransaction\nid is given
+                BelanjaYukDB --> PurchasesTransactionDetailRepository -- : list of PurchasesTransactionDetail\nmodel
+                PurchasesTransactionDetailRepository --> PurchasesTransactionService -- : list of\nPurchasesTransactionDetail model
+                PurchasesTransactionService -> PurchasesTransactionRepository ++ : get totalPrice passing PurchasesTransaction id
+                PurchasesTransactionRepository -> BelanjaYukDB ++ : select totalPrice where\nPurchasesTransaction id is given
+                BelanjaYukDB --> PurchasesTransactionRepository -- : totalPrice
+                PurchasesTransactionRepository --> PurchasesTransactionService -- : totalPrice
+                PurchasesTransactionService -> PurchasesTransactionService: calculate debt
+                note right of PurchasesTransactionService
+                    debt = totalPrice - totalPay
+                    if debt <= 0 PaymentStatus = 1
+                    else PaymentStatus = 2
+                end note
+                PurchasesTransactionService -> PaymentRepository ++ : update payment status passing purchasesTransaction id, debt, amountOfPayment, and payment status
+                PaymentRepository -> BelanjaYukDB ++ : update payment set values as passed\n from request where purchases transaction id is given
+                BelanjaYukDB --> PaymentRepository -- : affected row no error and return debt
+                PaymentRepository --> PurchasesTransactionService -- : affected row no error and return debt
+                else status is not 1
+                PurchasesTransactionService -> PurchasesTransactionDetailRepository ++ : get list of PurchasesTransactionDetail passing\nPurchasesTransaction id
+                PurchasesTransactionDetailRepository -> BelanjaYukDB ++ : select\nPurchasesTransactionDetail\nwhere\nPurchasesTransaction\nid is given
+                BelanjaYukDB --> PurchasesTransactionDetailRepository -- : list of\nPurchasesTransactionDetail\nmodel
+                PurchasesTransactionDetailRepository --> PurchasesTransactionService -- : list of PurchasesTransactionDetail model
+                PurchasesTransactionService -> PurchasesTransactionRepository ++ : get totalPrice and debt passing PurchasesTransaction id
+                PurchasesTransactionRepository -> BelanjaYukDB ++ : select totalPrice and debt where\nPurchasesTransaction id is given
+                BelanjaYukDB --> PurchasesTransactionRepository -- : totalPrice and debt
+                PurchasesTransactionRepository --> PurchasesTransactionService -- : totalPrice and debt
+            end alt
+            PurchasesTransactionService --> PurchasesTransactionResolver: PurchasesTransactionResult
+            note right of PurchasesTransactionService
+            PurchasesTransactionResult(
+                purchasesTransactionId,
+                debt,
+                amountOfPayment,
+                paymentStatus
+            )
+            end note
+            PurchasesTransactionResolver --> BelanjaYukBE: PurchasesTransactionResult
+            BelanjaYukBE --> BelanjaYukFE: status, debt
+        end alt
+        else error: role is not admin
+        PurchasesTransactionService --> PurchasesTransactionResolver: Error: Not Authorized
+        PurchasesTransactionResolver --> BelanjaYukBE: Error: Not Authorized
+        BelanjaYukBE --> BelanjaYukFE: Message: You're not authorize
+    end alt
+    else token is expired
+    PurchasesTransactionService --> PurchasesTransactionResolver -- : Error: token expired
+    PurchasesTransactionResolver --> BelanjaYukBE -- : Error: token expired
+    BelanjaYukBE --> BelanjaYukFE -- : Message: token was expired
+end alt
+@enduml

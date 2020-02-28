@@ -2,7 +2,7 @@ package repositories.repositoryInterfaces
 
 import java.util.UUID
 
-import graphql.input.{ProductInput}
+import graphql.input.ProductInput
 import models.ProductDetail
 
 import scala.concurrent.Future
@@ -14,4 +14,8 @@ trait ProductDetailRepository {
   def addProductDetail(productId: UUID, productDetail: ProductInput): Future[Unit]
 
   def findProductDetailByProductId(productId: UUID): Future[Seq[ProductDetail]]
+
+  def deleteProductDetail(id: UUID): Future[Int]
+
+  def addProductDetail(productDetail: ProductDetail): Future[ProductDetail]
 }

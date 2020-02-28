@@ -17,4 +17,6 @@ class ProductStockResolver @Inject()(productStockService: ProductStockService){
   
   def createProductStock(context: Context, productStock: ProductStock): Future[ProductStock] = productStockService.createProductStock(context, productStock)
 
+  def deleteProductStock(context: Context, id: UUID): Future[Int] = productStockService.deleteProductStock(context, id)
+
 }

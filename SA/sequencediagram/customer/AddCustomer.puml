@@ -1,0 +1,72 @@
+@startuml
+title: Add Customer Sequence Diagram
+actor user
+participant BelanjaYukFE
+database BelanjaYukDB
+box "BelanjaYuk.id" #LightBlue
+participant BelanjaYukBE
+participant CustomerResolver
+participant CustomerService
+participant UserRepository
+participant UserProfileRepository
+participant CustomerRepository
+participant JWTUtility
+participant BelanjaYukDB
+end box
+
+user -> BelanjaYukFE ++ : add customer menu
+BelanjaYukFE -> BelanjaYukBE ++ : /graphql add customer
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+          mutation{
+            createCustomer(
+                customerInput
+            ): customer
+          }
+          CustomerInput(
+              UserProfileInput(
+                  fullName,
+                  phoneNumber,
+                  address,
+                  noNik,
+                  dateOfBirth,
+              )
+          )
+    end note
+BelanjaYukBE -> CustomerResolver ++ : call CustomerResolver
+CustomerResolver -> CustomerService ++ : call CustomerService
+    note left
+    passing:
+    - context
+    - customerInput
+    end note
+CustomerService -> JWTUtility: validate token and claim role
+alt #LightGreen token is not expired
+    alt #LightYellow role is admin
+        CustomerService -> UserRepository ++ : add user passing user
+        UserRepository -> BelanjaYukDB ++ : insert user values passed from request
+        BelanjaYukDB --> UserRepository -- : affected row no error and return userId
+        UserRepository --> CustomerService -- : affected row no error and return userId
+        CustomerService -> UserProfileRepository ++ : add user profile passing user profile
+        UserProfileRepository -> BelanjaYukDB ++ : insert user profile values passed from request
+        BelanjaYukDB --> UserProfileRepository -- : affected row no error
+        UserProfileRepository --> CustomerService -- : affected row no error
+        CustomerService -> CustomerRepository ++ : add customer passing customer
+        CustomerRepository -> BelanjaYukDB ++ : insert customer values passed from request
+        BelanjaYukDB --> CustomerRepository -- : affected row no error and return customer
+        CustomerRepository --> CustomerService -- : affected row no error and return customer
+        CustomerService --> CustomerResolver : customer
+        CustomerResolver --> BelanjaYukBE : customer
+        BelanjaYukBE --> BelanjaYukFE: customer
+        else error: role is not admin
+        CustomerService --> CustomerResolver : Error: Not Authorized
+        CustomerResolver --> BelanjaYukBE : Error: Not Authorized
+        BelanjaYukBE --> BelanjaYukFE: Message: You're not authorize
+    end alt
+    else token is expired
+    CustomerService --> CustomerResolver -- : Error: token expired
+    CustomerResolver --> BelanjaYukBE -- : Error: token expired
+    BelanjaYukBE --> BelanjaYukFE -- : Message: token was expired
+end alt
+@enduml

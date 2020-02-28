@@ -1,0 +1,49 @@
+@startuml
+title: Create Staff Sequence Diagram
+actor user
+participant BelanjaYukFE
+box "BelanjaYuk.id" #LightBlue
+participant AppController
+participant StaffService
+end box
+
+user -> BelanjaYukFE ++ : Create staff menu
+activate user
+BelanjaYukFE -> AppController ++ : /graphql Create staff
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation {
+          createStaff(
+            staff: $staffInput
+          ) : Staff
+        }
+
+        StaffInput(
+            UserInput(
+                username,
+                password,
+                email,
+            )
+            UserProfileInput(
+                fullName,
+                phoneNumber,
+                address,
+                noNik,
+                dateOfBirth,
+            )
+            roleId
+        )
+    end note
+AppController -> AppController : call parseGraphql()
+AppController -> StaffService ++ : call createStaff()
+    note left
+    passing:
+    - context
+    - staffInput
+    end note
+StaffService --> AppController : Staff
+AppController --> BelanjaYukFE : Staff
+BelanjaYukFE --> user -- : create staff successful and view staff
+deactivate user
+@enduml

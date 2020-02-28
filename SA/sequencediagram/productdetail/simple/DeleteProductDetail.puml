@@ -1,0 +1,31 @@
+@startuml
+title: Delete Product Detail Sequence Diagram
+actor user
+participant BelanjaYukFE
+box "BelanjaYuk.id" #LightBlue
+participant AppController
+participant ProductDetailService
+end box
+
+user -> BelanjaYukFE ++ : Delete Product Detail menu
+activate user
+BelanjaYukFE -> AppController ++ : /graphql delete product detail
+    note right of BelanjaYukFE
+    content type: application/json
+    request body:
+        mutation {
+          deleteProductDetail(productDetailId)
+        }
+    end note
+AppController -> AppController : parseGraphql()
+AppController -> ProductDetailService ++ : call deleteProductDetail()
+    note left
+    passing:
+    - context
+    - id
+    end note
+ProductDetailService --> AppController --: ProductDetail
+AppController --> BelanjaYukFE -- : ProductDetail
+BelanjaYukFE --> user -- : delete successfull and view productDetail
+deactivate user
+@enduml
