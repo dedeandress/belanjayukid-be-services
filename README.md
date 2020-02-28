@@ -148,13 +148,28 @@ while(noSuccess) {
 ```graphql
 
 scalar BigDecimal
-scalar UUID
 scalar Long
+scalar UUID
 
 type Category {
   name: String!
   status: Boolean!
   id: UUID!
+}
+
+input CheckTransactionDetailInput {
+  transactionDetailId: String!
+  status: Int!
+}
+
+input CheckTransactionInput {
+  transactionId: String!
+  transactionDetail: [CheckTransactionDetailInput!]!
+}
+
+type CreatePurchasesTransactionResult {
+  status: Int!
+  purchasesTransactionId: UUID!
 }
 
 type CreateTransactionResult {
@@ -166,10 +181,18 @@ type Credential {
   bearerToken: String!
   username: String!
   roleName: String!
+  id: UUID!
+}
+
+type Customer {
+  status: Boolean!
+  id: UUID!
+  user: User
 }
 
 type Mutation {
   login(username: String!, password: String!): Credential!
+  updateStore(name: String!, phoneNumber: String!, address: String!): Store
   createStaff(staff: StaffInput!): Staff
   updateStaff(
     staffId: String!
@@ -179,7 +202,14 @@ type Mutation {
     noNik: String!
     dateOfBirth: Long!
     roleId: String!
+    staffEmail: String!
   ): Staff
+  deleteStaff(staffId: String!): Staff
+  changePassword(
+    oldPassword: String!
+    newPassword: String!
+    confirmPassword: String!
+  ): Boolean!
   createProduct(product: ProductInput!): Products!
   createCategory(name: String!): Category!
   deleteCategory(id: String!): Int!
@@ -196,9 +226,52 @@ type Mutation {
   productDetail(id: String!): ProductDetail
   createTransaction: CreateTransactionResult!
   checkout(transaction: TransactionInput!): TransactionResult!
-  completePayment(transactionId: String!): TransactionResult!
+  completePayment(
+    transactionId: String!
+    amountOfPayment: BigDecimal!
+  ): TransactionResult!
   updateStaffTransaction(transactionId: String!, staffId: String!): UUID
   updateCustomerTransaction(transactionId: String!, customerId: String!): UUID
+  payOffDebt(transactionId: String!, amountPaid: BigDecimal!): Transaction
+  createSupplier(
+    name: String!
+    phoneNumber: String!
+    address: String!
+  ): Supplier
+  updateSupplier(
+    id: String!
+    name: String!
+    phoneNumber: String!
+    address: String!
+  ): Supplier
+  deleteSupplier(id: String!): Int!
+  createCustomer(customer: UserProfileInput!): Customer
+  updateCustomer(
+    customerId: String!
+    fullName: String!
+    phoneNumber: String!
+    address: String!
+    noNik: String!
+    dateOfBirth: Long!
+  ): Customer
+  deleteCustomer(id: String!): Int!
+  createPurchasesTransaction: CreatePurchasesTransactionResult!
+  checkoutPurchases(
+    purchasesTransaction: PurchasesTransactionInput!
+  ): PurchasesTransactionsResult!
+  completePaymentPurchases(
+    purchasesTransactionId: String!
+    amountOfPayment: BigDecimal!
+  ): PurchasesTransactionsResult!
+  checkTransaction(checkTransaction: CheckTransactionInput!): Int
+  refundTransaction(transactionId: String!): RefundTransactionResult!
+  completeRefund(transactionId: String!): Transaction
+}
+
+type Payment {
+  debt: BigDecimal!
+  amountOfPayment: BigDecimal!
+  id: UUID!
 }
 
 type ProductDetail {
@@ -224,6 +297,7 @@ input ProductInput {
   SKU: String!
   stock: Int!
   categoryId: String!
+  imageUrl: String!
   productDetailInput: [ProductDetailInput!]!
 }
 
@@ -231,6 +305,7 @@ type Products {
   SKU: String!
   name: String!
   stock: Int!
+  imageUrl: String!
   status: Boolean!
   id: UUID!
   category: Category
@@ -243,7 +318,34 @@ type ProductStock {
   id: UUID!
 }
 
+type PurchasesTransactionDetail {
+  numberOfPurchases: Int!
+  id: UUID!
+  purchasesTransactionId: UUID!
+  productDetail: ProductDetail
+}
+
+input PurchasesTransactionDetailInput {
+  productDetailId: String!
+  numberOfPurchase: Int!
+}
+
+input PurchasesTransactionInput {
+  purchasesTransactionId: String!
+  supplierId: String!
+  staffId: String!
+  detail: [PurchasesTransactionDetailInput!]!
+}
+
+type PurchasesTransactionsResult {
+  status: Int!
+  totalPrice: BigDecimal!
+  debt: BigDecimal!
+  details: [PurchasesTransactionDetail!]!
+}
+
 type Query {
+  store: Store
   categories: [Category!]!
   productStocks: [ProductStock!]!
   roles: [Role!]!
@@ -251,10 +353,22 @@ type Query {
   products: [Products!]!
   transactions(status: Int!): [Transaction!]!
   transaction(transactionId: String!): Transaction
-  transactionsWithLimit(limit: Int!): TransactionsResult!
+  transactionsWithLimit(limit: Int!, status: Int!): TransactionsResult!
+  transactionsWithRange(fromDate: Long!, toDate: Long!): [Transaction!]!
+  transactionsByPaymentStatus(paymentStatus: Int!): [Transaction!]!
   staffs: [Staff!]!
   staff(staffId: String!): Staff
   productDetails(productId: String!): [ProductDetail!]!
+  customers: [Customer!]!
+  customer(customerId: String!): Customer
+  suppliers: [Supplier!]!
+  supplier(supplierId: String!): Supplier
+}
+
+type RefundTransactionResult {
+  totalRefund: BigDecimal!
+  totalPrice: BigDecimal!
+  transactionDetails: [TransactionDetail!]!
 }
 
 type Role {
@@ -275,20 +389,36 @@ input StaffInput {
   userProfileInput: UserProfileInput!
 }
 
+type Store {
+  name: String!
+  phoneNumber: String!
+  address: String!
+  id: UUID!
+}
+
+type Supplier {
+  name: String!
+  phoneNumber: String!
+  address: String!
+  status: Boolean!
+  id: UUID!
+}
+
 type Transaction {
   paymentStatus: Int!
   totalPrice: BigDecimal!
+  profit: BigDecimal!
   status: Int!
   date: Long!
   id: UUID!
   transactionDetail: [TransactionDetail!]!
   staff: Staff
-  customer: Staff
+  customer: Customer
+  payment: Payment
 }
 
 type TransactionDetail {
   numberOfPurchases: Int!
-  subTotalPrice: BigDecimal!
   status: Int!
   id: UUID!
   transactionID: UUID!
@@ -298,7 +428,6 @@ type TransactionDetail {
 input TransactionDetailInput {
   productDetailId: String!
   numberOfPurchase: Int!
-  subTotalPrice: BigDecimal!
 }
 
 input TransactionInput {
@@ -310,6 +439,8 @@ input TransactionInput {
 
 type TransactionResult {
   status: Int!
+  totalPrice: BigDecimal!
+  debt: BigDecimal!
   details: [TransactionDetail!]!
 }
 
